@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peak Axis — Adventure without borders</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --ash:#EDE7DA; --warm-white:#FAF8F3; --ink:#211F1D;
+  --ember:#C1440E; --teal:#1F4B4C; --sand:#C9B790;
+  --sand-line: rgba(33,31,29,0.14);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;background:var(--ash);color:var(--ink);
+  font-family:'Inter',sans-serif;font-weight:400;line-height:1.55;
+}
+h1,h2,h3,.display{
+  font-family:'Big Shoulders Display',sans-serif;font-weight:900;
+  letter-spacing:0.01em;text-transform:uppercase;line-height:0.92;margin:0;
+}
+a{color:inherit;text-decoration:none;}
+p{margin:0;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+
+/* master header */
+header.site-header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(237,231,218,0.94);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--sand-line);
+}
+.navbar{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;max-width:1180px;margin:0 auto;}
+.logo{font-family:'Big Shoulders Display';font-weight:900;font-size:22px;letter-spacing:0.02em;text-transform:uppercase;cursor:pointer;}
+.logo span{color:var(--ember);}
+nav ul{list-style:none;display:flex;gap:30px;margin:0;padding:0;}
+nav ul li a, nav ul li button.navlink{
+  background:none;border:none;font-family:'Inter';text-decoration:none;
+  font-size:14.5px;font-weight:500;color:var(--ink);cursor:pointer;padding:0;
+}
+nav ul li a.active, nav ul li button.navlink.active{color:var(--ember);}
+.nav-cta{border:1.5px solid var(--ink);padding:9px 18px;font-size:14px;font-weight:600;white-space:nowrap;background:none;cursor:pointer;font-family:'Inter';color:var(--ink);}
+.nav-cta:hover{background:var(--ink);color:var(--warm-white);}
+@media(max-width:820px){ nav ul{display:none;} }
+
+/* view switching */
+.view{display:none;}
+.view.active{display:block;}
+
+/* ===== home ===== */
+#view-home h1, #view-home h2, #view-home h3, #view-home .display{
+    font-family:'Big Shoulders Display',sans-serif;
+    font-weight:900;
+    letter-spacing:0.01em;
+    text-transform:uppercase;
+    line-height:0.92;
+    margin:0;}
+#view-home .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+#view-home a{color:inherit;}
+#view-home .hero{position:relative;overflow:hidden;padding:88px 0 64px;}
+#view-home .contour-svg{position:absolute;right:-8%;top:0;width:64%;height:100%;opacity:0.55;z-index:0;}
+#view-home .hero-inner{position:relative;z-index:1;max-width:640px;}
+#view-home .hero h1{font-size:clamp(48px,7vw,92px);}
+#view-home .hero h1 .em{color:var(--ember);}
+#view-home .hero-sub{
+    margin-top:26px;font-size:18px;max-width:480px;color:#3d3a36;}
+#view-home .hero-ctas{display:flex;gap:16px;margin-top:38px;flex-wrap:wrap;}
+#view-home .btn-primary{
+    background:var(--ember);color:var(--warm-white);border:none;
+    padding:14px 26px;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;}
+#view-home .btn-primary:hover{background:#a3390b;}
+#view-home .btn-ghost{
+    border:1.5px solid var(--ink);padding:13px 26px;font-size:15px;font-weight:600;
+    text-decoration:none;color:var(--ink);}
+#view-home .btn-ghost:hover{background:var(--ink);color:var(--warm-white);}
+#view-home .elev-marks{
+    display:flex;gap:44px;margin-top:64px;padding-top:24px;border-top:1px solid var(--sand-line);
+    max-width:560px;}
+#view-home .elev-mark .num{font-family:'Big Shoulders Display';font-weight:700;font-size:26px;}
+#view-home .elev-mark .lbl{font-size:12.5px;color:#5a564f;margin-top:2px;}
+#view-home .intro{padding:70px 0 20px;}
+#view-home .intro-inner{max-width:660px;}
+#view-home .intro h2{font-size:clamp(28px,4vw,40px);}
+#view-home .intro p{margin-top:20px;font-size:17px;color:#3d3a36;max-width:560px;}
+#view-home .pillars{padding:70px 0 90px;}
+#view-home .tab-row{
+    display:flex;border-bottom:1px solid var(--sand-line);flex-wrap:wrap;}
+#view-home .tab-btn{
+    background:none;border:none;cursor:pointer;
+    font-family:'Inter';font-size:15.5px;font-weight:600;color:#6b675f;
+    padding:16px 22px 16px 0;margin-right:26px;position:relative;}
+#view-home .tab-btn .code{font-family:'Big Shoulders Display';font-weight:700;font-size:13px;margin-right:8px;color:var(--sand);}
+#view-home .tab-btn.active{color:var(--ink);}
+#view-home .tab-btn.active::after{
+    content:'';position:absolute;left:0;right:26px;bottom:-1px;height:2px;background:var(--ember);}
+#view-home .panel{display:none;padding-top:44px;}
+#view-home .panel.active{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;}
+@media(max-width:760px){#view-home .panel.active{grid-template-columns:1fr;}}
+#view-home .panel-visual{
+    aspect-ratio:4/3;background:var(--teal);position:relative;overflow:hidden;}
+#view-home .panel-visual svg{width:100%;height:100%;}
+#view-home .panel-text .kicker{font-size:13px;font-weight:600;color:var(--ember);margin-bottom:10px;}
+#view-home .panel-text h3{font-size:clamp(26px,3.5vw,34px);margin-bottom:16px;}
+#view-home .panel-text p{font-size:16px;color:#3d3a36;max-width:440px;}
+#view-home .panel-text .go{
+    display:inline-block;margin-top:26px;font-size:15px;font-weight:600;
+    text-decoration:none;border-bottom:2px solid var(--ember);padding-bottom:2px;color:var(--ink);}
+#view-home .featured{background:var(--ink);color:var(--warm-white);padding:74px 0;}
+#view-home .featured-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:60px;align-items:center;}
+@media(max-width:760px){#view-home .featured-grid{grid-template-columns:1fr;}}
+#view-home .featured .tag{font-size:13px;color:var(--ember);font-weight:600;margin-bottom:14px;}
+#view-home .featured h2{font-size:clamp(30px,4.5vw,48px);color:var(--warm-white);}
+#view-home .featured p{margin-top:18px;color:#c9c5bc;font-size:16.5px;max-width:460px;}
+#view-home .stat-row{display:flex;gap:36px;margin-top:32px;flex-wrap:wrap;}
+#view-home .stat .n{font-family:'Big Shoulders Display';font-weight:700;font-size:24px;color:var(--warm-white);}
+#view-home .stat .l{font-size:12px;color:#a19c92;margin-top:2px;}
+#view-home .featured-ctas{margin-top:34px;display:flex;gap:14px;flex-wrap:wrap;}
+#view-home .featured .btn-ghost{border-color:var(--warm-white);color:var(--warm-white);}
+#view-home .featured .btn-ghost:hover{background:var(--warm-white);color:var(--ink);}
+#view-home .crater{width:100%;}
+#view-home .position{padding:80px 0;text-align:left;border-bottom:1px solid var(--sand-line);}
+#view-home .position h2{font-size:clamp(30px,5vw,54px);max-width:820px;}
+#view-home .position h2 .em{color:var(--ember);}
+#view-home footer{padding:52px 0 40px;}
+#view-home .foot-grid{display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;align-items:flex-end;}
+#view-home .foot-cta h3{font-size:24px;}
+#view-home footer p.small{font-size:13.5px;color:#6b675f;margin-top:10px;}
+/* ===== hikes ===== */
+#view-hikes h1, #view-hikes h2, #view-hikes h3, #view-hikes .display{font-family:'Big Shoulders Display',sans-serif;font-weight:900;letter-spacing:0.01em;text-transform:uppercase;line-height:0.95;margin:0;}
+#view-hikes .wrap{max-width:1080px;margin:0 auto;padding:0 32px;}
+#view-hikes a{color:inherit;text-decoration:none;}
+#view-hikes .pagehead{padding:64px 0 40px;}
+#view-hikes .pagehead h1{font-size:clamp(40px,6vw,64px);}
+#view-hikes .pagehead p{margin-top:18px;font-size:16.5px;color:#3d3a36;max-width:520px;}
+#view-hikes .filters{display:flex;gap:10px;flex-wrap:wrap;padding-bottom:44px;}
+#view-hikes .fbtn{
+    border:1px solid var(--sand-line);background:none;padding:9px 18px;font-size:14px;font-weight:600;
+    cursor:pointer;color:#6b675f;}
+#view-hikes .fbtn.active{background:var(--ink);color:var(--warm-white);border-color:var(--ink);}
+#view-hikes .hike-list{border-top:1px solid var(--sand-line);}
+#view-hikes .hike-row{
+    display:grid;grid-template-columns:160px 1fr auto;gap:28px;align-items:center;
+    padding:28px 0;border-bottom:1px solid var(--sand-line);}
+@media(max-width:760px){#view-hikes .hike-row{grid-template-columns:1fr;gap:16px;}}
+#view-hikes .hike-visual{width:160px;height:110px;background:var(--teal);flex-shrink:0;}
+@media(max-width:760px){#view-hikes .hike-visual{width:100%;height:140px;}}
+#view-hikes .hike-visual svg{width:100%;height:100%;}
+#view-hikes .hike-info h3{font-size:22px;text-transform:none;font-weight:700;letter-spacing:0;margin-bottom:6px;}
+#view-hikes .hike-meta{display:flex;gap:18px;flex-wrap:wrap;font-size:13.5px;color:#6b675f;margin-top:8px;}
+#view-hikes .hike-meta .diff{font-weight:600;}
+#view-hikes .diff-easy{color:var(--teal);}
+#view-hikes .diff-moderate{color:#a3720b;}
+#view-hikes .diff-challenging{color:var(--ember);}
+#view-hikes .hike-action{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+@media(max-width:760px){#view-hikes .hike-action{align-items:flex-start;text-align:left;flex-direction:row;justify-content:space-between;width:100%;}}
+#view-hikes .hike-price{font-family:'Big Shoulders Display';font-weight:700;font-size:20px;}
+#view-hikes .spots{font-size:12.5px;color:#6b675f;}
+#view-hikes .spots.low{color:var(--ember);font-weight:600;}
+#view-hikes .btn-primary{background:var(--ember);color:var(--warm-white);border:none;padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;}
+#view-hikes .btn-primary:hover{background:#a3390b;}
+#view-hikes .private-banner{
+    display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;
+    background:var(--ink);color:var(--warm-white);padding:30px 34px;margin-bottom:44px;}
+#view-hikes .private-banner h3{font-size:22px;text-transform:none;font-weight:700;letter-spacing:0;color:var(--warm-white);}
+#view-hikes .private-banner p{margin-top:6px;font-size:14.5px;color:#c9c5bc;max-width:400px;}
+#view-hikes .private-banner .btn-ghost{border:1.5px solid var(--warm-white);color:var(--warm-white);padding:12px 22px;font-size:14.5px;font-weight:600;white-space:nowrap;}
+#view-hikes .private-banner .btn-ghost:hover{background:var(--warm-white);color:var(--ink);}
+#view-hikes .cta-strip{padding:70px 0 90px;border-top:1px solid var(--sand-line);text-align:left;}
+#view-hikes .cta-strip h2{font-size:clamp(28px,4.5vw,44px);max-width:600px;}
+#view-hikes .cta-strip p{margin-top:16px;font-size:16px;color:#3d3a36;max-width:480px;}
+#view-hikes .cta-strip .btn-ghost{display:inline-block;margin-top:26px;border:1.5px solid var(--ink);padding:13px 26px;font-size:15px;font-weight:600;}
+#view-hikes .cta-strip .btn-ghost:hover{background:var(--ink);color:var(--warm-white);}
+#view-hikes footer{padding:30px 0 40px;border-top:1px solid var(--sand-line);}
+#view-hikes footer p{font-size:13px;color:#6b675f;}
+/* ===== expedition ===== */
+#view-expedition h1, #view-expedition h2, #view-expedition h3, #view-expedition .display{font-family:'Big Shoulders Display',sans-serif;font-weight:900;letter-spacing:0.01em;text-transform:uppercase;line-height:0.95;margin:0;}
+#view-expedition .wrap{max-width:1080px;margin:0 auto;padding:0 32px;}
+#view-expedition a{color:inherit;}
+#view-expedition p{margin:0;}
+#view-expedition .hero{position:relative;overflow:hidden;background:var(--ink);color:var(--warm-white);padding:90px 0 70px;}
+#view-expedition .hero-scape{position:absolute;inset:0;opacity:0.9;}
+#view-expedition .hero-inner{position:relative;z-index:1;}
+#view-expedition .tag{font-size:13px;color:var(--ember);font-weight:600;margin-bottom:14px;}
+#view-expedition .hero h1{font-size:clamp(42px,7vw,80px);color:var(--warm-white);}
+#view-expedition .hero-sub{margin-top:20px;font-size:18px;color:#c9c5bc;max-width:520px;}
+#view-expedition .hero-bottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:52px;flex-wrap:wrap;gap:24px;}
+#view-expedition .price-block .from{font-size:12.5px;color:#a19c92;}
+#view-expedition .price-block .amt{font-family:'Big Shoulders Display';font-weight:700;font-size:34px;color:var(--warm-white);}
+#view-expedition .btn-primary{background:var(--ember);color:var(--warm-white);border:none;padding:15px 28px;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;}
+#view-expedition .btn-primary:hover{background:#a3390b;}
+#view-expedition .btn-ghost{border:1.5px solid var(--ink);padding:13.5px 26px;font-size:15px;font-weight:600;text-decoration:none;color:var(--ink);display:inline-block;}
+#view-expedition .btn-ghost:hover{background:var(--ink);color:var(--warm-white);}
+#view-expedition .hero .btn-ghost{border-color:var(--warm-white);color:var(--warm-white);}
+#view-expedition .hero .btn-ghost:hover{background:var(--warm-white);color:var(--ink);}
+#view-expedition .quickinfo{border-bottom:1px solid var(--sand-line);}
+#view-expedition .qi-grid{display:grid;grid-template-columns:repeat(6,1fr);}
+#view-expedition .qi-grid div{padding:22px 18px;border-left:1px solid var(--sand-line);}
+#view-expedition .qi-grid div:first-child{border-left:none;}
+#view-expedition .qi-grid .l{font-size:11.5px;color:#6b675f;margin-bottom:6px;}
+#view-expedition .qi-grid .v{font-family:'Big Shoulders Display';font-weight:700;font-size:18px;}
+@media(max-width:900px){#view-expedition .qi-grid{grid-template-columns:repeat(3,1fr);}
+#view-expedition .qi-grid div{border-left:none;border-top:1px solid var(--sand-line);}}
+@media(max-width:520px){#view-expedition .qi-grid{grid-template-columns:repeat(2,1fr);}}
+#view-expedition section.block{padding:64px 0;border-bottom:1px solid var(--sand-line);}
+#view-expedition .block .kicker{font-size:13px;font-weight:600;color:var(--ember);margin-bottom:12px;}
+#view-expedition .block h2{font-size:clamp(26px,3.5vw,38px);max-width:640px;}
+#view-expedition .block .lead{margin-top:20px;font-size:16.5px;color:#3d3a36;max-width:600px;}
+#view-expedition .two-col{display:grid;grid-template-columns:1fr 1fr;gap:60px;}
+@media(max-width:760px){#view-expedition .two-col{grid-template-columns:1fr;}}
+#view-expedition .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--sand-line);margin-top:36px;}
+#view-expedition .why-item{background:var(--ash);padding:26px;}
+#view-expedition .why-item .t{font-family:'Big Shoulders Display';font-weight:700;font-size:17px;margin-bottom:8px;text-transform:uppercase;}
+#view-expedition .why-item p{font-size:14.5px;color:#3d3a36;}
+@media(max-width:700px){#view-expedition .why-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){#view-expedition .why-grid{grid-template-columns:1fr;}}
+#view-expedition .fit-list{list-style:none;margin:24px 0 0;padding:0;max-width:600px;}
+#view-expedition .fit-list li{display:flex;gap:16px;padding:14px 0;border-top:1px solid var(--sand-line);font-size:15px;}
+#view-expedition .fit-list li:last-child{border-bottom:1px solid var(--sand-line);}
+#view-expedition .fit-list .k{min-width:150px;font-weight:600;color:var(--ink);}
+#view-expedition .fit-list .d{color:#3d3a36;}
+#view-expedition .fit-note{margin-top:20px;padding:18px 20px;background:rgba(193,68,14,0.08);border-left:3px solid var(--ember);font-size:14.5px;max-width:560px;}
+#view-expedition .itin{position:relative;margin-top:36px;padding-left:32px;}
+#view-expedition .itin::before{content:'';position:absolute;left:6px;top:6px;bottom:6px;width:1px;background:var(--sand-line);}
+#view-expedition .itin-day{position:relative;padding-bottom:40px;}
+#view-expedition .itin-day:last-child{padding-bottom:0;}
+#view-expedition .itin-day::before{content:'';position:absolute;left:-32px;top:4px;width:11px;height:11px;border-radius:50%;background:var(--ember);}
+#view-expedition .itin-day .dn{font-family:'Big Shoulders Display';font-weight:700;font-size:13px;color:var(--ember);margin-bottom:4px;}
+#view-expedition .itin-day h3{font-size:21px;text-transform:none;font-weight:700;letter-spacing:0;margin-bottom:8px;}
+#view-expedition .itin-day p{font-size:15px;color:#3d3a36;max-width:560px;}
+#view-expedition .itin-day .meta{font-size:12.5px;color:#6b675f;margin-top:8px;}
+#view-expedition .inc-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;margin-top:8px;}
+@media(max-width:700px){#view-expedition .inc-grid{grid-template-columns:1fr;gap:36px;}}
+#view-expedition .inc-grid h3{font-size:16px;text-transform:uppercase;font-weight:700;letter-spacing:0.02em;margin-bottom:16px;}
+#view-expedition .inc-grid ul{list-style:none;margin:0;padding:0;}
+#view-expedition .inc-grid li{font-size:15px;padding:9px 0;border-top:1px solid var(--sand-line);color:#3d3a36;}
+#view-expedition .inc-grid.yes h3{color:var(--teal);}
+#view-expedition .inc-grid.no h3{color:var(--ember);}
+#view-expedition .pack-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;margin-top:36px;}
+@media(max-width:760px){#view-expedition .pack-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){#view-expedition .pack-grid{grid-template-columns:1fr;}}
+#view-expedition .pack-cat .t{font-family:'Big Shoulders Display';font-weight:700;font-size:15px;text-transform:uppercase;margin-bottom:12px;color:var(--teal);}
+#view-expedition .pack-cat ul{margin:0;padding:0;list-style:none;font-size:14.5px;color:#3d3a36;}
+#view-expedition .pack-cat li{padding:5px 0;}
+#view-expedition .safety{background:var(--teal);color:var(--warm-white);}
+#view-expedition .safety .kicker{color:#e8d9b8;}
+#view-expedition .safety h2{color:var(--warm-white);}
+#view-expedition .safety .lead{color:#d7e4e3;}
+#view-expedition .safety .fit-list li{border-color:rgba(250,248,243,0.18);}
+#view-expedition .safety .fit-list .k{color:var(--warm-white);}
+#view-expedition .safety .fit-list .d{color:#d7e4e3;}
+#view-expedition .pay-box{margin-top:30px;border:1px solid var(--sand-line);max-width:460px;}
+#view-expedition .pay-row{display:flex;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--sand-line);font-size:15px;}
+#view-expedition .pay-row:last-child{border-bottom:none;}
+#view-expedition .pay-row .l{color:#6b675f;}
+#view-expedition .pay-row .v{font-weight:600;}
+#view-expedition .pay-note{margin-top:18px;font-size:14px;color:#6b675f;max-width:480px;}
+#view-expedition .final{text-align:left;padding:90px 0;}
+#view-expedition .final h2{font-size:clamp(32px,6vw,58px);max-width:700px;}
+#view-expedition .final .em{color:var(--ember);}
+#view-expedition .final .lead{margin-top:22px;font-size:17px;color:#3d3a36;max-width:480px;}
+#view-expedition .final-ctas{margin-top:34px;display:flex;gap:16px;flex-wrap:wrap;}
+#view-expedition footer{padding:30px 0 40px;border-top:1px solid var(--sand-line);}
+#view-expedition footer p{font-size:13px;color:#6b675f;}
+/* ===== enquire ===== */
+#view-enquire h1, #view-enquire h2, #view-enquire .display{font-family:'Big Shoulders Display',sans-serif;font-weight:900;letter-spacing:0.01em;text-transform:uppercase;line-height:0.95;margin:0;}
+#view-enquire .wrap{max-width:900px;margin:0 auto;padding:0 32px;}
+#view-enquire a{color:inherit;text-decoration:none;}
+#view-enquire .pagehead{padding:60px 0 20px;}
+#view-enquire .pagehead h1{font-size:clamp(38px,6vw,58px);}
+#view-enquire .pagehead p{margin-top:16px;font-size:16.5px;color:#3d3a36;max-width:480px;}
+#view-enquire form{padding:44px 0 90px;}
+#view-enquire .field{margin-bottom:26px;}
+#view-enquire .field label{display:block;font-size:13px;font-weight:600;color:#3d3a36;margin-bottom:9px;}
+#view-enquire .field .hint{font-size:12.5px;color:#8a857a;margin-top:6px;}
+#view-enquire input[type=text], #view-enquire input[type=email], #view-enquire input[type=tel], #view-enquire input[type=number], #view-enquire input[type=date], #view-enquire select, #view-enquire textarea{
+    width:100%;border:none;border-bottom:1.5px solid var(--sand-line);background:transparent;
+    padding:11px 2px;font-family:'Inter';font-size:15.5px;color:var(--ink);
+    outline:none;appearance:none;-webkit-appearance:none;}
+#view-enquire select{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M0 0L6 8L12 0' fill='%23211F1D'/></svg>");
+    background-repeat:no-repeat;background-position:right 4px center;padding-right:22px;}
+#view-enquire input:focus, #view-enquire select:focus, #view-enquire textarea:focus{border-bottom-color:var(--ember);}
+#view-enquire textarea{resize:vertical;min-height:90px;font-family:'Inter';}
+#view-enquire .row2{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+@media(max-width:600px){#view-enquire .row2{grid-template-columns:1fr;}}
+#view-enquire .interest-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+@media(max-width:760px){#view-enquire .interest-grid{grid-template-columns:1fr 1fr 1fr;}}
+@media(max-width:480px){#view-enquire .interest-grid{grid-template-columns:1fr 1fr;}}
+#view-enquire .price-note{display:inline-block;margin-top:4px;font-size:12.5px;font-weight:600;color:var(--ember);}
+#view-enquire .interest-opt{
+    border:1.5px solid var(--sand-line);padding:16px 14px;cursor:pointer;text-align:left;background:none;
+    font-family:'Inter';color:var(--ink);}
+#view-enquire .interest-opt .t{font-weight:600;font-size:14.5px;}
+#view-enquire .interest-opt .s{font-size:12px;color:#6b675f;margin-top:3px;}
+#view-enquire .interest-opt.active{border-color:var(--ember);background:rgba(193,68,14,0.06);}
+#view-enquire .conditional{
+    margin-top:8px;padding-top:8px;border-top:1px solid var(--sand-line);display:none;}
+#view-enquire .conditional.show{display:block;}
+#view-enquire .cond-label{font-size:13px;font-weight:600;color:var(--ember);margin:28px 0 4px;text-transform:uppercase;letter-spacing:0.02em;}
+#view-enquire .btn-primary{
+    background:var(--ember);color:var(--warm-white);border:none;padding:16px 30px;font-size:15.5px;font-weight:600;
+    cursor:pointer;margin-top:20px;}
+#view-enquire .btn-primary:hover{background:#a3390b;}
+#view-enquire .confirm{display:none;padding:100px 0;text-align:left;}
+#view-enquire .confirm.show{display:block;}
+#view-enquire .confirm h2{font-size:clamp(32px,5vw,50px);}
+#view-enquire .confirm p{margin-top:18px;font-size:16.5px;color:#3d3a36;max-width:460px;}
+#view-enquire .confirm .tick{width:44px;height:44px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;margin-bottom:24px;}
+#view-enquire footer{padding:30px 0 40px;border-top:1px solid var(--sand-line);}
+#view-enquire footer p{font-size:13px;color:#6b675f;}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="navbar">
+    <div class="logo">PEAK<span>AXIS</span></div>
+    <nav>
+      <ul>
+        <li><button class="navlink" data-view="home">Home</button></li>
+        <li><button class="navlink" data-view="hikes">Hikes</button></li>
+        <li><button class="navlink" data-view="expedition">Expeditions</button></li>
+      </ul>
+    </nav>
+    <button class="nav-cta navlink" data-view="enquire">Enquire</button>
+  </div>
+</header>
+
+<div id="view-home" class="view">
+
+
+
+
+<section class="hero">
+  <svg class="contour-svg" viewBox="0 0 600 500" preserveAspectRatio="xMidYMid slice">
+    <path d="M-20,420 C120,380 180,300 260,300 C340,300 360,420 460,400 C520,388 560,340 620,340" fill="none" stroke="#1F4B4C" stroke-width="2" opacity="0.5"/>
+    <path d="M-20,450 C130,410 200,330 270,330 C350,330 370,440 470,420 C530,408 570,370 620,370" fill="none" stroke="#1F4B4C" stroke-width="2" opacity="0.4"/>
+    <path d="M-20,380 C110,340 170,260 260,260 C345,260 355,390 450,370 C515,357 560,300 620,300" fill="none" stroke="#C1440E" stroke-width="2" opacity="0.35"/>
+    <path d="M-20,340 C100,300 160,220 260,220 C350,220 345,350 440,330 C505,317 555,260 620,260" fill="none" stroke="#1F4B4C" stroke-width="2" opacity="0.3"/>
+    <path d="M-20,300 C95,260 150,180 260,180 C355,180 340,310 430,290 C495,277 550,220 620,220" fill="none" stroke="#C1440E" stroke-width="2" opacity="0.25"/>
+  </svg>
+  <div class="wrap">
+    <div class="hero-inner">
+      <h1>Adventure <span class="em">without</span><br>borders.</h1>
+      <p class="hero-sub">Local trails across Mauritius, volcano expeditions to La Réunion, and team experiences built to bring people closer — on the ground and off it.</p>
+      <div class="hero-ctas">
+        <a href="#" data-goto="hikes" class="btn-primary">Find your next hike</a>
+        <a href="#" data-goto="expedition" class="btn-ghost">See expeditions</a>
+      </div>
+      <div class="elev-marks">
+        <div class="elev-mark"><div class="num">2,504m</div><div class="lbl">Piton des Neiges — completed</div></div>
+        <div class="elev-mark"><div class="num">2,632m</div><div class="lbl">Piton de la Fournaise — upcoming</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="intro">
+  <div class="wrap">
+    <div class="intro-inner">
+      <h2>From island trails to island volcanoes.</h2>
+      <p>Peak Axis started on the trails of Mauritius. It's grown into expeditions across the water to Réunion's volcanic peaks, team days built around real challenge, and group activities for anyone who'd rather move than sit still.</p>
+    </div>
+  </div>
+</section>
+
+<section class="pillars">
+  <div class="wrap">
+    <div class="tab-row" role="tablist">
+      <button class="tab-btn active" data-tab="hikes"><span class="code">01</span>Hikes</button>
+      <button class="tab-btn" data-tab="expeditions"><span class="code">02</span>Expeditions</button>
+      <button class="tab-btn" data-tab="team"><span class="code">03</span>Team Building</button>
+      <button class="tab-btn" data-tab="activities"><span class="code">04</span>Activities</button>
+    </div>
+
+    <div class="panel active" id="panel-hikes">
+      <div class="panel-visual">
+        <svg viewBox="0 0 400 300"><path d="M0,240 L80,140 L140,190 L220,80 L280,170 L400,60 L400,300 L0,300 Z" fill="#173838"/><path d="M0,260 L100,180 L170,220 L240,140 L310,210 L400,120 L400,300 L0,300 Z" fill="#1F4B4C"/></svg>
+      </div>
+      <div class="panel-text">
+        <div class="kicker">Local Hikes</div>
+        <h3>Group hikes across Mauritius, most weekends.</h3>
+        <p>No group of your own? Join one of ours. Trails run from easy coastal walks to full-day ridge hikes, with a guide and a group who show up for it too.</p>
+        <a href="#" data-goto="hikes" class="go">View upcoming hikes</a>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-expeditions">
+      <div class="panel-visual">
+        <svg viewBox="0 0 400 300"><path d="M0,300 L60,180 L120,240 L200,60 L260,180 L340,120 L400,220 L400,300 Z" fill="#7a2607"/><path d="M195,60 L205,60 L215,90 L185,90 Z" fill="#C1440E"/></svg>
+      </div>
+      <div class="panel-text">
+        <div class="kicker">International Expeditions</div>
+        <h3>Réunion's volcanoes, one expedition at a time.</h3>
+        <p>A short flight, a much bigger trail. Our expeditions take small groups to Piton des Neiges and Piton de la Fournaise — multi-day treks with real altitude and real preparation behind them.</p>
+        <a href="#" data-goto="expedition" class="go">View expeditions</a>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-team">
+      <div class="panel-visual">
+        <svg viewBox="0 0 400 300"><circle cx="120" cy="150" r="34" fill="#1F4B4C"/><circle cx="210" cy="120" r="34" fill="#C1440E"/><circle cx="290" cy="170" r="34" fill="#1F4B4C"/><circle cx="200" cy="210" r="34" fill="#7a2607"/></svg>
+      </div>
+      <div class="panel-text">
+        <div class="kicker">Team Building</div>
+        <h3>Teams work better after they've climbed something together.</h3>
+        <p>Outdoor challenges, indoor games, and custom formats for companies who want their team days to actually be remembered.</p>
+        <a href="#" class="go">Request a package</a>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-activities">
+      <div class="panel-visual">
+        <svg viewBox="0 0 400 300"><rect x="30" y="60" width="150" height="90" fill="#1F4B4C"/><rect x="210" y="150" width="160" height="90" fill="#C1440E"/><rect x="60" y="180" width="110" height="60" fill="#7a2607"/></svg>
+      </div>
+      <div class="panel-text">
+        <div class="kicker">Activities</div>
+        <h3>Indoor and outdoor, for any group.</h3>
+        <p>Adventure challenges, nature activities, and indoor games for friends, families and companies looking for something different.</p>
+        <a href="#" class="go">See all activities</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="featured" id="expeditions">
+  <div class="wrap featured-grid">
+    <div>
+      <div class="tag">Next Expedition</div>
+      <h2>Piton de la Fournaise</h2>
+      <p>One of the world's most active volcanoes, and one of Réunion's most striking treks. Our next expedition crosses the Plaine des Sables to the crater rim — a landscape that looks more like Mars than an island.</p>
+      <div class="stat-row">
+        <div class="stat"><div class="n">2,632m</div><div class="l">Summit elevation</div></div>
+        <div class="stat"><div class="n">3 days</div><div class="l">Duration</div></div>
+        <div class="stat"><div class="n">Challenging</div><div class="l">Difficulty</div></div>
+      </div>
+      <div class="featured-ctas">
+        <a href="#" data-goto="enquire" class="btn-primary">Enquire about this expedition</a>
+        <a href="#" data-goto="expedition" class="btn-ghost">Full itinerary</a>
+      </div>
+    </div>
+    <div>
+      <svg class="crater" viewBox="0 0 400 280">
+        <path d="M0,220 C60,180 90,140 150,140 C210,140 220,90 280,90 C330,90 360,150 400,140 L400,280 L0,280 Z" fill="#2c2a27"/>
+        <path d="M0,240 C60,210 100,180 160,180 C220,180 230,130 290,130 C335,130 365,180 400,170 L400,280 L0,280 Z" fill="#C1440E" opacity="0.55"/>
+        <ellipse cx="255" cy="105" rx="30" ry="10" fill="#211F1D"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="position" id="about">
+  <div class="wrap">
+    <h2>You're not just here for a hike.<br>You're here to go <span class="em">further</span>.</h2>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap foot-grid">
+    <div class="foot-cta">
+      <h3 class="display">Ready for your next adventure?</h3>
+      <p class="small">Hikes · Expeditions · Team Building · Activities — Mauritius &amp; La Réunion</p>
+    </div>
+    <a href="#" data-goto="enquire" class="btn-primary">Send an enquiry</a>
+  </div>
+</footer>
+
+</div>
+<div id="view-hikes" class="view">
+
+
+
+
+<section class="pagehead">
+  <div class="wrap">
+    <h1>Group Hikes</h1>
+    <p>No group of your own? Join one of ours. Every hike runs with a guide, a fixed group size, and a route chosen for the season.</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="filters">
+    <button class="fbtn active" data-diff="all">All</button>
+    <button class="fbtn" data-diff="easy">Easy</button>
+    <button class="fbtn" data-diff="moderate">Moderate</button>
+    <button class="fbtn" data-diff="challenging">Challenging</button>
+  </div>
+
+  <div class="private-banner">
+    <div>
+      <h3>Want your own trail, your own date?</h3>
+      <p>Book a private hike for your group — choose the trail and preferred date instead of joining a scheduled one.</p>
+    </div>
+    <a href="#" data-goto="enquire" class="btn-ghost">Book a private hike</a>
+  </div>
+
+  <div class="hike-list" id="hikeList">
+
+    <div class="hike-row" data-diff="moderate">
+      <div class="hike-visual"><svg viewBox="0 0 200 140"><path d="M0,120 L40,60 L70,90 L110,30 L140,75 L200,50 L200,140 L0,140Z" fill="#173838"/></svg></div>
+      <div class="hike-info">
+        <h3>Le Morne Brabant</h3>
+        <div class="hike-meta">
+          <span class="diff diff-moderate">Moderate</span>
+          <span>📅 Sat 12 Sep</span>
+          <span>⏱ Half-day</span>
+          <span>📍 Le Morne</span>
+        </div>
+      </div>
+      <div class="hike-action">
+        <div class="hike-price">Rs 900</div>
+        <div class="spots low">4 spots left</div>
+        <a href="#" data-goto="enquire" class="btn-primary">Book your spot</a>
+      </div>
+    </div>
+
+    <div class="hike-row" data-diff="challenging">
+      <div class="hike-visual"><svg viewBox="0 0 200 140"><path d="M0,130 L30,80 L60,110 L100,40 L130,95 L170,60 L200,90 L200,140 L0,140Z" fill="#1F4B4C"/></svg></div>
+      <div class="hike-info">
+        <h3>Trois Mamelles</h3>
+        <div class="hike-meta">
+          <span class="diff diff-challenging">Challenging</span>
+          <span>📅 Sun 20 Sep</span>
+          <span>⏱ Full-day</span>
+          <span>📍 Tamarin</span>
+        </div>
+      </div>
+      <div class="hike-action">
+        <div class="hike-price">Rs 1,200</div>
+        <div class="spots">9 spots left</div>
+        <a href="#" data-goto="enquire" class="btn-primary">Book your spot</a>
+      </div>
+    </div>
+
+    <div class="hike-row" data-diff="easy">
+      <div class="hike-visual"><svg viewBox="0 0 200 140"><path d="M0,110 L50,90 L90,100 L130,70 L200,85 L200,140 L0,140Z" fill="#7a2607"/></svg></div>
+      <div class="hike-info">
+        <h3>Black River Gorges Loop</h3>
+        <div class="hike-meta">
+          <span class="diff diff-easy">Easy</span>
+          <span>📅 Sat 26 Sep</span>
+          <span>⏱ 3 hrs</span>
+          <span>📍 Black River</span>
+        </div>
+      </div>
+      <div class="hike-action">
+        <div class="hike-price">Rs 700</div>
+        <div class="spots">12 spots left</div>
+        <a href="#" data-goto="enquire" class="btn-primary">Book your spot</a>
+      </div>
+    </div>
+
+    <div class="hike-row" data-diff="moderate">
+      <div class="hike-visual"><svg viewBox="0 0 200 140"><path d="M0,120 L45,70 L80,95 L120,50 L160,85 L200,65 L200,140 L0,140Z" fill="#1F4B4C"/></svg></div>
+      <div class="hike-info">
+        <h3>Corps de Garde</h3>
+        <div class="hike-meta">
+          <span class="diff diff-moderate">Moderate</span>
+          <span>📅 Sat 3 Oct</span>
+          <span>⏱ Half-day</span>
+          <span>📍 Vacoas</span>
+        </div>
+      </div>
+      <div class="hike-action">
+        <div class="hike-price">Rs 900</div>
+        <div class="spots">15 spots left</div>
+        <a href="#" data-goto="enquire" class="btn-primary">Book your spot</a>
+      </div>
+    </div>
+
+    <div class="hike-row" data-diff="challenging">
+      <div class="hike-visual"><svg viewBox="0 0 200 140"><path d="M0,130 L35,60 L65,100 L110,35 L145,90 L200,55 L200,140 L0,140Z" fill="#173838"/></svg></div>
+      <div class="hike-info">
+        <h3>Piton de la Petite Rivière Noire</h3>
+        <div class="hike-meta">
+          <span class="diff diff-challenging">Challenging</span>
+          <span>📅 Sun 11 Oct</span>
+          <span>⏱ Full-day</span>
+          <span>📍 Black River</span>
+        </div>
+      </div>
+      <div class="hike-action">
+        <div class="hike-price">Rs 1,300</div>
+        <div class="spots low">2 spots left</div>
+        <a href="#" data-goto="enquire" class="btn-primary">Book your spot</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<section class="cta-strip">
+  <div class="wrap">
+    <h2>Ready for something further?</h2>
+    <p>If local trails feel too familiar, our next expedition to Réunion's volcanoes might be a better fit.</p>
+    <a href="#" data-goto="expedition" class="btn-ghost">See expeditions</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Peak Axis — Hikes · Expeditions · Team Building · Activities</p>
+  </div>
+</footer>
+
+</div>
+<div id="view-expedition" class="view">
+
+
+
+
+<section class="hero">
+  <svg class="hero-scape" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMax slice">
+    <path d="M0,500 L0,340 C150,300 220,220 340,220 C440,220 470,150 560,150 C620,150 640,110 690,110 C740,110 760,150 820,150 C920,150 980,260 1100,250 C1150,246 1180,270 1200,270 L1200,500 Z" fill="#173838" opacity="0.9"/>
+    <path d="M0,500 L0,400 C160,370 240,320 360,320 C450,320 480,270 570,270 C630,270 650,240 700,240 C750,240 770,270 830,270 C930,270 990,340 1100,335 L1200,335 L1200,500 Z" fill="#0f2626"/>
+    <ellipse cx="660" cy="145" rx="26" ry="9" fill="#C1440E" opacity="0.85"/>
+  </svg>
+  <div class="wrap hero-inner">
+    <div class="tag">International Expedition — La Réunion</div>
+    <h1>Piton de la Fournaise</h1>
+    <p class="hero-sub">A three-day crossing of one of the world's most active volcanoes — from the Plaine des Sables to the edge of the Dolomieu crater.</p>
+    <div class="hero-bottom">
+      <div class="price-block">
+        <div class="from">From</div>
+        <div class="amt">Rs 24,500 <span style="font-size:15px;color:#a19c92;font-family:'Inter';font-weight:400;">per person</span></div>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;">
+        <a href="#itinerary" class="btn-ghost">Full itinerary</a>
+        <a href="#" data-goto="enquire" class="btn-primary">Enquire now</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quickinfo">
+  <div class="wrap qi-grid">
+    <div><div class="l">Destination</div><div class="v">La Réunion</div></div>
+    <div><div class="l">Duration</div><div class="v">3 Days</div></div>
+    <div><div class="l">Difficulty</div><div class="v">Challenging</div></div>
+    <div><div class="l">Group Size</div><div class="v">6–12</div></div>
+    <div><div class="l">Summit</div><div class="v">2,632m</div></div>
+    <div><div class="l">Next Departure</div><div class="v">TBC</div></div>
+  </div>
+</section>
+
+<section class="block" id="expo-about">
+  <div class="wrap two-col">
+    <div>
+      <div class="kicker">About the Expedition</div>
+      <h2>An island that looks like it's still being made.</h2>
+      <p class="lead">Piton de la Fournaise is one of the most active volcanoes on Earth, and one of the most dramatic landscapes in the Indian Ocean. The trek crosses the Plaine des Sables — a barren, lunar plateau — before dropping into the caldera and climbing to the crater rim, where the ground still steams in places.</p>
+    </div>
+    <div>
+      <div class="why-grid" style="margin-top:0;">
+        <div class="why-item"><div class="t">Landscape</div><p>Lava fields, cinder cones and a plateau that feels more like Mars than an island.</p></div>
+        <div class="why-item"><div class="t">Challenge</div><p>Long days, altitude, and terrain that demands your full attention underfoot.</p></div>
+        <div class="why-item"><div class="t">Access</div><p>A short flight from Mauritius — no long-haul travel required to reach it.</p></div>
+        <div class="why-item"><div class="t">Group</div><p>Small groups only, guided throughout by people who know the mountain.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="kicker">Is This Expedition For You?</div>
+    <h2>Fitness &amp; Difficulty</h2>
+    <p class="lead">We'd rather you know exactly what this trek demands before you commit than find out on day two. Read this section properly.</p>
+    <ul class="fit-list">
+      <li><span class="k">Hiking experience</span><span class="d">Prior multi-day or full-day hiking experience strongly recommended. This is not a first hike.</span></li>
+      <li><span class="k">Fitness level</span><span class="d">Comfortable walking 15–18km in a day over uneven volcanic terrain, including sustained ascent and descent.</span></li>
+      <li><span class="k">Altitude</span><span class="d">Summit sits at 2,632m. Mild altitude effects (shortness of breath, fatigue) are common; acute altitude sickness is uncommon at this elevation but not impossible.</span></li>
+      <li><span class="k">Terrain</span><span class="d">Volcanic rock, loose cinder, exposed plateau with little shade or shelter. Sturdy ankle support required.</span></li>
+      <li><span class="k">Age &amp; health</span><span class="d">Recommended for ages 16+. Please disclose any heart, lung or mobility conditions before booking.</span></li>
+    </ul>
+    <div class="fit-note">If you're unsure whether this trek is right for your fitness level, get in touch before booking — we'd rather talk it through than have you find out on the trail.</div>
+  </div>
+</section>
+
+<section class="block" id="itinerary">
+  <div class="wrap">
+    <div class="kicker">Day By Day</div>
+    <h2>Itinerary</h2>
+    <div class="itin">
+      <div class="itin-day">
+        <div class="dn">Day 1</div>
+        <h3>Arrival &amp; the Plaine des Sables</h3>
+        <p>Transfer to Réunion and out to the volcano's edge. We cross the Plaine des Sables on foot to reach Gîte du Volcan, our base for the night — a landscape that shifts from green to grey to red within a few kilometres.</p>
+        <div class="meta">Approx. 3–4 hrs walking · Overnight at Gîte du Volcan</div>
+      </div>
+      <div class="itin-day">
+        <div class="dn">Day 2</div>
+        <h3>Pas de Bellecombe to the crater rim</h3>
+        <p>An early start down into the caldera, across the lava fields past Formica Leo, and up to the rim of Dolomieu crater. Weather and activity levels are checked continuously — the route adjusts if conditions call for it. Return to the gîte by evening.</p>
+        <div class="meta">Approx. 6–7 hrs walking · Summit day</div>
+      </div>
+      <div class="itin-day">
+        <div class="dn">Day 3</div>
+        <h3>Return &amp; transfer</h3>
+        <p>A shorter final walk back across the plateau, then transfer back for onward travel or return to Mauritius.</p>
+        <div class="meta">Approx. 2 hrs walking</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap inc-grid">
+    <div class="yes">
+      <h3>What's Included</h3>
+      <ul>
+        <li>Guiding throughout the expedition</li>
+        <li>One night at Gîte du Volcan</li>
+        <li>Local transport between listed activities</li>
+        <li>Entry/permit fees where applicable</li>
+        <li>Breakfast and dinner on Day 1 &amp; 2</li>
+      </ul>
+    </div>
+    <div class="no">
+      <h3>What's Not Included</h3>
+      <ul>
+        <li>Flights between Mauritius and Réunion</li>
+        <li>Travel insurance</li>
+        <li>Lunches and personal snacks</li>
+        <li>Personal hiking gear</li>
+        <li>Personal expenses</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="kicker">Packing List</div>
+    <h2>What To Bring</h2>
+    <div class="pack-grid">
+      <div class="pack-cat">
+        <div class="t">Footwear &amp; Clothing</div>
+        <ul><li>Broken-in hiking boots</li><li>Layered clothing — plateau gets cold at altitude</li><li>Waterproof shell</li><li>Sun hat + warm hat</li></ul>
+      </div>
+      <div class="pack-cat">
+        <div class="t">Essential Gear</div>
+        <ul><li>30L+ daypack</li><li>2–3L water capacity</li><li>Headlamp</li><li>Trekking poles (recommended)</li></ul>
+      </div>
+      <div class="pack-cat">
+        <div class="t">Personal &amp; Documents</div>
+        <ul><li>Valid ID / passport</li><li>Travel insurance confirmation</li><li>Sunscreen &amp; sunglasses</li><li>Personal medication</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block safety">
+  <div class="wrap">
+    <div class="kicker">Your Safety Comes First</div>
+    <h2>Safety on the Mountain</h2>
+    <p class="lead">Fournaise is an active volcano, and we treat that seriously. Access to the crater area is subject to the local observatory's alert level, and our guides check conditions before and during every departure.</p>
+    <ul class="fit-list">
+      <li><span class="k">Guiding</span><span class="d">Every group is led by a guide familiar with the terrain and current volcanic activity status.</span></li>
+      <li><span class="k">Volcanic activity</span><span class="d">Routes are adjusted or expeditions postponed if the alert level restricts crater access. Your safety takes priority over the itinerary.</span></li>
+      <li><span class="k">Communication</span><span class="d">Guides carry means of emergency communication for sections without mobile coverage.</span></li>
+      <li><span class="k">Weather</span><span class="d">The plateau is exposed with fast-changing weather; contingency plans are in place for wind, rain and low visibility.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="block" id="payment">
+  <div class="wrap">
+    <div class="kicker">Enquire</div>
+    <h2>How Booking Works</h2>
+    <p class="lead">This expedition runs on an enquiry basis — send us your details and preferred dates, and our team will confirm availability and next steps directly with you before anything is finalised.</p>
+    <div class="pay-box">
+      <div class="pay-row"><span class="l">Price per person</span><span class="v">From Rs 24,500</span></div>
+      <div class="pay-row"><span class="l">Group size</span><span class="v">6–12 people</span></div>
+      <div class="pay-row"><span class="l">Confirmation</span><span class="v">Via WhatsApp or email</span></div>
+    </div>
+    <p class="pay-note">Payment and deposit terms will be confirmed directly with you once your enquiry is reviewed. Online payment isn't available yet — it's coming soon.</p>
+  </div>
+</section>
+
+<section class="final" id="expo-contact">
+  <div class="wrap">
+    <h2>Ready to stand<br>on the <span class="em">rim</span>?</h2>
+    <p class="lead">Send an enquiry and we'll get back to you with availability, current volcanic activity status, and everything else you need to know before you commit.</p>
+    <div class="final-ctas">
+      <a href="#" data-goto="enquire" class="btn-primary">Enquire about this expedition</a>
+      <a href="#" data-goto="home" class="btn-ghost">Back to all expeditions</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Information last updated: [DATE] — volcanic activity status and access can change; we confirm current conditions at time of enquiry.</p>
+  </div>
+</footer>
+
+
+</div>
+<div id="view-enquire" class="view">
+
+
+
+
+<div id="formView">
+  <section class="pagehead">
+    <div class="wrap">
+      <h1>Let's plan your<br>next adventure.</h1>
+      <p>Tell us what you're interested in and we'll get back to you directly — by WhatsApp or email, whichever you prefer.</p>
+    </div>
+  </section>
+
+  <form class="wrap" id="enquiryForm">
+
+    <div class="field">
+      <label>I'm interested in</label>
+      <div class="interest-grid" id="interestGrid">
+        <button type="button" class="interest-opt" data-val="hike"><div class="t">Hiking</div><div class="s">Group hike</div></button>
+        <button type="button" class="interest-opt" data-val="private"><div class="t">Private Hike</div><div class="s">Your trail, your date</div></button>
+        <button type="button" class="interest-opt" data-val="expedition"><div class="t">Expedition</div><div class="s">La Réunion</div></button>
+        <button type="button" class="interest-opt" data-val="team"><div class="t">Team Building</div><div class="s">Corporate</div></button>
+        <button type="button" class="interest-opt" data-val="activity"><div class="t">Activity</div><div class="s">Indoor / outdoor</div></button>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label for="name">Full name</label>
+        <input type="text" id="name" required>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="phone">WhatsApp / Phone</label>
+      <input type="tel" id="phone" placeholder="+230 ...">
+    </div>
+
+    <!-- HIKE FIELDS -->
+    <div class="conditional" id="cond-hike">
+      <div class="cond-label">Hike details</div>
+      <div class="row2">
+        <div class="field">
+          <label for="hikeSelect">Which hike?</label>
+          <select id="hikeSelect">
+            <option>Le Morne Brabant</option>
+            <option>Trois Mamelles</option>
+            <option>Black River Gorges Loop</option>
+            <option>Corps de Garde</option>
+            <option>Not sure yet</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="hikeDate">Preferred date</label>
+          <input type="date" id="hikeDate">
+        </div>
+      </div>
+      <div class="field">
+        <label for="hikePeople">Number of people</label>
+        <input type="number" id="hikePeople" min="1" value="1">
+      </div>
+    </div>
+
+    <!-- PRIVATE HIKE FIELDS -->
+    <div class="conditional" id="cond-private">
+      <div class="cond-label">Private hike details</div>
+      <div class="row2">
+        <div class="field">
+          <label for="privateTrail">Which trail?</label>
+          <select id="privateTrail">
+            <option>Le Morne Brabant</option>
+            <option>Trois Mamelles</option>
+            <option>Black River Gorges Loop</option>
+            <option>Corps de Garde</option>
+            <option>Piton de la Petite Rivière Noire</option>
+            <option>Not sure — suggest a trail</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="privateDate">Preferred date</label>
+          <input type="date" id="privateDate">
+        </div>
+      </div>
+      <div class="field">
+        <label for="privatePeople">Group size</label>
+        <input type="number" id="privatePeople" min="1" value="1">
+        <div class="hint">Pricing for private hikes is confirmed per group — <span class="price-note">price on request</span>.</div>
+      </div>
+    </div>
+
+    <!-- EXPEDITION FIELDS -->
+    <div class="conditional" id="cond-expedition">
+      <div class="cond-label">Expedition details</div>
+      <div class="row2">
+        <div class="field">
+          <label for="expSelect">Which expedition?</label>
+          <select id="expSelect">
+            <option>Piton de la Fournaise</option>
+            <option>Not sure yet — tell me what's available</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="expPeople">Number of people</label>
+          <input type="number" id="expPeople" min="1" value="1">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="expExperience">Hiking / altitude experience</label>
+          <select id="expExperience">
+            <option>Beginner — limited multi-day hiking experience</option>
+            <option>Intermediate — regular hiker, some multi-day treks</option>
+            <option>Experienced — frequent multi-day and altitude treks</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="expCountry">Country of residence</label>
+          <input type="text" id="expCountry">
+        </div>
+      </div>
+    </div>
+
+    <!-- TEAM BUILDING FIELDS -->
+    <div class="conditional" id="cond-team">
+      <div class="cond-label">Team building details</div>
+      <div class="row2">
+        <div class="field">
+          <label for="teamCompany">Company name</label>
+          <input type="text" id="teamCompany">
+        </div>
+        <div class="field">
+          <label for="teamSize">Team size</label>
+          <input type="number" id="teamSize" min="1">
+        </div>
+      </div>
+      <div class="field">
+        <label for="teamFormat">Preferred format</label>
+        <select id="teamFormat">
+          <option>Outdoor</option>
+          <option>Indoor</option>
+          <option>Mix of both</option>
+          <option>Not sure — open to suggestions</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ACTIVITY FIELDS -->
+    <div class="conditional" id="cond-activity">
+      <div class="cond-label">Activity details</div>
+      <div class="row2">
+        <div class="field">
+          <label for="activityType">Indoor or outdoor?</label>
+          <select id="activityType">
+            <option>Outdoor</option>
+            <option>Indoor</option>
+            <option>Either</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="activityPeople">Number of people</label>
+          <input type="number" id="activityPeople" min="1" value="1">
+        </div>
+      </div>
+      <div class="field">
+        <label for="activityDate">Preferred date</label>
+        <input type="date" id="activityDate">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="message">Anything else we should know?</label>
+      <textarea id="message" placeholder="Questions, group details, accessibility needs, etc."></textarea>
+    </div>
+
+    <button type="submit" class="btn-primary">Send enquiry</button>
+  </form>
+</div>
+
+<div class="confirm" id="confirmView">
+  <div class="wrap">
+    <div class="tick">
+      <svg width="20" height="16" viewBox="0 0 20 16" fill="none"><path d="M1 8L7 14L19 1" stroke="#FAF8F3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h2>Enquiry sent.</h2>
+    <p>Thanks — we've got your details. Our team will get back to you directly, usually within a day or two.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>Peak Axis — Hikes · Expeditions · Team Building · Activities</p>
+  </div>
+</footer>
+
+</div>
+<script>
+/* home script */
+
+  const tabs = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+/* hikes script */
+
+  const buttons = document.querySelectorAll('.fbtn');
+  const rows = document.querySelectorAll('.hike-row');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const diff = btn.dataset.diff;
+      rows.forEach(row => {
+        row.style.display = (diff === 'all' || row.dataset.diff === diff) ? 'grid' : 'none';
+      });
+    });
+  });
+
+/* enquire script */
+
+  const interestButtons = document.querySelectorAll('.interest-opt');
+  const conditionals = {
+    hike: document.getElementById('cond-hike'),
+    private: document.getElementById('cond-private'),
+    expedition: document.getElementById('cond-expedition'),
+    team: document.getElementById('cond-team'),
+    activity: document.getElementById('cond-activity'),
+  };
+
+  interestButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      interestButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      Object.values(conditionals).forEach(c => c.classList.remove('show'));
+      const val = btn.dataset.val;
+      if (conditionals[val]) conditionals[val].classList.add('show');
+    });
+  });
+
+  document.getElementById('enquiryForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('confirmView').classList.add('show');
+    window.scrollTo(0,0);
+  });
+
+
+function switchView(name){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  var el = document.getElementById('view-' + name);
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.navlink').forEach(l => l.classList.remove('active'));
+  var link = document.querySelector('.navlink[data-view="' + name + '"]');
+  if(link) link.classList.add('active');
+  window.scrollTo(0,0);
+  window.location.hash = name;
+}
+document.querySelectorAll('.navlink').forEach(function(btn){
+  btn.addEventListener('click', function(){ switchView(btn.dataset.view); });
+});
+document.querySelectorAll('.logo').forEach(function(l){
+  l.addEventListener('click', function(){ switchView('home'); });
+});
+document.querySelectorAll('[data-goto]').forEach(function(el){
+  el.addEventListener('click', function(e){ e.preventDefault(); switchView(el.dataset.goto); });
+});
+(function(){
+  var initial = (window.location.hash || '#home').replace('#','');
+  if(!document.getElementById('view-' + initial)) initial = 'home';
+  switchView(initial);
+})();
+
+</script>
+</body>
+</html>
