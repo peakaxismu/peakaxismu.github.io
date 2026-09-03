@@ -33,8 +33,8 @@ export async function PUT(
     }
 
     return NextResponse.json({ success: true, data })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -58,7 +58,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 })
+  } catch (err: unknown) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal server error' }, { status: 500 })
   }
 }

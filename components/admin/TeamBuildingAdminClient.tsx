@@ -202,7 +202,7 @@ export default function TeamBuildingAdminClient({ initialPackages }: { initialPa
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Type *</label>
                   <select
                     value={editingPkg.type || 'outdoor'}
-                    onChange={(e) => setEditingPkg({ ...editingPkg, type: e.target.value as any })}
+                    onChange={(e) => setEditingPkg({ ...editingPkg, type: e.target.value as 'outdoor' | 'indoor' })}
                     style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }}
                   >
                     <option value="outdoor">Outdoor</option>
@@ -213,7 +213,7 @@ export default function TeamBuildingAdminClient({ initialPackages }: { initialPa
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Status</label>
                   <select
                     value={editingPkg.status || 'published'}
-                    onChange={(e) => setEditingPkg({ ...editingPkg, status: e.target.value as any })}
+                    onChange={(e) => setEditingPkg({ ...editingPkg, status: e.target.value as 'draft' | 'published' })}
                     style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }}
                   >
                     <option value="published">Published</option>

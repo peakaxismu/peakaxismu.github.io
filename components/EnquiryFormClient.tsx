@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 
 interface HikeOption {
   id: string
@@ -76,8 +76,8 @@ export default function EnquiryFormClient({
 
       setSubmitted(true)
       window.scrollTo({ top: 0, behavior: 'smooth' })
-    } catch (err: any) {
-      setErrorMsg(err.message || 'An error occurred. Please try again.')
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'An error occurred. Please try again.')
     } finally {
       setSubmitting(false)
     }

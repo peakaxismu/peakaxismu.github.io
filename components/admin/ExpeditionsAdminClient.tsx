@@ -348,7 +348,7 @@ export default function ExpeditionsAdminClient({ initialExpeditions }: { initial
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Status</label>
                   <select
                     value={editingExp.status || 'published'}
-                    onChange={(e) => setEditingExp({ ...editingExp, status: e.target.value as any })}
+                    onChange={(e) => setEditingExp({ ...editingExp, status: e.target.value as 'draft' | 'published' })}
                     style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }}
                   >
                     <option value="published">Published</option>
