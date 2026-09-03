@@ -111,7 +111,7 @@ export default function EnquiriesTable({ initialEnquiries }: { initialEnquiries:
                 <select
                   value={e.status}
                   disabled={loadingId === e.id}
-                  onChange={(evt) => handleStatusChange(e.id, evt.target.value as any)}
+                  onChange={(evt) => handleStatusChange(e.id, evt.target.value as 'new' | 'contacted' | 'closed')}
                   style={{
                     padding: '6px 10px',
                     fontSize: '13px',

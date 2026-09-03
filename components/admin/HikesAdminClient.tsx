@@ -225,7 +225,7 @@ export default function HikesAdminClient({ initialHikes }: { initialHikes: Hike[
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Difficulty *</label>
                   <select
                     value={editingHike.difficulty || 'moderate'}
-                    onChange={(e) => setEditingHike({ ...editingHike, difficulty: e.target.value as any })}
+                    onChange={(e) => setEditingHike({ ...editingHike, difficulty: e.target.value as 'easy' | 'moderate' | 'challenging' })}
                     style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }}
                   >
                     <option value="easy">Easy</option>
@@ -316,7 +316,7 @@ export default function HikesAdminClient({ initialHikes }: { initialHikes: Hike[
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Status</label>
                 <select
                   value={editingHike.status || 'published'}
-                  onChange={(e) => setEditingHike({ ...editingHike, status: e.target.value as any })}
+                  onChange={(e) => setEditingHike({ ...editingHike, status: e.target.value as 'draft' | 'published' })}
                   style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }}
                 >
                   <option value="published">Published</option>
