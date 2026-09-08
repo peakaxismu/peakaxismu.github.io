@@ -1,20 +1,27 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 export default function CookieConsent() {
-  const [showBanner, setShowBanner] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return !localStorage.getItem('peak_axis_cookie_consent')
-  })
+  const [showBanner, setShowBanner] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+
+    if (typeof window === 'undefined') return
+
+    const consent = window.localStorage.getItem('peak_axis_cookie_consent')
+    setShowBanner(!consent)
+  }, [])
 
   const handleAccept = () => {
-    localStorage.setItem('peak_axis_cookie_consent', 'accepted')
+    window.localStorage.setItem('peak_axis_cookie_consent', 'accepted')
     setShowBanner(false)
   }
 
-  if (!showBanner) return null
+  if (!isMounted || !showBanner) return null
 
   return (
     <div
