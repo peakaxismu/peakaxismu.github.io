@@ -79,7 +79,7 @@ export default function HomeClientPillars({
         {/* Panel 01: Hikes */}
         <div className={`panel ${activeTab === 'hikes' ? 'active' : ''}`}>
           <div className="p-left">
-            <h3>Group hikes across Mauritius, most weekends.</h3>
+            <h2>Group hikes across Mauritius, most weekends.</h2>
             <p>
               Join guided group walks through Mauritius’ mountain ranges and nature reserves. We handle navigation, safety, and pacing so you can focus on the trail.
             </p>
@@ -97,7 +97,7 @@ export default function HomeClientPillars({
               {hikes.slice(0, 3).map((hike) => (
                 <div key={hike.id} className="mini-card">
                   <div className="tag">SCHEDULED</div>
-                  <h4>{hike.name}</h4>
+                  <h3>{hike.name}</h3>
                   <div className="meta">
                     <span>{hike.date}</span> · <span>{hike.duration}</span> · <span>{hike.price}</span>
                   </div>
@@ -110,7 +110,7 @@ export default function HomeClientPillars({
         {/* Panel 02: Expeditions */}
         <div className={`panel ${activeTab === 'expeditions' ? 'active' : ''}`}>
           <div className="p-left">
-            <h3>Réunion&apos;s volcanoes, one expedition at a time.</h3>
+            <h2>Réunion&apos;s volcanoes, one expedition at a time.</h2>
             <p>
               Multi-day wilderness journeys beyond Mauritius. Crossing active calderas, lava fields, and high altitude trails with full mountain logistics and certified guides.
             </p>
@@ -124,7 +124,7 @@ export default function HomeClientPillars({
             {expedition && (
               <div className="feat-box">
                 <span className="badge">NEXT EXPEDITION</span>
-                <h4>{expedition.name}</h4>
+                <h3>{expedition.name}</h3>
                 <div className="dest">{expedition.destination} · {expedition.duration_days} days</div>
                 <p className="desc">{expedition.description?.substring(0, 140)}...</p>
                 <div className="foot">
@@ -139,7 +139,7 @@ export default function HomeClientPillars({
         {/* Panel 03: Team Building */}
         <div className={`panel ${activeTab === 'team' ? 'active' : ''}`}>
           <div className="p-left">
-            <h3>Teams work better after they&apos;ve climbed something together.</h3>
+            <h2>Teams work better after they&apos;ve climbed something together.</h2>
             <p>
               Custom outdoor challenges designed for company teams. From ridge walks to orientering tasks that build trust, clear minds, and test problem-solving outside the office.
             </p>
@@ -154,7 +154,7 @@ export default function HomeClientPillars({
               {outdoorTeam.slice(0, 3).map((pkg) => (
                 <div key={pkg.id} className="mini-card">
                   <div className="tag">OUTDOOR</div>
-                  <h4>{pkg.name}</h4>
+                  <h3>{pkg.name}</h3>
                   <div className="meta">{pkg.description}</div>
                 </div>
               ))}
@@ -165,7 +165,7 @@ export default function HomeClientPillars({
         {/* Panel 04: Activities */}
         <div className={`panel ${activeTab === 'activities' ? 'active' : ''}`}>
           <div className="p-left">
-            <h3>Indoor and outdoor, for any group.</h3>
+            <h2>Indoor and outdoor, for any group.</h2>
             <p>
               Tailored group experiences — half-day workshops, nature walks, and adventure sessions for schools, clubs, or private gatherings.
             </p>
@@ -180,7 +180,7 @@ export default function HomeClientPillars({
               {indoorActivities.slice(0, 3).map((act) => (
                 <div key={act.id} className="mini-card">
                   <div className="tag">INDOOR / OUTDOOR</div>
-                  <h4>{act.name}</h4>
+                  <h3>{act.name}</h3>
                   <div className="meta">{act.description}</div>
                 </div>
               ))}

@@ -32,7 +32,7 @@ export default async function HomePage() {
     <div id="view-home">
       {/* Hero Section */}
       <section className="hero">
-        <svg className="contour-svg" viewBox="0 0 600 500" fill="none">
+        <svg className="contour-svg" viewBox="0 0 600 500" fill="none" aria-hidden="true">
           <path d="M50 400 C150 350, 200 480, 350 420 C500 360, 480 200, 580 150" stroke="#C9B790" strokeWidth="1" opacity="0.4" />
           <path d="M20 320 C120 270, 180 390, 310 330 C440 270, 420 120, 550 80" stroke="#C9B790" strokeWidth="1" opacity="0.5" />
           <path d="M80 450 C180 400, 220 500, 380 450 C520 400, 510 250, 590 200" stroke="#C1440E" strokeWidth="1.2" opacity="0.35" />
@@ -162,7 +162,7 @@ export default async function HomePage() {
       <section className="cta-banner">
         <div className="wrap">
           <div className="banner-box">
-            <h3 className="display">Ready for your next adventure?</h3>
+            <h2>Ready for your next adventure?</h2>
             <p>Tell us what you&apos;re planning — whether it&apos;s a solo spot on a weekend hike or an expedition for your team.</p>
             <Link href="/enquire" className="btn-primary">
               Get in touch

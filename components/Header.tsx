@@ -16,7 +16,7 @@ export default function Header() {
         <Link href="/" className="logo">
           PEAK <span>AXIS</span>
         </Link>
-        <nav>
+        <nav aria-label="Main Navigation">
           <ul>
             <li>
               <Link href="/" className={pathname === '/' ? 'active' : ''}>

@@ -1,48 +1,50 @@
 'use client'
 
 import { useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 
-interface HikeOption {
+interface Hike {
   id: string
   name: string
   date: string
   price: string
 }
 
-interface ExpeditionOption {
+interface Expedition {
   id: string
   name: string
   destination: string
   price_from: string
 }
 
-interface TeamPackageOption {
+interface TeamPackage {
   id: string
   name: string
   type: string
+}
+
+interface EnquiryFormClientProps {
+  hikes: Hike[]
+  expeditions: Expedition[]
+  teamPackages: TeamPackage[]
+  initialInterest?: string
+  initialRef?: string
 }
 
 export default function EnquiryFormClient({
   hikes,
   expeditions,
   teamPackages,
-}: {
-  hikes: HikeOption[]
-  expeditions: ExpeditionOption[]
-  teamPackages: TeamPackageOption[]
-}) {
-  const searchParams = useSearchParams()
-  const initialInterest = searchParams.get('interest') || 'hike'
-  const initialRef = searchParams.get('ref') || ''
-
-  const [interestType, setInterestType] = useState<string>(initialInterest)
+  initialInterest = 'hike',
+  initialRef = '',
+}: EnquiryFormClientProps) {
+  const [interestType, setInterestType] = useState(initialInterest)
+  const [referenceId, setReferenceId] = useState(initialRef)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
-  const [referenceId, setReferenceId] = useState(initialRef)
   const [preferredDate, setPreferredDate] = useState('')
-  const [groupSize, setGroupSize] = useState('1-2')
+  const [groupSize, setGroupSize] = useState('2')
   const [message, setMessage] = useState('')
 
   const [submitting, setSubmitting] = useState(false)
@@ -59,25 +61,26 @@ export default function EnquiryFormClient({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name,
-          email,
-          phone,
+          name: name.trim(),
+          email: email.trim(),
+          phone: phone.trim() || undefined,
           interest_type: interestType,
-          reference_id: referenceId,
-          preferred_date: preferredDate,
+          reference_id: referenceId.trim() || undefined,
+          preferred_date: preferredDate || undefined,
           group_size: groupSize,
-          message,
+          message: message.trim() || undefined,
         }),
       })
 
+      const json = await res.json()
+
       if (!res.ok) {
-        throw new Error('Failed to submit enquiry')
+        throw new Error(json.error || 'Failed to submit enquiry. Please try again.')
       }
 
       setSubmitted(true)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (err: unknown) {
-      setErrorMsg(err instanceof Error ? err.message : 'An error occurred. Please try again.')
+      setErrorMsg(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setSubmitting(false)
     }
@@ -85,17 +88,11 @@ export default function EnquiryFormClient({
 
   if (submitted) {
     return (
-      <div className="confirm show" id="confirmView">
-        <div className="wrap">
+      <div className="wrap" id="formView">
+        <div className="confirm show" role="alert" aria-live="polite">
           <div className="tick">
-            <svg width="20" height="16" viewBox="0 0 20 16" fill="none">
-              <path
-                d="M1 8L7 14L19 1"
-                stroke="#FAF8F3"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+            <svg width="20" height="16" viewBox="0 0 20 16" fill="none" aria-hidden="true">
+              <path d="M2 8L7.5 13.5L18 2" stroke="#FAF8F3" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
           <h2>Enquiry sent.</h2>
@@ -109,17 +106,19 @@ export default function EnquiryFormClient({
 
   return (
     <div className="wrap" id="formView">
-      <form id="enquiryForm" onSubmit={handleSubmit}>
+      <form id="enquiryForm" onSubmit={handleSubmit} noValidate={false}>
         {errorMsg && (
-          <div style={{ padding: '12px 16px', background: '#C1440E', color: '#FAF8F3', marginBottom: '24px' }}>
+          <div role="alert" style={{ padding: '12px 16px', background: '#C1440E', color: '#FAF8F3', marginBottom: '24px', fontWeight: 600 }}>
             {errorMsg}
           </div>
         )}
 
         {/* Interest Selector */}
         <div className="field">
-          <label>What are you interested in?</label>
-          <div className="interest-grid">
+          <span id="interest-label" style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#3d3a36', marginBottom: '9px' }}>
+            What are you interested in? *
+          </span>
+          <div className="interest-grid" role="group" aria-labelledby="interest-label">
             <button
               type="button"
               className={`interest-opt ${interestType === 'hike' ? 'active' : ''}`}
@@ -181,22 +180,28 @@ export default function EnquiryFormClient({
         {/* Contact Info */}
         <div className="f-row">
           <div className="field">
-            <label htmlFor="fullName">Full name *</label>
+            <label htmlFor="fullName">Full name <span aria-hidden="true">*</span></label>
             <input
               type="text"
               id="fullName"
+              name="name"
+              autoComplete="name"
               required
+              aria-required="true"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Jean-Luc Marie"
             />
           </div>
           <div className="field">
-            <label htmlFor="email">Email address *</label>
+            <label htmlFor="email">Email address <span aria-hidden="true">*</span></label>
             <input
               type="email"
               id="email"
+              name="email"
+              autoComplete="email"
               required
+              aria-required="true"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@domain.com"
@@ -210,6 +215,8 @@ export default function EnquiryFormClient({
             <input
               type="tel"
               id="phone"
+              name="tel"
+              autoComplete="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+230 5123 4567"
@@ -219,13 +226,14 @@ export default function EnquiryFormClient({
             <label htmlFor="groupSize">Estimated group size</label>
             <select
               id="groupSize"
+              name="groupSize"
               value={groupSize}
               onChange={(e) => setGroupSize(e.target.value)}
             >
               <option value="1">Solo (1 person)</option>
               <option value="2">2 people</option>
-              <option value="3-5">3–5 people</option>
-              <option value="6-10">6–10 people</option>
+              <option value="3–5">3–5 people</option>
+              <option value="6–10">6–10 people</option>
               <option value="11+">11+ people (large group)</option>
             </select>
           </div>
@@ -269,16 +277,16 @@ export default function EnquiryFormClient({
                 />
               </div>
               <div className="field">
-                <label htmlFor="prefDate">Preferred date</label>
+                <label htmlFor="prefDatePrivate">Preferred date</label>
                 <input
                   type="date"
-                  id="prefDate"
+                  id="prefDatePrivate"
                   value={preferredDate}
                   onChange={(e) => setPreferredDate(e.target.value)}
                 />
               </div>
             </div>
-            <div style={{ marginTop: '8px', fontSize: '13px', color: '#5a564f' }}>
+            <div style={{ marginTop: '8px', fontSize: '13px', color: '#5A564F' }}>
               Note: Private hike pricing is provided on request based on group size and trail selection.
             </div>
           </div>
@@ -376,6 +384,14 @@ export default function EnquiryFormClient({
             placeholder="Questions, group details, fitness levels, accessibility needs, etc."
           ></textarea>
         </div>
+
+        {/* Privacy Notice */}
+        <p style={{ fontSize: '13px', color: '#5A564F', marginBottom: '16px' }}>
+          By submitting this form, you agree to our processing of your personal information to handle your enquiry as described in our{' '}
+          <Link href="/privacy-policy" style={{ textDecoration: 'underline', color: 'var(--ink)', fontWeight: 600 }}>
+            Privacy Policy
+          </Link>.
+        </p>
 
         <button type="submit" className="btn-primary" disabled={submitting}>
           {submitting ? 'Sending...' : 'Send enquiry'}

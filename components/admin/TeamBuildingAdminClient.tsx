@@ -148,7 +148,7 @@ export default function TeamBuildingAdminClient({ initialPackages }: { initialPa
                       border: 'none',
                       cursor: 'pointer',
                       textTransform: 'uppercase',
-                      background: pkg.status === 'published' ? 'var(--teal)' : '#888',
+                      background: pkg.status === 'published' ? 'var(--teal)' : '#5A564F',
                       color: '#FFF',
                     }}
                   >

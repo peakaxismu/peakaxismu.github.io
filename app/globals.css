@@ -300,7 +300,7 @@ nav ul li a.active, nav ul li button.navlink.active{color:var(--ember);}
 #view-enquire form{padding:44px 0 90px;}
 #view-enquire .field{margin-bottom:26px;}
 #view-enquire .field label{display:block;font-size:13px;font-weight:600;color:#3d3a36;margin-bottom:9px;}
-#view-enquire .field .hint{font-size:12.5px;color:#8a857a;margin-top:6px;}
+#view-enquire .field .hint{font-size:12.5px;color:#5A564F;margin-top:6px;}
 #view-enquire input[type=text], #view-enquire input[type=email], #view-enquire input[type=tel], #view-enquire input[type=number], #view-enquire input[type=date], #view-enquire select, #view-enquire textarea{
     width:100%;border:none;border-bottom:1.5px solid var(--sand-line);background:transparent;
     padding:11px 2px;font-family:'Inter';font-size:15.5px;color:var(--ink);
@@ -337,3 +337,91 @@ nav ul li a.active, nav ul li button.navlink.active{color:var(--ember);}
 #view-enquire .confirm .tick{width:44px;height:44px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;margin-bottom:24px;}
 #view-enquire footer{padding:30px 0 40px;border-top:1px solid var(--sand-line);}
 #view-enquire footer p{font-size:13px;color:#6b675f;}
+
+
+/* Accessibility Focus & Contrast Additions */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--ember) !important;
+  outline-offset: 2px !important;
+}
+
+::placeholder {
+  color: #5A564F !important;
+  opacity: 1;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 16px;
+  background: var(--ink);
+  color: var(--warm-white);
+  padding: 12px 20px;
+  z-index: 9999;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: underline;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 16px;
+}
+
+/* ===== Legal Pages ===== */
+.legal-page {
+  padding: 60px 0 90px;
+}
+.legal-page .wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+.legal-page h1 {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  font-size: clamp(38px, 6vw, 56px);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  line-height: 0.95;
+}
+.legal-page .last-updated {
+  font-size: 13.5px;
+  color: #5A564F;
+  margin-bottom: 40px;
+}
+.legal-page section {
+  margin-bottom: 36px;
+}
+.legal-page h2 {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  font-size: 24px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+.legal-page p, .legal-page ul {
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: #3d3a36;
+  margin-bottom: 12px;
+}
+.legal-page ul {
+  padding-left: 20px;
+  list-style-type: disc;
+}
+.legal-page li {
+  margin-bottom: 8px;
+}
+.legal-flag {
+  background: rgba(193, 68, 14, 0.08);
+  border-left: 4px solid var(--ember);
+  padding: 14px 18px;
+  font-size: 14px;
+  color: #3d3a36;
+  margin: 16px 0;
+}
+.legal-flag strong {
+  color: var(--ember);
+}
