@@ -43,7 +43,7 @@ export default function HikesClientList({ hikes }: { hikes: Hike[] }) {
     ]
     const path = paths[index % paths.length]
     return (
-      <svg viewBox="0 0 200 140">
+      <svg viewBox="0 0 200 140" aria-hidden="true">
         <path d={path} fill="#1F4B4C" />
       </svg>
     )
@@ -80,7 +80,7 @@ export default function HikesClientList({ hikes }: { hikes: Hike[] }) {
 
       <div className="private-banner">
         <div>
-          <h3>Want your own trail, your own date?</h3>
+          <h2>Want your own trail, your own date?</h2>
           <p>
             Book a private hike for your group — choose the trail and preferred date instead of joining a scheduled one.
           </p>

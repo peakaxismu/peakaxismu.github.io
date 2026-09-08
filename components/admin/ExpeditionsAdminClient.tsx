@@ -229,7 +229,7 @@ export default function ExpeditionsAdminClient({ initialExpeditions }: { initial
                       fontSize: '11px',
                       fontWeight: 700,
                       textTransform: 'uppercase',
-                      background: exp.status === 'published' ? 'var(--teal)' : '#888',
+                      background: exp.status === 'published' ? 'var(--teal)' : '#5A564F',
                       color: '#FFF',
                     }}
                   >

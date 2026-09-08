@@ -80,7 +80,7 @@ export default function EnquiriesTable({ initialEnquiries }: { initialEnquiries:
               <td style={{ padding: '16px' }}>
                 <div style={{ fontWeight: 600 }}>{e.name}</div>
                 <div style={{ fontSize: '13px', color: '#5a564f' }}>{e.email}</div>
-                {e.phone && <div style={{ fontSize: '12px', color: '#888' }}>{e.phone}</div>}
+                {e.phone && <div style={{ fontSize: '12px', color: '#5A564F' }}>{e.phone}</div>}
               </td>
               <td style={{ padding: '16px' }}>
                 {getInterestBadge(e.interest_type)}
@@ -100,7 +100,7 @@ export default function EnquiriesTable({ initialEnquiries }: { initialEnquiries:
                     fontWeight: 700,
                     borderRadius: '2px',
                     textTransform: 'uppercase',
-                    background: e.status === 'new' ? '#C1440E' : e.status === 'contacted' ? '#1F4B4C' : '#888',
+                    background: e.status === 'new' ? '#C1440E' : e.status === 'contacted' ? '#1F4B4C' : '#5A564F',
                     color: '#FFF',
                   }}
                 >

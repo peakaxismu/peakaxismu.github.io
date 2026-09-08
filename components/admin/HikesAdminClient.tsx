@@ -171,7 +171,7 @@ export default function HikesAdminClient({ initialHikes }: { initialHikes: Hike[
                       border: 'none',
                       cursor: 'pointer',
                       textTransform: 'uppercase',
-                      background: h.status === 'published' ? 'var(--teal)' : '#888',
+                      background: h.status === 'published' ? 'var(--teal)' : '#5A564F',
                       color: '#FFF',
                     }}
                   >
