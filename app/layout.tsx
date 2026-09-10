@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Big_Shoulders_Display, Inter } from 'next/font/google'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import CookieConsent from '@/components/CookieConsent'
@@ -9,6 +9,13 @@ const inter = Inter({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
   variable: '--font-inter',
+  display: 'swap',
+})
+
+const bigShoulders = Big_Shoulders_Display({
+  subsets: ['latin'],
+  weight: ['700', '800', '900'],
+  variable: '--font-display',
   display: 'swap',
 })
 
@@ -23,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${inter.variable} ${bigShoulders.variable}`}>
       <body className={inter.className}>
         <a href="#main-content" className="skip-link">
           Skip to main content
