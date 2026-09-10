@@ -55,7 +55,7 @@ export default function HomeClientPillars({
             role="tab"
             aria-selected={activeTab === 'hikes'}
             aria-controls="panel-hikes"
-            className={}
+            className=""
             onClick={() => setActiveTab('hikes')}
           >
             <span className="code">01</span> GROUP HIKES
@@ -65,7 +65,7 @@ export default function HomeClientPillars({
             role="tab"
             aria-selected={activeTab === 'expeditions'}
             aria-controls="panel-expeditions"
-            className={}
+            className=""
             onClick={() => setActiveTab('expeditions')}
           >
             <span className="code">02</span> EXPEDITIONS
@@ -75,7 +75,7 @@ export default function HomeClientPillars({
             role="tab"
             aria-selected={activeTab === 'team'}
             aria-controls="panel-team"
-            className={}
+            className=""
             onClick={() => setActiveTab('team')}
           >
             <span className="code">03</span> TEAM BUILDING
@@ -85,15 +85,14 @@ export default function HomeClientPillars({
             role="tab"
             aria-selected={activeTab === 'activities'}
             aria-controls="panel-activities"
-            className={}
+            className=""
             onClick={() => setActiveTab('activities')}
           >
             <span className="code">04</span> ACTIVITIES
           </button>
         </div>
 
-        {/* Panel 01: Hikes */}
-        <div id="panel-hikes" role="tabpanel" aria-labelledby="tab-hikes" className={}>
+        <div id="panel-hikes" role="tabpanel" aria-labelledby="tab-hikes" className="">
           <div className="p-left">
             <h2>Group hikes across Mauritius, most weekends.</h2>
             <p>
@@ -123,15 +122,14 @@ export default function HomeClientPillars({
           </div>
         </div>
 
-        {/* Panel 02: Expeditions */}
-        <div id="panel-expeditions" role="tabpanel" aria-labelledby="tab-expeditions" className={}>
+        <div id="panel-expeditions" role="tabpanel" aria-labelledby="tab-expeditions" className="">
           <div className="p-left">
             <h2>Réunion&apos;s volcanoes, one expedition at a time.</h2>
             <p>
               Multi-day wilderness journeys beyond Mauritius. Crossing active calderas, lava fields, and high altitude trails with full mountain logistics and certified guides.
             </p>
             <div className="p-ctas">
-              <Link href={} className="btn-primary">
+              <Link href="/expeditions" className="btn-primary">
                 Explore Piton de la Fournaise
               </Link>
             </div>
@@ -152,8 +150,7 @@ export default function HomeClientPillars({
           </div>
         </div>
 
-        {/* Panel 03: Team Building */}
-        <div id="panel-team" role="tabpanel" aria-labelledby="tab-team" className={}>
+        <div id="panel-team" role="tabpanel" aria-labelledby="tab-team" className="">
           <div className="p-left">
             <h2>Teams work better after they&apos;ve climbed something together.</h2>
             <p>
@@ -178,8 +175,7 @@ export default function HomeClientPillars({
           </div>
         </div>
 
-        {/* Panel 04: Activities */}
-        <div id="panel-activities" role="tabpanel" aria-labelledby="tab-activities" className={}>
+        <div id="panel-activities" role="tabpanel" aria-labelledby="tab-activities" className="">
           <div className="p-left">
             <h2>Indoor and outdoor, for any group.</h2>
             <p>
