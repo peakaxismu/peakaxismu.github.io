@@ -2,15 +2,25 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+
+const links = [
+  { href: '/admin', label: 'Dashboard' },
+  { href: '/admin/enquiries', label: 'Enquiries' },
+  { href: '/admin/hikes', label: 'Hikes' },
+  { href: '/admin/expeditions', label: 'Expeditions' },
+  { href: '/admin/team-building', label: 'Team & Activities' },
+]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
+  const [menuOpen, setMenuOpen] = useState(false)
 
-  if (pathname === '/admin/login') {
-    return <>{children}</>
-  }
+  if (pathname === '/admin/login') return <>{children}</>
+
+  const isActive = (href: string) => href === '/admin' ? pathname === href : pathname.startsWith(href)
 
   const handleSignOut = async () => {
     const supabase = createClient()
@@ -20,49 +30,47 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--ash)', display: 'flex', flexDirection: 'column' }}>
-      {/* Admin Top Navbar */}
-      <header style={{ background: 'var(--warm-white)', borderBottom: '1px solid var(--sand-line)', padding: '16px 32px' }}>
-        <div style={{ maxWidth: '1180px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-            <Link href="/admin" style={{ fontFamily: 'Big Shoulders Display', fontWeight: 900, fontSize: '22px', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-              PEAK <span style={{ color: 'var(--ember)' }}>AXIS</span> <span style={{ fontSize: '14px', color: 'var(--teal)', fontWeight: 700 }}>ADMIN</span>
-            </Link>
-            <nav style={{ display: 'flex', gap: '20px' }}>
-              <Link href="/admin" style={{ fontSize: '14px', fontWeight: 600, color: pathname === '/admin' ? 'var(--ember)' : 'var(--ink)' }}>
-                Dashboard
+    <div className="admin-shell">
+      <header className="admin-header">
+        <div className="admin-header-inner">
+          <Link href="/admin" className="admin-brand" onClick={() => setMenuOpen(false)}>
+            PEAK <span>AXIS</span> <small>ADMIN</small>
+          </Link>
+
+          <button
+            type="button"
+            className="admin-menu-button"
+            aria-expanded={menuOpen}
+            aria-controls="admin-navigation"
+            aria-label={menuOpen ? 'Close admin navigation' : 'Open admin navigation'}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? '×' : '☰'}
+          </button>
+
+          <nav id="admin-navigation" className={`admin-nav ${menuOpen ? 'open' : ''}`} aria-label="Admin navigation">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={isActive(link.href) ? 'active' : ''}
+                aria-current={isActive(link.href) ? 'page' : undefined}
+                onClick={() => setMenuOpen(false)}
+              >
+                {link.label}
               </Link>
-              <Link href="/admin/enquiries" style={{ fontSize: '14px', fontWeight: 600, color: pathname?.startsWith('/admin/enquiries') ? 'var(--ember)' : 'var(--ink)' }}>
-                Enquiries
-              </Link>
-              <Link href="/admin/hikes" style={{ fontSize: '14px', fontWeight: 600, color: pathname?.startsWith('/admin/hikes') ? 'var(--ember)' : 'var(--ink)' }}>
-                Hikes
-              </Link>
-              <Link href="/admin/expeditions" style={{ fontSize: '14px', fontWeight: 600, color: pathname?.startsWith('/admin/expeditions') ? 'var(--ember)' : 'var(--ink)' }}>
-                Expeditions
-              </Link>
-              <Link href="/admin/team-building" style={{ fontSize: '14px', fontWeight: 600, color: pathname?.startsWith('/admin/team-building') ? 'var(--ember)' : 'var(--ink)' }}>
-                Team &amp; Activities
-              </Link>
-            </nav>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Link href="/" target="_blank" style={{ fontSize: '13px', textDecoration: 'underline', color: '#5a564f' }}>
-              View Live Site ↗
-            </Link>
-            <button
-              onClick={handleSignOut}
-              style={{ background: 'none', border: '1px solid var(--ink)', padding: '6px 14px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter' }}
-            >
-              Sign out
-            </button>
+            ))}
+          </nav>
+
+          <div className="admin-actions">
+            <Link href="/" target="_blank" rel="noreferrer">View Live Site ↗</Link>
+            <button type="button" onClick={handleSignOut}>Sign out</button>
           </div>
         </div>
       </header>
 
-      {/* Admin Content Body */}
-      <main style={{ flex: 1, padding: '40px 32px' }}>
-        <div style={{ maxWidth: '1180px', margin: '0 auto' }}>{children}</div>
+      <main className="admin-main">
+        <div className="admin-content">{children}</div>
       </main>
     </div>
   )
