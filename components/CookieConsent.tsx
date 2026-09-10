@@ -1,27 +1,31 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import Link from 'next/link'
 
+function subscribe(callback: () => void) {
+  window.addEventListener('storage', callback)
+  return () => window.removeEventListener('storage', callback)
+}
+
+function getSnapshot() {
+  return typeof window !== 'undefined' ? window.localStorage.getItem('peak_axis_cookie_consent') : 'accepted'
+}
+
+function getServerSnapshot() {
+  return 'accepted'
+}
+
 export default function CookieConsent() {
-  const [showBanner, setShowBanner] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
-
-  useEffect(() => {
-    setIsMounted(true)
-
-    if (typeof window === 'undefined') return
-
-    const consent = window.localStorage.getItem('peak_axis_cookie_consent')
-    setShowBanner(!consent)
-  }, [])
+  const consent = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+  const showBanner = !consent
 
   const handleAccept = () => {
     window.localStorage.setItem('peak_axis_cookie_consent', 'accepted')
-    setShowBanner(false)
+    window.dispatchEvent(new Event('storage'))
   }
 
-  if (!isMounted || !showBanner) return null
+  if (!showBanner) return null
 
   return (
     <div
