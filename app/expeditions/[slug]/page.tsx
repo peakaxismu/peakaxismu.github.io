@@ -128,7 +128,7 @@ export default async function ExpeditionDetailPage({
         </section>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .exp-detail { background: #f5f1e8; color: #211f1d; min-height: 100vh; }
         .exp-wrap { width: min(1180px, calc(100% - 64px)); margin: 0 auto; }
         .exp-hero { padding: 78px 0 74px; border-bottom: 1px solid rgba(33,31,29,.14); }
