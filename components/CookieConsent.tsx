@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 function subscribe(callback: () => void) {
   window.addEventListener('storage', callback)
@@ -17,6 +18,7 @@ function getServerSnapshot() {
 }
 
 export default function CookieConsent() {
+  const pathname = usePathname()
   const consent = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
   const showBanner = !consent
 
@@ -25,7 +27,7 @@ export default function CookieConsent() {
     window.dispatchEvent(new Event('storage'))
   }
 
-  if (!showBanner) return null
+  if (pathname?.startsWith('/admin') || !showBanner) return null
 
   return (
     <div
