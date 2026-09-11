@@ -4,6 +4,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import CookieConsent from '@/components/CookieConsent'
 import './globals.css'
+import './font-vars.css'
 import './home-overrides.css'
 
 const inter = Inter({
