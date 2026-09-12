@@ -1,0 +1,67 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+
+interface Waterfall {
+  id: string
+  name: string
+  location: string
+  duration: string
+  price: string
+  status: string
+  short_line: string | null
+}
+
+const emptyWaterfall: Partial<Waterfall> = { name: '', location: '', duration: '3 hrs', price: 'From Rs ', status: 'ON DEMAND', short_line: '' }
+
+export default function AdminWaterfallsPage() {
+  const [items, setItems] = useState<Waterfall[]>([])
+  const [editing, setEditing] = useState<Partial<Waterfall> | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  const load = async () => {
+    setLoading(true)
+    const res = await fetch('/api/admin/waterfalls')
+    const json = await res.json()
+    setItems(json.data || [])
+    setLoading(false)
+  }
+  useEffect(() => { load() }, [])
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editing) return
+    const isEdit = Boolean(editing.id)
+    const res = await fetch(isEdit ? `/api/admin/waterfalls/${editing.id}` : '/api/admin/waterfalls', {
+      method: isEdit ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editing),
+    })
+    const json = await res.json()
+    if (!res.ok || !json.success) return alert(json.error || 'Failed to save waterfall')
+    setEditing(null)
+    load()
+  }
+
+  const remove = async (id: string) => {
+    if (!confirm('Delete this waterfall route?')) return
+    await fetch(`/api/admin/waterfalls/${id}`, { method: 'DELETE' })
+    load()
+  }
+
+  const field = (label: string, key: keyof Waterfall, multiline = false) => (
+    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, textTransform: 'uppercase' }}>
+      {label}
+      {multiline ? <textarea rows={4} value={(editing?.[key] as string) || ''} onChange={e => setEditing({ ...editing, [key]: e.target.value })} style={{ display: 'block', width: '100%', marginTop: 6, padding: 10, border: '1px solid var(--sand-line)' }} /> : <input value={(editing?.[key] as string) || ''} onChange={e => setEditing({ ...editing, [key]: e.target.value })} style={{ display: 'block', width: '100%', marginTop: 6, padding: 10, border: '1px solid var(--sand-line)' }} />}
+    </label>
+  )
+
+  return <div>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div><h1 style={{ fontFamily: 'Big Shoulders Display', fontSize: 36, fontWeight: 900, textTransform: 'uppercase' }}>Waterfalls</h1><p style={{ color: '#5a564f' }}>Manage waterfall routes shown on the public site.</p></div>
+      <button onClick={() => setEditing(emptyWaterfall)} style={{ background: 'var(--ember)', color: '#fff', border: 0, padding: '12px 20px', cursor: 'pointer' }}>+ Add Waterfall</button>
+    </div>
+    <div style={{ background: 'var(--warm-white)', border: '1px solid var(--sand-line)', padding: 24 }}>
+      {loading ? <p>Loading…</p> : items.length === 0 ? <p>No waterfall routes yet. Add the first one above.</p> : <table style={{ width: '100%', borderCollapse: 'collapse' }}><thead><tr>{['Route','Location','Duration','Price','Status','Actions'].map(x => <th key={x} style={{ textAlign: 'left', padding: 12, borderBottom: '2px solid var(--sand-line)', fontSize: 12 }}>{x}</th>)}</tr></thead><tbody>{items.map(item => <tr key={item.id}><td style={{ padding: 12 }}>{item.name}</td><td style={{ padding: 12 }}>{item.location}</td><td style={{ padding: 12 }}>{item.duration}</td><td style={{ padding: 12 }}>{item.price}</td><td style={{ padding: 12 }}>{item.status}</td><td style={{ padding: 12 }}><button onClick={() => setEditing(item)} style={{ marginRight: 8 }}>Edit</button><button onClick={() => remove(item.id)}>Delete</button></td></tr>)}</tbody></table>}
+    </div>
+    {editing && <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 100 }}><form onSubmit={save} style={{ background: 'var(--warm-white)', padding: 30, width: '100%', maxWidth: 620, display: 'grid', gap: 16, maxHeight: '90vh', overflow: 'auto' }}><h2 style={{ fontFamily: 'Big Shoulders Display', fontSize: 28, textTransform: 'uppercase' }}>{editing.id ? 'Edit Waterfall' : 'Add Waterfall'}</h2>{field('Route name *', 'name')}{field('Location *', 'location')}{field('Duration *', 'duration')}{field('Price *', 'price')}{field('Status', 'status')}{field('Short description', 'short_line', true)}<div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}><button type="button" onClick={() => setEditing(null)}>Cancel</button><button type="submit">Save</button></div></form></div>}
+  </div>
+}
