@@ -24,14 +24,22 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
     .select('id, name, type, duration, price_note, description')
     .eq('status', 'published')
 
-  const allowedInterests = new Set(['hike', 'private_hike', 'expedition', 'team', 'activity'])
-  const initialInterest = params.interest && allowedInterests.has(params.interest) ? params.interest : 'hike'
+  const allowedInterests = new Set(['hike', 'private_hike', 'expedition', 'piton_des_neiges', 'team', 'activity'])
+  let initialInterest = params.interest && allowedInterests.has(params.interest) ? params.interest : 'hike'
+
   const rawRef = params.ref ?? ''
   let initialRef = ''
   try {
     initialRef = decodeURIComponent(rawRef)
   } catch {
     initialRef = rawRef
+  }
+
+  if (initialInterest === 'piton_des_neiges') {
+    initialInterest = 'expedition'
+    if (!initialRef) {
+      initialRef = 'Piton des Neiges Expedition'
+    }
   }
 
   return (

@@ -316,12 +316,11 @@ export default function EnquiryFormClient({
                 </div>
               )}
 
-              {interestType === 'expedition' && selectedExpedition && (
+              {interestType === 'expedition' && (selectedExpedition || referenceId.includes('Piton des Neiges')) && (
                 <div className="ref-card-meta">
-                  <span className="ref-pill">📍 {selectedExpedition.destination}</span>
-                  {selectedExpedition.duration && <span className="ref-pill">⏱ {selectedExpedition.duration}</span>}
-                  {selectedExpedition.difficulty && <span className="ref-pill diff">⚡ {selectedExpedition.difficulty}</span>}
-                  {selectedExpedition.price_from && <span className="ref-pill">💵 From {selectedExpedition.price_from}</span>}
+                  <span className="ref-pill">📍 La Réunion</span>
+                  <span className="ref-pill diff">⚡ Mountain Expedition</span>
+                  {selectedExpedition?.price_from && <span className="ref-pill">💵 From {selectedExpedition.price_from}</span>}
                 </div>
               )}
 
@@ -432,6 +431,10 @@ export default function EnquiryFormClient({
                         {ex.name} ({ex.destination}) — From {ex.price_from}
                       </option>
                     ))}
+                    {!expeditions.some((ex) => ex.name === referenceId) && referenceId && (
+                      <option value={referenceId}>{referenceId}</option>
+                    )}
+                    <option value="Piton des Neiges Expedition">Piton des Neiges Expedition (La Réunion)</option>
                   </select>
                 </div>
               </div>
