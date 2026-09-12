@@ -9,7 +9,6 @@ const links = [
   { href: '/hikes', label: 'Hikes' },
   { href: '/waterfalls', label: 'Waterfalls' },
   { href: '/expeditions/piton-de-la-fournaise', label: 'Expeditions' },
-  { href: '/guides', label: 'Guides' },
   { href: '/journal', label: 'Journal' },
   { href: '/enquire', label: 'Contact' },
 ]
