@@ -7,7 +7,10 @@ import { useState } from 'react'
 const links = [
   { href: '/', label: 'Home' },
   { href: '/hikes', label: 'Hikes' },
+  { href: '/waterfalls', label: 'Waterfalls' },
   { href: '/expeditions/piton-de-la-fournaise', label: 'Expeditions' },
+  { href: '/guides', label: 'Guides' },
+  { href: '/journal', label: 'Journal' },
   { href: '/enquire', label: 'Contact' },
 ]
 
@@ -16,6 +19,13 @@ export default function Header() {
   const [open, setOpen] = useState(false)
 
   if (pathname?.startsWith('/admin')) return null
+
+  const isLinkActive = (href: string) => {
+    if (!pathname) return false
+    if (href === '/') return pathname === '/'
+    if (href.startsWith('/expeditions')) return pathname.startsWith('/expeditions')
+    return pathname === href
+  }
 
   return (
     <header className="site-header">
@@ -30,7 +40,7 @@ export default function Header() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={pathname === link.href || (link.href.startsWith('/expeditions') && pathname?.startsWith('/expeditions')) ? 'active' : ''}
+                  className={isLinkActive(link.href) ? 'active' : ''}
                 >
                   {link.label}
                 </Link>
@@ -62,7 +72,7 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className={pathname === link.href || (link.href.startsWith('/expeditions') && pathname?.startsWith('/expeditions')) ? 'active' : ''}
+              className={isLinkActive(link.href) ? 'active' : ''}
               onClick={() => setOpen(false)}
             >
               {link.label}
