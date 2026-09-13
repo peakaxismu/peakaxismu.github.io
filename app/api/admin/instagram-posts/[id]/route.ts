@@ -1,0 +1,21 @@
+import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+
+async function authorized() { const { data: { user } } = await (await createClient()).auth.getUser(); return Boolean(user) }
+
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!(await authorized())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { id } = await params; const body = await request.json()
+  if (!body.image_url || !body.post_url) return NextResponse.json({ error: 'Image URL and post URL are required' }, { status: 400 })
+  const { data, error } = await createAdminClient().from('instagram_posts').update({ image_url: body.image_url, post_url: body.post_url, caption: body.caption || '', status: body.status === 'draft' ? 'draft' : 'published', sort_order: Number(body.sort_order || 0), updated_at: new Date().toISOString() }).eq('id', id).select().single()
+  if (error) return NextResponse.json({ error: 'Failed to update Instagram post' }, { status: 500 })
+  return NextResponse.json({ success: true, data })
+}
+
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!(await authorized())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { id } = await params; const { error } = await createAdminClient().from('instagram_posts').delete().eq('id', id)
+  if (error) return NextResponse.json({ error: 'Failed to delete Instagram post' }, { status: 500 })
+  return NextResponse.json({ success: true })
+}
