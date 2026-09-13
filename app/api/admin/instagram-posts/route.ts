@@ -1,5 +1,22 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-async function authorized(){const{data:{user}}=await(await createClient()).auth.getUser();return Boolean(user)}
-export async function POST(request:Request){if(!(await authorized()))return NextResponse.json({error:'Unauthorized'},{status:401});const b=await request.json();if(!b.image_url||!b.post_url)return NextResponse.json({error:'Image URL and post URL are required'},{status:400});const{data,error}=await createAdminClient().from('instagram_posts').insert({image_url:b.image_url,post_url:b.post_url,caption:b.caption||'',status:b.status==='draft'?'draft':'published',sort_order:Number(b.sort_order||0)}).select().single();if(error)return NextResponse.json({error:'Failed to create Instagram post'},{status:500});return NextResponse.json({success:true,data})}
+
+async function authorized() { const { data: { user } } = await (await createClient()).auth.getUser(); return Boolean(user) }
+
+function getPostUrl(embedCode: string, fallback: string) {
+  const match = embedCode?.match(/data-instgrm-permalink=["']([^"']+)["']/i)
+  return match?.[1] || fallback || ''
+}
+
+export async function POST(request: Request) {
+  if (!(await authorized())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const b = await request.json()
+  const embed_code = String(b.embed_code || '').trim()
+  const post_url = getPostUrl(embed_code, String(b.post_url || '').trim())
+  if (!embed_code || !post_url) return NextResponse.json({ error: 'Paste the Instagram embed code. A post URL is extracted from it.' }, { status: 400 })
+  if (!/<blockquote[^>]*class=["'][^"']*instagram-media/i.test(embed_code)) return NextResponse.json({ error: 'That does not look like an Instagram embed block.' }, { status: 400 })
+  const { data, error } = await createAdminClient().from('instagram_posts').insert({ image_url: String(b.image_url || ''), post_url, embed_code, caption: String(b.caption || ''), status: b.status === 'published' ? 'published' : 'draft', sort_order: Number(b.sort_order || 0) }).select().single()
+  if (error) return NextResponse.json({ error: 'Failed to create Instagram post' }, { status: 500 })
+  return NextResponse.json({ success: true, data })
+}
