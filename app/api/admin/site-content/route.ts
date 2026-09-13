@@ -11,21 +11,34 @@ async function authorized() {
 export async function GET() {
   if (!(await authorized())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const admin = createAdminClient()
-  const [{ data: settings, error: settingsError }, { data: testimonials, error: testimonialsError }] = await Promise.all([
+  const [{ data: settings, error: settingsError }, { data: homepage, error: homepageError }, { data: testimonials, error: testimonialsError }, { data: instagram_posts, error: instagramError }] = await Promise.all([
     admin.from('site_settings').select('*').eq('id', true).maybeSingle(),
+    admin.from('homepage_content').select('*').eq('id', true).maybeSingle(),
     admin.from('testimonials').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: true }),
+    admin.from('instagram_posts').select('*').order('sort_order', { ascending: true }).order('created_at', { ascending: true }),
   ])
-  if (settingsError || testimonialsError) return NextResponse.json({ error: 'Failed to load site content' }, { status: 500 })
-  return NextResponse.json({ success: true, settings, testimonials: testimonials || [] })
+  if (settingsError || homepageError || testimonialsError || instagramError) return NextResponse.json({ error: 'Failed to load site content' }, { status: 500 })
+  return NextResponse.json({ success: true, settings, homepage, testimonials: testimonials || [], instagram_posts: instagram_posts || [] })
 }
 
 export async function PUT(request: Request) {
   if (!(await authorized())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await request.json()
-  const { instagram_handle, instagram_url } = body
-  if (!instagram_handle || !instagram_url) return NextResponse.json({ error: 'Instagram handle and URL are required' }, { status: 400 })
+  const { instagram_handle, instagram_url, homepage } = body
   const admin = createAdminClient()
-  const { data, error } = await admin.from('site_settings').upsert({ id: true, instagram_handle, instagram_url, updated_at: new Date().toISOString() }).select().single()
-  if (error) return NextResponse.json({ error: 'Failed to update site settings' }, { status: 500 })
-  return NextResponse.json({ success: true, data })
+  if (instagram_handle !== undefined || instagram_url !== undefined) {
+    if (!instagram_handle || !instagram_url) return NextResponse.json({ error: 'Instagram handle and URL are required' }, { status: 400 })
+    const { error } = await admin.from('site_settings').upsert({ id: true, instagram_handle, instagram_url, updated_at: new Date().toISOString() })
+    if (error) return NextResponse.json({ error: 'Failed to update Instagram settings' }, { status: 500 })
+  }
+  if (homepage) {
+    const clean = Object.fromEntries(Object.entries(homepage).filter(([key, value]) => key !== 'id' && key !== 'updated_at' && typeof value === 'string'))
+    const { error } = await admin.from('homepage_content').upsert({ id: true, ...clean, updated_at: new Date().toISOString() })
+    if (error) return NextResponse.json({ error: 'Failed to update homepage content' }, { status: 500 })
+  }
+  const [{ data: settings }, { data: updatedHomepage }] = await Promise.all([
+    admin.from('site_settings').select('*').eq('id', true).maybeSingle(),
+    admin.from('homepage_content').select('*').eq('id', true).maybeSingle(),
+  ])
+  return NextResponse.json({ success: true, settings, homepage: updatedHomepage })
 }
