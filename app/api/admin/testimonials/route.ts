@@ -1,0 +1,5 @@
+import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+async function authorized(){const s=await createClient();const{data:{user}}=await s.auth.getUser();return Boolean(user)}
+export async function POST(request:Request){if(!(await authorized()))return NextResponse.json({error:'Unauthorized'},{status:401});const b=await request.json();if(!b.quote||!b.name||!b.activity)return NextResponse.json({error:'Quote, name and activity are required'},{status:400});if(b.status&&!['draft','published'].includes(b.status))return NextResponse.json({error:'Invalid status'},{status:400});const a=createAdminClient();const{data,error}=await a.from('testimonials').insert({quote:b.quote,name:b.name,activity:b.activity,status:b.status||'published',sort_order:Number(b.sort_order)||0}).select().single();if(error)return NextResponse.json({error:'Failed to create testimonial'},{status:500});return NextResponse.json({success:true,data})}
