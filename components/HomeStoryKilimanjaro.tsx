@@ -12,9 +12,9 @@ export default function HomeStoryKilimanjaro() {
               <p className="story-thesis">We are building the mountain before we ever stand on it.</p>
             </div>
             <div className="story-copy">
-              <p>That is the reason Peak Axis exists. Mauritius does not have the altitude or glaciers that prepare a team for Everest, so we build the experience we need one hike, one expedition and one year at a time.</p>
-              <p>We did not want to ask people to fund a dream from the outside. We built something people can be part of: guided hikes across Mauritius, volcano expeditions in La Réunion and, from 2027, Kilimanjaro. Every trail brings people into the journey and helps build the next step.</p>
-              <p>By the time we reach Everest, everyone who hiked with us, crossed a caldera with us or trained with us will have helped build that summit long before anyone sets foot on it.</p>
+              <p>That is why Peak Axis exists. Mauritius&apos; highest point is 828m. We do not have glaciers or the altitude that Everest demands, so if a Mauritian wants to stand on the roof of the world, we have to build the path ourselves — one hike, one expedition, one year at a time.</p>
+              <p>We never wanted to ask people to fund a dream from the outside. Instead, we built something people can join: guided hikes across Mauritius, volcano expeditions in La Réunion and, from 2027, Kilimanjaro. Every trail brings another person into the journey and helps fund the next step.</p>
+              <p>By the time we reach Everest, everyone who hiked with us, crossed a caldera with us or trained with us on Kilimanjaro will have helped build that summit long before anyone sets foot on it.</p>
             </div>
           </div>
           <div className="story-stats" aria-label="Peak Axis long-term mission">
