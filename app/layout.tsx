@@ -14,9 +14,32 @@ const inter = Inter({
   display: 'swap',
 })
 
+const siteUrl = 'https://peakaxismu-github-io.vercel.app'
+
 export const metadata: Metadata = {
-  title: 'Peak Axis — Adventure without borders',
-  description: 'Peak Axis is an adventure company based in Mauritius running local hikes, La Réunion volcano expeditions, team building, and group activities.',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'Peak Axis — Adventure without borders',
+    template: '%s | Peak Axis Mauritius',
+  },
+  description: 'Peak Axis is a Mauritius adventure company running guided hikes, La Réunion volcano expeditions, team terrain days, and group activities.',
+  applicationName: 'Peak Axis',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'Peak Axis',
+    title: 'Peak Axis — Adventure without borders',
+    description: 'Guided hikes in Mauritius, volcano expeditions in La Réunion, and outdoor experiences built around real terrain.',
+    url: siteUrl,
+    locale: 'en_MU',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Peak Axis — Adventure without borders',
+    description: 'Guided hikes in Mauritius, volcano expeditions in La Réunion, and outdoor experiences built around real terrain.',
+  },
 }
 
 export default function RootLayout({
