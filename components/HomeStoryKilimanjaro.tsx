@@ -22,6 +22,16 @@ export default function HomeStoryKilimanjaro() {
             <div><strong>3</strong><span>EXPEDITIONS COMPLETED SO FAR</span></div>
             <div><strong>100%</strong><span>SELF-FUNDED THROUGH OUR OWN HIKES</span></div>
           </div>
+
+          <div className="story-credential">
+            <div className="credential-mark" aria-hidden="true">GOLD</div>
+            <div>
+              <span className="credential-eyebrow">BUILT BY PEOPLE WHO HAVE DONE THE WORK</span>
+              <h3>The people behind Peak Axis hold the <span>Duke of Edinburgh&apos;s Award Gold Award.</span></h3>
+              <p>That experience is part of the foundation of how we approach the outdoors: preparation, resilience, teamwork, self-reliance and the willingness to keep moving when the terrain gets harder.</p>
+              <Link href="https://www.dofe.org/level/gold/" target="_blank" rel="noreferrer" className="credential-link">Learn about the Gold Award <span>↗</span></Link>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -70,6 +80,14 @@ export default function HomeStoryKilimanjaro() {
         .story-stats>div:last-child{border-right:0}
         .story-stats strong{display:block;font-family:var(--font-display),sans-serif;font-size:30px;font-weight:800}
         .story-stats span{display:block;margin-top:3px;color:#6b675f;font-size:10px;font-weight:800;letter-spacing:.08em;line-height:1.4}
+        .story-credential{display:grid;grid-template-columns:86px 1fr;gap:24px;align-items:start;max-width:920px;margin-top:62px;padding:28px 30px;border:1px solid var(--sand-line);background:rgba(255,255,255,.24)}
+        .credential-mark{display:grid;place-items:center;width:72px;height:72px;border:1px solid #9d8960;background:var(--warm-white);color:#6e5a34;font-family:var(--font-display),sans-serif;font-size:18px;font-weight:800;letter-spacing:.04em}
+        .credential-eyebrow{display:block;color:#777167;font-size:10px;font-weight:800;letter-spacing:.1em;margin-bottom:7px}
+        .story-credential h3{font-size:24px;line-height:1.15;max-width:760px}
+        .story-credential h3 span{color:var(--ember)}
+        .story-credential p{margin-top:10px;max-width:740px;color:#57534c;font-size:14px;line-height:1.65}
+        .credential-link{display:inline-flex;margin-top:12px;color:#282522;font-size:11px;font-weight:800;border-bottom:1px solid #8f887e;padding-bottom:4px}
+        .credential-link span{color:var(--ember);font-size:14px;margin-left:5px}
         .home-kili{position:relative;min-height:640px;overflow:hidden;background:#211f1d;color:var(--warm-white);display:flex;align-items:center}
         .kili-scape{position:absolute;inset:0;width:100%;height:100%;opacity:.96;pointer-events:none}
         .home-kili::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(33,31,29,.97) 0%,rgba(33,31,29,.8) 45%,rgba(33,31,29,.12) 100%);pointer-events:none}
@@ -88,8 +106,8 @@ export default function HomeStoryKilimanjaro() {
         .kili-text-link{color:var(--warm-white);font-size:12px;font-weight:700;border-bottom:1px solid var(--sand);padding-bottom:4px}
         .kili-text-link span{color:var(--ember);font-size:15px;margin-left:5px}
         .kili-bottom-line{position:absolute;z-index:2;bottom:0;left:0;right:0;display:flex;justify-content:space-between;gap:20px;padding:15px max(32px,calc((100vw - 1180px)/2 + 32px));border-top:1px solid rgba(250,248,243,.15);color:#8f8a82;font-size:9px;font-weight:800;letter-spacing:.1em}
-        @media(max-width:800px){.home-story{padding:64px 0}.story-grid{grid-template-columns:1fr;gap:28px}.story-copy{padding-top:0}.story-stats{grid-template-columns:1fr;gap:0}.story-stats>div,.story-stats>div+div{padding:15px 0;border-right:0;border-bottom:1px solid var(--sand-line)}.story-stats>div:last-child{border-bottom:0}.home-kili{min-height:700px}.kili-content{padding:72px 0 92px}.kili-stats{grid-template-columns:1fr;gap:17px}.kili-stats>div{padding:0}.kili-bottom-line{display:none}}
-        @media(max-width:520px){.story-intro h2{font-size:clamp(46px,15vw,70px)}.story-copy p{font-size:15px}.kili-content h2{font-size:clamp(52px,17vw,78px)}.kili-lead{font-size:16px}.kili-actions{align-items:flex-start;flex-direction:column;gap:16px}.kili-button{width:100%;justify-content:center}}
+        @media(max-width:800px){.home-story{padding:64px 0}.story-grid{grid-template-columns:1fr;gap:28px}.story-copy{padding-top:0}.story-stats{grid-template-columns:1fr;gap:0}.story-stats>div,.story-stats>div+div{padding:15px 0;border-right:0;border-bottom:1px solid var(--sand-line)}.story-stats>div:last-child{border-bottom:0}.story-credential{grid-template-columns:1fr;gap:18px;margin-top:46px;padding:24px}.home-kili{min-height:700px}.kili-content{padding:72px 0 92px}.kili-stats{grid-template-columns:1fr;gap:17px}.kili-stats>div{padding:0}.kili-bottom-line{display:none}}
+        @media(max-width:520px){.story-intro h2{font-size:clamp(46px,15vw,70px)}.story-copy p{font-size:15px}.story-credential h3{font-size:21px}.kili-content h2{font-size:clamp(52px,17vw,78px)}.kili-lead{font-size:16px}.kili-actions{align-items:flex-start;flex-direction:column;gap:16px}.kili-button{width:100%;justify-content:center}}
       `}</style>
     </>
   )
