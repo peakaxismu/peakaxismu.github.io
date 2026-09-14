@@ -18,6 +18,7 @@ export default async function ExpeditionsPage() {
           <span>EXPEDITIONS · LA RÉUNION</span>
           <h1>Go further than the trail.</h1>
           <p>Multi-day mountain trips built around real terrain, clear logistics, small groups, and proper preparation.</p>
+          <Link href="/enquire?interest=expedition" className="expeditions-hero-cta">Plan an expedition →</Link>
         </div>
 
         <div className="expedition-principles" aria-label="Expedition approach">
@@ -51,7 +52,7 @@ export default async function ExpeditionsPage() {
           <div className="expeditions-empty">
             <h2>No expeditions are currently published.</h2>
             <p>Check back soon or tell us what kind of mountain trip you are planning.</p>
-            <Link href="/enquire">Plan an adventure →</Link>
+            <Link href="/enquire?interest=expedition">Plan an adventure →</Link>
           </div>
         )}
 
@@ -61,7 +62,7 @@ export default async function ExpeditionsPage() {
             <h2>Not sure you&apos;re ready for a multi-day mountain?</h2>
           </div>
           <p>Start with a Mauritius hike and build your fitness, pacing and confidence on real terrain. Our team can help you choose the right progression.</p>
-          <Link href="/hikes">Start with a hike →</Link>
+          <Link href="/hikes">Build up with a Mauritius hike →</Link>
         </div>
       </div>
 
@@ -72,6 +73,8 @@ export default async function ExpeditionsPage() {
         .expeditions-index-head > span { color: #c1440e; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
         .expeditions-index-head h1 { margin-top: 16px; font-family: var(--font-display), sans-serif; font-size: clamp(52px, 8vw, 92px); line-height: .86; text-transform: uppercase; }
         .expeditions-index-head p { margin-top: 22px; max-width: 620px; color: #45413b; font-size: 18px; line-height: 1.6; }
+        .expeditions-hero-cta { display: inline-flex; margin-top: 24px; padding: 13px 18px; background: #c1440e; color: #fffaf2; font-size: 13px; font-weight: 800; }
+        .expeditions-hero-cta:hover { background: #a83a0b; transform: translateY(-1px); }
         .expedition-principles { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0 0 38px; border-top: 1px solid rgba(33,31,29,.14); border-bottom: 1px solid rgba(33,31,29,.14); }
         .expedition-principles > div { padding: 20px 24px 21px 0; border-right: 1px solid rgba(33,31,29,.14); }
         .expedition-principles > div + div { padding-left: 24px; }
@@ -96,9 +99,9 @@ export default async function ExpeditionsPage() {
         .expeditions-next-step h2 { margin-top: 8px; font-family: var(--font-display), sans-serif; font-size: clamp(32px, 4vw, 50px); line-height: .92; text-transform: uppercase; }
         .expeditions-next-step p { color: #514c45; font-size: 14px; line-height: 1.65; max-width: 390px; }
         .expeditions-next-step a { color: #211f1d; font-size: 13px; font-weight: 800; white-space: nowrap; border-bottom: 2px solid #c1440e; padding-bottom: 4px; }
-        @media (max-width: 860px) { .expedition-principles { grid-template-columns: 1fr; } .expedition-principles > div, .expedition-principles > div + div { padding: 17px 0; border-right: 0; border-bottom: 1px solid rgba(33,31,29,.14); } .expedition-principles > div:last-child { border-bottom: 0; } .expeditions-next-step { grid-template-columns: 1fr; gap: 18px; } }
+        @media (max-width: 860px) { .expedition-principles { grid-template-columns: 1fr; } .expedition-principles > div, .expedition-principles > div + div { padding: 17px 0; border-right: 0; border-bottom: 1px solid rgba(33,31,29,.14); } .expedition-principles > div:last-child { border-bottom: 0; } .expeditions-next-step { grid-template-columns: 1fr; gap: 18px; } .expeditions-next-step a { white-space: normal; justify-self: start; } }
         @media (max-width: 760px) { .expeditions-index-wrap { width: calc(100% - 40px); padding: 54px 0 70px; } .expeditions-index-grid { grid-template-columns: 1fr; } .expedition-card { min-height: 0; } }
-        @media (max-width: 520px) { .expeditions-index-wrap { width: calc(100% - 32px); } .expedition-card { padding: 24px; } .expedition-card-top { flex-direction: column; gap: 6px; } }
+        @media (max-width: 520px) { .expeditions-index-wrap { width: calc(100% - 32px); } .expedition-card { padding: 24px; } }
       `}</style>
     </section>
   )
