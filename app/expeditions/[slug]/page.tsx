@@ -41,13 +41,24 @@ export default async function ExpeditionDetailPage({
   return (
     <main className="exp-detail">
       <section className="exp-hero">
-        <div className="exp-wrap">
-          <div className="exp-kicker">EXPEDITION · {exp.destination?.toUpperCase()}</div>
+        <svg className="exp-hero-scape" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+          <path d="M0,500 L0,340 C150,300 220,220 340,220 C440,220 470,150 560,150 C620,150 640,110 690,110 C740,110 760,150 820,150 C920,150 980,260 1100,250 C1150,246 1180,270 1200,270 L1200,500 Z" fill="#173838" opacity="0.9" />
+          <path d="M0,500 L0,400 C160,370 240,320 360,320 C450,320 480,270 570,270 C630,270 650,240 700,240 C750,240 770,270 830,270 C930,270 990,340 1100,335 L1200,335 L1200,500 Z" fill="#0f2626" />
+          <ellipse cx="660" cy="145" rx="26" ry="9" fill="#C1440E" opacity="0.85" />
+        </svg>
+        <div className="exp-wrap exp-hero-inner">
+          <div className="exp-kicker">International Expedition — {exp.destination || 'La Réunion'}</div>
           <h1>{exp.name}</h1>
           <p className="exp-lead">{exp.description}</p>
-          <div className="exp-hero-actions">
-            <Link href={`/enquire?interest=expedition&ref=${encodeURIComponent(exp.name)}`} className="exp-primary">Plan this expedition</Link>
-            <Link href="/expeditions" className="exp-secondary">All expeditions</Link>
+          <div className="exp-hero-bottom">
+            <div className="exp-price-block">
+              <div className="exp-price-from">From</div>
+              <div className="exp-price-amount">{exp.price_from} <span>per person</span></div>
+            </div>
+            <div className="exp-hero-actions">
+              <Link href="#itinerary" className="exp-secondary">Full itinerary</Link>
+              <Link href={`/enquire?interest=expedition&ref=${encodeURIComponent(exp.name)}`} className="exp-primary">Enquire now</Link>
+            </div>
           </div>
         </div>
       </section>
@@ -84,7 +95,7 @@ export default async function ExpeditionDetailPage({
         </section>
 
         {itinerary.length > 0 && (
-          <section className="exp-section">
+          <section className="exp-section" id="itinerary">
             <div className="exp-index">03 · ITINERARY</div>
             <div>
               <h2>Three days on the volcanic landscape.</h2>
@@ -131,16 +142,22 @@ export default async function ExpeditionDetailPage({
       <style>{`
         .exp-detail { background: #f5f1e8; color: #211f1d; min-height: 100vh; }
         .exp-wrap { width: min(1180px, calc(100% - 64px)); margin: 0 auto; }
-        .exp-hero { padding: 78px 0 74px; border-bottom: 1px solid rgba(33,31,29,.14); }
-        .exp-kicker { color: #c1440e; font-size: 12px; font-weight: 800; letter-spacing: .12em; margin-bottom: 18px; }
-        .exp-hero h1 { font-family: 'Big Shoulders Display', sans-serif; font-size: clamp(58px, 9vw, 118px); line-height: .84; text-transform: uppercase; max-width: 980px; letter-spacing: -.015em; }
-        .exp-lead { max-width: 760px; margin-top: 28px; font-size: 19px; line-height: 1.65; color: #45413b; }
-        .exp-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 34px; }
-        .exp-primary, .exp-secondary { display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 0 22px; font-weight: 700; font-size: 14px; }
+        .exp-hero { position: relative; overflow: hidden; background: #211f1d; color: #fffaf2; padding: 90px 0 70px; min-height: 560px; display: flex; align-items: flex-end; }
+        .exp-hero-scape { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .9; }
+        .exp-hero-inner { position: relative; z-index: 1; }
+        .exp-kicker { color: #c1440e; font-size: 13px; font-weight: 700; letter-spacing: .03em; margin-bottom: 14px; }
+        .exp-hero h1 { font-family: 'Big Shoulders Display', sans-serif; font-size: clamp(58px, 9vw, 118px); line-height: .84; text-transform: uppercase; max-width: 980px; letter-spacing: .01em; color: #fffaf2; margin: 0; }
+        .exp-lead { max-width: 560px; margin-top: 20px; font-size: 18px; line-height: 1.6; color: #c9c5bc; }
+        .exp-hero-bottom { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 52px; flex-wrap: wrap; gap: 24px; }
+        .exp-price-from { color: #a19c92; font-size: 12px; }
+        .exp-price-amount { margin-top: 3px; color: #fffaf2; font-size: 27px; font-weight: 750; }
+        .exp-price-amount span { font-family: Inter, sans-serif; color: #a19c92; font-size: 15px; font-weight: 400; }
+        .exp-hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+        .exp-primary, .exp-secondary { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; font-weight: 700; font-size: 14px; }
         .exp-primary { background: #c1440e; color: #fffaf2; }
         .exp-primary:hover { background: #a83a0b; transform: translateY(-1px); }
-        .exp-secondary { border: 1.5px solid #211f1d; }
-        .exp-secondary:hover { background: #211f1d; color: #fffaf2; }
+        .exp-secondary { border: 1px solid rgba(255,250,242,.45); color: #fffaf2; background: transparent; }
+        .exp-secondary:hover { border-color: #fffaf2; background: rgba(255,250,242,.08); }
         .exp-facts { background: #211f1d; color: #fffaf2; }
         .exp-facts-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
         .exp-facts-grid > div { min-height: 112px; padding: 23px 26px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid rgba(255,250,242,.14); }
@@ -181,7 +198,7 @@ export default async function ExpeditionDetailPage({
         .exp-final .exp-primary { flex: 0 0 auto; }
         @media (max-width: 900px) {
           .exp-wrap { width: min(100% - 40px, 760px); }
-          .exp-hero { padding: 58px 0 54px; }
+          .exp-hero { padding: 58px 0 54px; min-height: 520px; }
           .exp-facts-grid { grid-template-columns: 1fr 1fr; }
           .exp-facts-grid > div:nth-child(3n) { border-right: 1px solid rgba(255,250,242,.14); }
           .exp-facts-grid > div:nth-child(2n) { border-right: 0; }
@@ -194,9 +211,12 @@ export default async function ExpeditionDetailPage({
         }
         @media (max-width: 560px) {
           .exp-wrap { width: calc(100% - 32px); }
+          .exp-hero { padding: 52px 0 44px; min-height: 540px; }
           .exp-hero h1 { font-size: clamp(50px, 17vw, 76px); }
           .exp-lead { font-size: 16px; }
+          .exp-hero-bottom { align-items: flex-start; }
           .exp-primary, .exp-secondary { width: 100%; }
+          .exp-hero-actions { width: 100%; }
           .exp-facts-grid { grid-template-columns: 1fr; }
           .exp-facts-grid > div, .exp-facts-grid > div:nth-child(2n), .exp-facts-grid > div:nth-child(3n) { border-right: 0; border-top: 1px solid rgba(255,250,242,.14); min-height: 82px; padding: 17px 18px; }
           .exp-facts-grid > div:first-child { border-top: 0; }
