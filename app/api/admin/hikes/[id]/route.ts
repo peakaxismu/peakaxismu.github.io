@@ -17,6 +17,10 @@ function practicalPayload(body: Record<string, unknown>) {
   return payload
 }
 
+function normaliseBookingType(value: unknown) {
+  return value === 'scheduled_group' || value === 'private' || value === 'on_demand' ? value : 'on_demand'
+}
+
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
@@ -26,18 +30,19 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     const body = await request.json() as Record<string, unknown>
     const { name, difficulty, date, duration, location, price, spots_total, spots_remaining, description, status } = body
-    if (!name || !difficulty || !date || !duration || !location || !price) {
+    const bookingType = normaliseBookingType(body.booking_type)
+    if (!name || !difficulty || !duration || !location || !price || (bookingType === 'scheduled_group' && !date)) {
       return NextResponse.json({ error: 'Missing required hike fields' }, { status: 400 })
     }
 
     const admin = createAdminClient()
     const { data, error } = await admin.from('hikes').update({
-      name, difficulty, date, duration, location, price,
+      name, difficulty, date: date || null, duration, location, price,
       spots_total: Number(spots_total) || 10,
-      spots_remaining: Number(spots_remaining) || 10,
+      spots_remaining: Number(spots_remaining ?? spots_total) || 10,
       description: description || null,
       status,
-      ...practicalPayload(body),
+      ...practicalPayload({ ...body, booking_type: bookingType, rating_label: body.rating_label || 'Peak Axis rating' }),
     }).eq('id', id).select()
 
     if (error) {
