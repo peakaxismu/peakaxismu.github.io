@@ -19,6 +19,14 @@ jobs:
         with:
           version: latest
 
+      - name: Validate migration inventory
+        run: |
+          test -f supabase/config.toml
+          test -d supabase/migrations
+          test -f supabase/tests/database/enquiries_pipeline_test.sql
+          echo "Migration files:"
+          find supabase/migrations -maxdepth 1 -type f -name '*.sql' -print | sort
+
       - name: Start local Supabase
         run: supabase start
 
