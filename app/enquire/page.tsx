@@ -12,7 +12,7 @@ type EnquiryPageProps = {
 export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
   const params = await searchParams
   const supabase = await createClient()
-  const { data: hikes } = await supabase.from('hikes').select('id, name, date, price, price_solo_usd, price_group_usd, hike_type, main_attraction, difficulty, difficulty_numeric, duration, location, spots_remaining, spots_total, description').eq('status', 'published')
+  const { data: hikes } = await supabase.from('hikes').select('id, name, date, price, price_solo_usd, price_group_usd, hike_type, main_attraction, difficulty, difficulty_numeric, duration, location, spots_remaining, spots_total, description, booking_type').eq('status', 'published').eq('booking_type', 'scheduled_group')
   const { data: expeditions } = await supabase.from('expeditions').select('id, name, destination, price_from, duration, difficulty, description').eq('status', 'published')
   const { data: teamPackages } = await supabase.from('team_building_packages').select('id, name, type, duration, price_note, description').eq('status', 'published')
   const allowedInterests = new Set(['hike', 'private_hike', 'expedition', 'piton_des_neiges', 'team', 'activity'])
@@ -136,53 +136,6 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
         #view-enquire .interest-opt.active .s { color:#c9c5bc; }
         #view-enquire .cond-section { margin:2px 0 4px; padding:20px 0 2px; border-top:1px solid #ded7ca; }
         #view-enquire .upsell-box { margin:4px 0 18px; padding:12px 14px; background:#f4eadf; border-left:3px solid #c1440e; color:#5a564f; font-size:12px; line-height:1.5; }
-        #view-enquire .referenced-item-card { margin-bottom:20px; padding:20px; background:#211f1d; color:#faf8f3; border-left:3px solid #c1440e; }
-        #view-enquire .ref-card-header { display:flex; justify-content:space-between; gap:16px; align-items:center; }
-        #view-enquire .ref-card-kicker { color:#c9b790; font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
-        #view-enquire .ref-card-title { margin-top:7px; color:#faf8f3; font-size:24px; line-height:1.05; }
-        #view-enquire .ref-card-meta { display:flex; gap:7px; flex-wrap:wrap; margin-top:12px; }
-        #view-enquire .ref-pill { padding:6px 9px; background:rgba(250,248,243,.08); color:#c9c5bc; font-size:10.5px; }
-        #view-enquire .ref-clear-btn { flex-shrink:0; border:0; background:none; color:#c9b790; font-size:11px; cursor:pointer; }
-        #view-enquire .form-error-banner { margin-bottom:18px; padding:12px 14px; background:#f7e4dc; border:1px solid #d9a18d; color:#8e2f0c; font-size:13px; }
-        #view-enquire .privacy-notice { margin:20px 0 16px; color:#6b675f; font-size:11px; line-height:1.55; max-width:760px; }
-        #view-enquire .legal-link { color:#211f1d; text-decoration:underline; text-underline-offset:2px; }
-        #view-enquire .form-submit-btn { display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:13px 24px; border:0; background:#c1440e; color:#faf8f3; font-size:14px; font-weight:800; cursor:pointer; }
-        #view-enquire .form-submit-btn:hover { background:#a3390b; }
-        #view-enquire .enquiry-success-card { max-width:820px; margin:70px auto 100px; padding:40px; background:#faf8f3; border:1px solid rgba(33,31,29,.12); box-shadow:0 18px 50px rgba(33,31,29,.08); }
-        #view-enquire .enquiry-success-card h2 { margin-top:14px; font-size:clamp(34px,5vw,52px); }
-        #view-enquire .success-badge { display:inline-block; padding:7px 10px; background:#173838; color:#c9b790; font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
-        #view-enquire .success-lead { margin-top:18px; color:#5a564f; line-height:1.65; }
-        #view-enquire .ref-number-box, #view-enquire .summary-recap-box, #view-enquire .success-next-steps { margin-top:24px; padding:18px; border:1px solid #ded7ca; background:#f5f1e8; }
-        #view-enquire .ref-number-box { border-left:3px solid #c1440e; }
-        #view-enquire .ref-label, #view-enquire .ref-value { display:block; }
-        #view-enquire .ref-label { color:#6b675f; font-size:10px; text-transform:uppercase; letter-spacing:.1em; }
-        #view-enquire .ref-value { margin-top:4px; font-size:20px; }
-        #view-enquire .summary-recap-box h3 { font-size:20px; }
-        #view-enquire .recap-list { margin:14px 0 0; }
-        #view-enquire .recap-list > div { display:grid; grid-template-columns:150px 1fr; gap:16px; padding:9px 0; border-top:1px solid #ded7ca; }
-        #view-enquire .recap-list dt { color:#6b675f; font-size:12px; }
-        #view-enquire .recap-list dd { margin:0; font-size:13px; overflow-wrap:anywhere; }
-        #view-enquire .success-next-steps h4 { margin:0; font-size:15px; }
-        #view-enquire .success-next-steps ul { margin:10px 0 0; padding-left:20px; color:#5a564f; font-size:13px; line-height:1.6; }
-        #view-enquire .success-actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:26px; }
-        #view-enquire .success-actions .btn-primary { background:#c1440e; color:#faf8f3; padding:13px 20px; font-weight:700; }
-        #view-enquire .success-actions .btn-secondary { border:1px solid #211f1d; padding:12px 20px; font-weight:700; }
-        @media(max-width:900px) {
-          #view-enquire .enquiry-layout { grid-template-columns:1fr; }
-          #view-enquire .enquiry-sidebar-col { order:2; }
-          #view-enquire .sticky-summary-card { position:relative; top:auto; }
-        }
-        @media(max-width:700px) {
-          #view-enquire .contact-hero, #view-enquire .contact-hero-inner { min-height:500px; }
-          #view-enquire .contact-hero-copy { padding:56px 0 48px; }
-          #view-enquire .contact-form-heading { display:block; }
-          #view-enquire .contact-form-heading p { margin-top:12px; }
-          #view-enquire #enquiryForm { padding:22px; }
-          #view-enquire .interest-grid, #view-enquire .row2 { grid-template-columns:1fr; }
-          #view-enquire .contact-trust-row { gap:18px 28px; }
-          #view-enquire .enquiry-success-card { margin:38px auto 70px; padding:24px; }
-          #view-enquire .recap-list > div { grid-template-columns:1fr; gap:3px; }
-        }
       `}</style>
     </div>
   )
