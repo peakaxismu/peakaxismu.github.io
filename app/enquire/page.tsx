@@ -21,6 +21,7 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
   let initialRef = ''
   try { initialRef = decodeURIComponent(rawRef) } catch { initialRef = rawRef }
   if (initialInterest === 'piton_des_neiges') { initialInterest = 'expedition'; if (!initialRef) initialRef = 'Piton des Neiges Expedition' }
+  if (initialInterest === 'hike' && !(hikes?.length)) initialInterest = 'private_hike'
 
   return (
     <div id="view-enquire" className="view active" style={{ display: 'block' }}>
