@@ -40,4 +40,6 @@ export interface Hike {
   region?: string | null
   booking_type?: HikeBookingType
   rating_label?: string
+  logistics_source?: string | null
+  logistics_verified_at?: string | null
 }
