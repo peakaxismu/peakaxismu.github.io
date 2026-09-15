@@ -1,143 +1,36 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
-interface Enquiry {
-  id: string
-  name: string
-  email: string
-  phone: string | null
-  interest_type: string
-  reference_id: string | null
-  preferred_date: string | null
-  group_size: string | null
-  message: string | null
-  status: 'new' | 'contacted' | 'closed'
-  submitted_at: string
+type Status = 'new' | 'contacted' | 'closed'
+interface Enquiry { id:string; name:string; email:string; phone:string|null; interest_type:string; reference_id:string|null; preferred_date:string|null; group_size:string|null; message:string|null; status:Status; submitted_at:string }
+
+const styles = {
+  card:{background:'var(--warm-white)',border:'1px solid var(--sand-line)',padding:'22px'},
+  input:{width:'100%',padding:'10px 12px',border:'1px solid var(--sand-line)',background:'#fff',fontFamily:'Inter',fontSize:14} as const,
+  button:{padding:'9px 13px',border:'1px solid var(--ink)',background:'transparent',fontWeight:700,cursor:'pointer',fontSize:13} as const,
 }
 
-export default function EnquiriesTable({ initialEnquiries }: { initialEnquiries: Enquiry[] }) {
-  const [enquiries, setEnquiries] = useState<Enquiry[]>(initialEnquiries)
-  const [loadingId, setLoadingId] = useState<string | null>(null)
+export default function EnquiriesTable({ initialEnquiries }:{initialEnquiries:Enquiry[]}){
+  const [enquiries,setEnquiries]=useState(initialEnquiries)
+  const [query,setQuery]=useState(''); const [status,setStatus]=useState<'all'|Status>('all'); const [interest,setInterest]=useState('all')
+  const [selected,setSelected]=useState<Enquiry|null>(null); const [loadingId,setLoadingId]=useState<string|null>(null)
+  const filtered=useMemo(()=>enquiries.filter(e=>{
+    const hay=`${e.name} ${e.email} ${e.phone||''} ${e.reference_id||''} ${e.message||''}`.toLowerCase()
+    return (!query||hay.includes(query.toLowerCase()))&&(status==='all'||e.status===status)&&(interest==='all'||e.interest_type===interest)
+  }),[enquiries,query,status,interest])
+  const counts=useMemo(()=>({total:enquiries.length,new:enquiries.filter(e=>e.status==='new').length,contacted:enquiries.filter(e=>e.status==='contacted').length,closed:enquiries.filter(e=>e.status==='closed').length}),[enquiries])
+  const interests=Array.from(new Set(enquiries.map(e=>e.interest_type).filter(Boolean)))
 
-  const handleStatusChange = async (id: string, newStatus: 'new' | 'contacted' | 'closed') => {
-    setLoadingId(id)
-    try {
-      const res = await fetch(`/api/admin/enquiries/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      })
+  const updateStatus=async(id:string,next:Status)=>{setLoadingId(id);try{const r=await fetch(`/api/admin/enquiries/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:next})});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||'Failed to update status');setEnquiries(p=>p.map(e=>e.id===id?{...e,status:next}:e));setSelected(s=>s?.id===id?{...s,status:next}:s)}catch(e){alert(e instanceof Error?e.message:'Failed to update status')}finally{setLoadingId(null)}}
+  const badge=(value:string,kind='default')=><span style={{display:'inline-block',padding:'4px 8px',fontSize:11,fontWeight:800,textTransform:'uppercase',letterSpacing:'.03em',background:kind==='teal'?'var(--teal)':kind==='ember'?'var(--ember)':kind==='sand'?'var(--sand)':'#5a564f',color:kind==='sand'?'var(--ink)':'#fff'}}>{value.replaceAll('_',' ')}</span>
 
-      if (res.ok) {
-        setEnquiries((prev) =>
-          prev.map((e) => (e.id === id ? { ...e, status: newStatus } : e))
-        )
-      } else {
-        alert('Failed to update status')
-      }
-    } catch {
-      alert('Error updating status')
-    } finally {
-      setLoadingId(null)
-    }
-  }
-
-  const getInterestBadge = (type: string) => {
-    switch (type) {
-      case 'hike':
-        return <span style={{ padding: '2px 8px', fontSize: '11px', fontWeight: 700, background: 'var(--teal)', color: '#FFF' }}>Group Hike</span>
-      case 'private_hike':
-        return <span style={{ padding: '2px 8px', fontSize: '11px', fontWeight: 700, background: 'var(--sand)', color: 'var(--ink)' }}>Private Hike</span>
-      case 'expedition':
-        return <span style={{ padding: '2px 8px', fontSize: '11px', fontWeight: 700, background: 'var(--ember)', color: '#FFF' }}>Expedition</span>
-      case 'team':
-        return <span style={{ padding: '2px 8px', fontSize: '11px', fontWeight: 700, background: '#3D3A36', color: '#FFF' }}>Team Building</span>
-      default:
-        return <span style={{ padding: '2px 8px', fontSize: '11px', fontWeight: 700, background: '#8C6A5D', color: '#FFF' }}>Activity</span>
-    }
-  }
-
-  return (
-    <div style={{ background: 'var(--warm-white)', border: '1px solid var(--sand-line)', padding: '24px' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
-        <thead>
-          <tr style={{ borderBottom: '2px solid var(--sand-line)' }}>
-            <th style={{ padding: '12px 16px', fontSize: '12px', textTransform: 'uppercase', color: '#5a564f' }}>Submitted</th>
-            <th style={{ padding: '12px 16px', fontSize: '12px', textTransform: 'uppercase', color: '#5a564f' }}>Customer</th>
-            <th style={{ padding: '12px 16px', fontSize: '12px', textTransform: 'uppercase', color: '#5a564f' }}>Interest</th>
-            <th style={{ padding: '12px 16px', fontSize: '12px', textTransform: 'uppercase', color: '#5a564f' }}>Details</th>
-            <th style={{ padding: '12px 16px', fontSize: '12px', textTransform: 'uppercase', color: '#5a564f' }}>Status</th>
-            <th style={{ padding: '12px 16px', fontSize: '12px', textTransform: 'uppercase', color: '#5a564f' }}>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {enquiries.map((e) => (
-            <tr key={e.id} style={{ borderBottom: '1px solid var(--sand-line)' }}>
-              <td style={{ padding: '16px', whiteSpace: 'nowrap', color: '#5a564f', fontSize: '13px' }}>
-                {new Date(e.submitted_at).toLocaleDateString()} {new Date(e.submitted_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </td>
-              <td style={{ padding: '16px' }}>
-                <div style={{ fontWeight: 600 }}>{e.name}</div>
-                <div style={{ fontSize: '13px', color: '#5a564f' }}>{e.email}</div>
-                {e.phone && <div style={{ fontSize: '12px', color: '#5A564F' }}>{e.phone}</div>}
-              </td>
-              <td style={{ padding: '16px' }}>
-                {getInterestBadge(e.interest_type)}
-                {e.reference_id && <div style={{ fontSize: '12.5px', marginTop: '4px', fontWeight: 500 }}>{e.reference_id}</div>}
-              </td>
-              <td style={{ padding: '16px', maxWidth: '300px' }}>
-                {e.preferred_date && <div style={{ fontSize: '12.5px' }}>📅 Date: {e.preferred_date}</div>}
-                {e.group_size && <div style={{ fontSize: '12.5px' }}>👥 Group size: {e.group_size}</div>}
-                {e.message && <p style={{ fontSize: '12.5px', marginTop: '4px', fontStyle: 'italic', color: '#3d3a36' }}>&quot;{e.message}&quot;</p>}
-              </td>
-              <td style={{ padding: '16px' }}>
-                <span
-                  style={{
-                    display: 'inline-block',
-                    padding: '4px 10px',
-                    fontSize: '12px',
-                    fontWeight: 700,
-                    borderRadius: '2px',
-                    textTransform: 'uppercase',
-                    background: e.status === 'new' ? '#C1440E' : e.status === 'contacted' ? '#1F4B4C' : '#5A564F',
-                    color: '#FFF',
-                  }}
-                >
-                  {e.status}
-                </span>
-              </td>
-              <td style={{ padding: '16px' }}>
-                <select
-                  value={e.status}
-                  disabled={loadingId === e.id}
-                  onChange={(evt) => handleStatusChange(e.id, evt.target.value as 'new' | 'contacted' | 'closed')}
-                  style={{
-                    padding: '6px 10px',
-                    fontSize: '13px',
-                    background: '#FFF',
-                    border: '1px solid var(--sand-line)',
-                    fontFamily: 'Inter',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <option value="new">Mark New</option>
-                  <option value="contacted">Mark Contacted</option>
-                  <option value="closed">Mark Closed</option>
-                </select>
-              </td>
-            </tr>
-          ))}
-
-          {enquiries.length === 0 && (
-            <tr>
-              <td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: '#5a564f' }}>
-                No enquiries received yet.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  )
+  return <div>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',gap:20,marginBottom:22}}><div><div style={{fontSize:10,fontWeight:800,letterSpacing:'.12em',color:'var(--ember)'}}>CUSTOMER PIPELINE</div><h1 style={{fontFamily:'Big Shoulders Display',fontWeight:900,fontSize:44,textTransform:'uppercase',margin:'5px 0 7px'}}>Enquiries</h1><p style={{color:'#5a564f',margin:0}}>Review new requests, follow up with customers, and close completed conversations.</p></div><button style={{...styles.button}} onClick={()=>{setQuery('');setStatus('all');setInterest('all')}}>Reset filters</button></div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:16}}>{[['Total',counts.total,'#5a564f'],['New',counts.new,'var(--ember)'],['Contacted',counts.contacted,'var(--teal)'],['Closed',counts.closed,'#5a564f']].map(([label,count,bg])=><div key={String(label)} style={{...styles.card,padding:'16px 18px'}}><div style={{fontSize:11,fontWeight:800,textTransform:'uppercase',color:'#625d55'}}>{label}</div><div style={{fontSize:28,fontWeight:800,marginTop:4,color:bg as string}}>{count}</div></div>)}</div>
+    <div style={{...styles.card,marginBottom:16,display:'grid',gridTemplateColumns:'minmax(220px,1fr) 160px 170px',gap:10}}><input aria-label="Search enquiries" placeholder="Search name, email, phone, activity…" value={query} onChange={e=>setQuery(e.target.value)}/><select value={status} onChange={e=>setStatus(e.target.value as typeof status)}><option value="all">All statuses</option><option value="new">New</option><option value="contacted">Contacted</option><option value="closed">Closed</option></select><select value={interest} onChange={e=>setInterest(e.target.value)}><option value="all">All interests</option>{interests.map(i=><option key={i} value={i}>{i.replaceAll('_',' ')}</option>)}</select></div>
+    <div style={{...styles.card,padding:0,overflow:'hidden'}}><div style={{padding:'12px 18px',borderBottom:'1px solid var(--sand-line)',fontSize:12,color:'#625d55'}}>{filtered.length} matching {filtered.length===1?'enquiry':'enquiries'}</div><div style={{overflowX:'auto'}}><table style={{width:'100%',borderCollapse:'collapse',textAlign:'left',fontSize:14,minWidth:900}}><thead><tr>{['Submitted','Customer','Interest','Request','Status','Action'].map(h=><th key={h} style={{padding:'12px 16px',fontSize:11,textTransform:'uppercase',color:'#5a564f',borderBottom:'2px solid var(--sand-line)'}}>{h}</th>)}</tr></thead><tbody>{filtered.map(e=><tr key={e.id} style={{borderBottom:'1px solid var(--sand-line)',verticalAlign:'top'}}><td style={{padding:'15px 16px',whiteSpace:'nowrap',color:'#625d55',fontSize:12}}>{new Date(e.submitted_at).toLocaleDateString()}<br/>{new Date(e.submitted_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</td><td style={{padding:'15px 16px'}}><strong>{e.name}</strong><div style={{fontSize:12,color:'#625d55'}}>{e.email}</div>{e.phone&&<div style={{fontSize:12,color:'#625d55'}}>{e.phone}</div>}</td><td style={{padding:'15px 16px'}}>{badge(e.interest_type,e.interest_type==='hike'||e.interest_type==='team'?'teal':e.interest_type==='expedition'?'ember':'sand')}{e.reference_id&&<div style={{fontSize:12,marginTop:6,fontWeight:600}}>{e.reference_id}</div>}</td><td style={{padding:'15px 16px',maxWidth:330}}>{e.preferred_date&&<div style={{fontSize:12}}>Date: {e.preferred_date}</div>}{e.group_size&&<div style={{fontSize:12}}>Group size: {e.group_size}</div>}{e.message&&<div style={{fontSize:12.5,marginTop:5,color:'#3d3a36',lineHeight:1.45}}>{e.message.length>120?`${e.message.slice(0,120)}…`:e.message}</div>}</td><td style={{padding:'15px 16px'}}>{badge(e.status,e.status==='new'?'ember':e.status==='contacted'?'teal':'default')}</td><td style={{padding:'15px 16px'}}><button style={styles.button} onClick={()=>setSelected(e)}>Open</button></td></tr>)}{filtered.length===0&&<tr><td colSpan={6} style={{padding:42,textAlign:'center',color:'#625d55'}}>No enquiries match these filters.</td></tr>}</tbody></table></div></div>
+    {selected&&<div role="dialog" aria-modal="true" onClick={e=>{if(e.target===e.currentTarget)setSelected(null)}} style={{position:'fixed',inset:0,zIndex:100,background:'rgba(0,0,0,.5)',display:'flex',justifyContent:'flex-end'}}><aside style={{width:'min(520px,100%)',height:'100%',background:'var(--warm-white)',padding:28,overflowY:'auto',boxShadow:'-8px 0 30px rgba(0,0,0,.12)'}}><div style={{display:'flex',justifyContent:'space-between',gap:16,alignItems:'flex-start'}}><div><div style={{fontSize:10,fontWeight:800,letterSpacing:'.12em',color:'var(--ember)'}}>ENQUIRY</div><h2 style={{fontFamily:'Big Shoulders Display',fontSize:34,textTransform:'uppercase',margin:'5px 0'}}>{selected.name}</h2><div style={{color:'#625d55',fontSize:13}}>{new Date(selected.submitted_at).toLocaleString()}</div></div><button aria-label="Close" style={{...styles.button,fontSize:18}} onClick={()=>setSelected(null)}>×</button></div><div style={{marginTop:24,display:'grid',gap:14}}><div><b>Email</b><div>{selected.email}</div></div>{selected.phone&&<div><b>Phone</b><div>{selected.phone}</div></div>}<div><b>Interest</b><div style={{marginTop:5}}>{badge(selected.interest_type)}</div></div>{selected.reference_id&&<div><b>Reference</b><div>{selected.reference_id}</div></div>}{selected.preferred_date&&<div><b>Preferred date</b><div>{selected.preferred_date}</div></div>}{selected.group_size&&<div><b>Group size</b><div>{selected.group_size}</div></div>}<div><b>Message</b><div style={{whiteSpace:'pre-wrap',lineHeight:1.6,marginTop:5}}>{selected.message||'No message supplied.'}</div></div></div><div style={{marginTop:28,paddingTop:20,borderTop:'1px solid var(--sand-line)'}}><div style={{fontSize:11,fontWeight:800,textTransform:'uppercase',marginBottom:9}}>Update status</div><div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{(['new','contacted','closed'] as Status[]).map(s=><button key={s} disabled={loadingId===selected.id} onClick={()=>updateStatus(selected.id,s)} style={{...styles.button,background:selected.status===s?'var(--ink)':'transparent',color:selected.status===s?'#fff':'var(--ink)',opacity:loadingId===selected.id?.6:1}}>{loadingId===selected.id&&selected.status!==s?'…':s[0].toUpperCase()+s.slice(1)}</button>)}</div></div></aside></div>}
+    <style>{`@media(max-width:760px){.page-head{align-items:flex-start!important}.page-head>div{min-width:0}.page-head h1{font-size:36px!important}.admin-enquiries-grid{grid-template-columns:1fr!important}}@media(max-width:680px){.card[style*="repeat(4"]{grid-template-columns:repeat(2,1fr)!important}.card[style*="minmax(220px"]{grid-template-columns:1fr!important}}select,input{font:inherit}`}</style>
+  </div>
 }
