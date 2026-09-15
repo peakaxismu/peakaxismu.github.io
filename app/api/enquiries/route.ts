@@ -1,33 +1,38 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+const VALID_INTEREST_TYPES = ['hike', 'private_hike', 'expedition', 'team', 'activity'] as const
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()
     const { name, email, phone, interest_type, reference_id, preferred_date, group_size, message } = body
 
-    if (!name || !email || !interest_type) {
+    if (typeof name !== 'string' || typeof email !== 'string' || typeof interest_type !== 'string') {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const cleanName = String(name).trim().slice(0, 100)
-    const cleanEmail = String(email).trim().toLowerCase().slice(0, 100)
+    const cleanName = name.trim().slice(0, 100)
+    const cleanEmail = email.trim().toLowerCase().slice(0, 100)
+
+    if (!cleanName) {
+      return NextResponse.json({ error: 'Please enter your name' }, { status: 400 })
+    }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(cleanEmail)) {
       return NextResponse.json({ error: 'Please enter a valid email address' }, { status: 400 })
     }
 
-    const validInterestTypes = ['hike', 'private_hike', 'expedition', 'team', 'activity']
-    if (!validInterestTypes.includes(interest_type)) {
+    if (!VALID_INTEREST_TYPES.includes(interest_type as typeof VALID_INTEREST_TYPES[number])) {
       return NextResponse.json({ error: 'Invalid interest type selected' }, { status: 400 })
     }
 
-    const cleanPhone = phone ? String(phone).trim().slice(0, 30) : null
-    const cleanRef = reference_id ? String(reference_id).trim().slice(0, 100) : null
-    const cleanDate = preferred_date ? String(preferred_date).trim().slice(0, 50) : null
-    const cleanGroupSize = group_size ? String(group_size).trim().slice(0, 30) : null
-    const cleanMessage = message ? String(message).trim().slice(0, 2000) : null
+    const cleanPhone = typeof phone === 'string' ? phone.trim().slice(0, 30) : null
+    const cleanRef = typeof reference_id === 'string' ? reference_id.trim().slice(0, 100) : null
+    const cleanDate = typeof preferred_date === 'string' ? preferred_date.trim().slice(0, 50) : null
+    const cleanGroupSize = typeof group_size === 'string' ? group_size.trim().slice(0, 30) : null
+    const cleanMessage = typeof message === 'string' ? message.trim().slice(0, 2000) : null
 
     const supabase = await createClient()
 
@@ -77,7 +82,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true, data })
-  } catch (err: unknown) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal server error' }, { status: 500 })
+  } catch (err) {
+    console.error('Enquiry request failed:', err)
+    return NextResponse.json({ error: 'Invalid request. Please check your details and try again.' }, { status: 400 })
   }
 }
