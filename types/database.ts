@@ -1,6 +1,7 @@
 export type HikeDifficulty = 'easy' | 'moderate' | 'challenging'
 export type HikeStatus = 'draft' | 'published'
 export type HikeBookingType = 'scheduled_group' | 'on_demand' | 'private'
+export type HikeTrailConditionStatus = 'open' | 'conditions_to_confirm' | 'temporarily_unsuitable' | 'closed'
 
 export interface Hike {
   id: string
@@ -42,4 +43,7 @@ export interface Hike {
   rating_label?: string
   logistics_source?: string | null
   logistics_verified_at?: string | null
+  trail_condition_status?: HikeTrailConditionStatus
+  trail_condition_note?: string | null
+  trail_condition_updated_at?: string | null
 }
