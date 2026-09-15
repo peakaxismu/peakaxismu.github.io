@@ -8,6 +8,7 @@ export const revalidate = 0
 type Props = { params: Promise<{ slug: string }> }
 const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 const valueOr = (value: string | number | null | undefined, fallback = 'To be confirmed') => value === null || value === undefined || value === '' ? fallback : String(value)
+const list = (items?: string[]) => items?.filter(Boolean) ?? []
 
 async function getHikes() {
   const supabase = await createClient()
@@ -19,15 +20,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const hike = (await getHikes()).find((item) => slugify(item.name) === slug)
   if (!hike) return { title: 'Hike not found | Peak Axis' }
-  return { title: `${hike.name} | Peak Axis Mauritius`, description: hike.description || `${hike.name} — guided ${hike.hike_type} adventure in Mauritius. ${hike.difficulty} difficulty, ${hike.duration}.` }
+  const type = (hike.hike_type || 'guided hike').toLowerCase()
+  return { title: `${hike.name} | Peak Axis Mauritius`, description: hike.description || `${hike.name} — ${type} adventure in Mauritius. ${hike.difficulty} difficulty, ${hike.duration}.` }
 }
-
-const list = (items?: string[]) => items?.filter(Boolean) ?? []
 
 export default async function HikeDetailPage({ params }: Props) {
   const { slug } = await params
   const hike = (await getHikes()).find((item) => slugify(item.name) === slug)
   if (!hike) notFound()
+
   const spots = hike.spots_remaining ?? 0
   const isScheduled = hike.booking_type === 'scheduled_group'
   const available = !isScheduled || spots > 0
@@ -37,6 +38,8 @@ export default async function HikeDetailPage({ params }: Props) {
   const experienceTypes = list(hike.experience_types)
   const bookingType = hike.booking_type === 'private' ? 'private' : isScheduled ? 'scheduled_group' : 'on_demand'
   const ratingLabel = hike.rating_label || 'Peak Axis rating'
+  const hikeType = (hike.hike_type || 'guided hike').toLowerCase()
+  const bookingLabel = bookingType === 'scheduled_group' ? 'Scheduled group hike' : bookingType === 'private' ? 'Private / on-demand' : 'On-demand hike'
 
   const facts = [
     ['Difficulty', valueOr(hike.difficulty_numeric || hike.difficulty)],
@@ -60,7 +63,7 @@ export default async function HikeDetailPage({ params }: Props) {
           {hike.overall_rating != null && <span style={{ fontWeight: 700 }}>★ {hike.overall_rating}/10 · {ratingLabel}</span>}
         </div>
         <h1 style={{ fontSize: 'clamp(40px, 6vw, 64px)' }}>{hike.name}</h1>
-        <p style={{ marginTop: '18px', maxWidth: '780px', fontSize: '17px', lineHeight: 1.7, color: '#3d3a36' }}>{hike.description || `Join Peak Axis for ${hike.name}, a guided ${hike.hike_type.toLowerCase()} experience in Mauritius.`}</p>
+        <p style={{ marginTop: '18px', maxWidth: '780px', fontSize: '17px', lineHeight: 1.7, color: '#3d3a36' }}>{hike.description || `Join Peak Axis for ${hike.name}, a guided ${hikeType} experience in Mauritius.`}</p>
       </div>
     </div></section>
 
@@ -69,7 +72,7 @@ export default async function HikeDetailPage({ params }: Props) {
         <div>
           <div style={{ width: '100%', aspectRatio: '16/7', background: 'var(--teal)', overflow: 'hidden' }} aria-hidden="true"><svg viewBox="0 0 800 360" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}><rect width="800" height="360" fill="var(--sand)"/><path d="M0 300 L150 130 L260 230 L390 70 L520 220 L650 110 L800 260 L800 360 L0 360Z" fill="var(--teal)"/></svg></div>
 
-          <section style={{ marginTop: '36px' }}><h2 style={{ fontSize: '32px', marginBottom: '14px' }}>The experience</h2><p style={{ fontSize: '16px', maxWidth: '760px', color: '#3d3a36', lineHeight: 1.8 }}>{hike.description || `A guided ${hike.hike_type.toLowerCase()} route built around ${hike.main_attraction?.toLowerCase() || 'the landscape of Mauritius'}.`}</p></section>
+          <section style={{ marginTop: '36px' }}><h2 style={{ fontSize: '32px', marginBottom: '14px' }}>The experience</h2><p style={{ fontSize: '16px', maxWidth: '760px', color: '#3d3a36', lineHeight: 1.8 }}>{hike.description || `A guided ${hikeType} route built around ${hike.main_attraction?.toLowerCase() || 'the landscape of Mauritius'}.`}</p></section>
 
           <section style={{ marginTop: '38px' }}><h2 style={{ fontSize: '32px', marginBottom: '18px' }}>Quick facts</h2><div className="hike-detail-facts" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', borderTop: '1px solid var(--sand-line)', borderLeft: '1px solid var(--sand-line)' }}>{facts.map(([label, value]) => <div key={label} style={{ padding: '17px', borderRight: '1px solid var(--sand-line)', borderBottom: '1px solid var(--sand-line)' }}><div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color: '#777168' }}>{label}</div><div style={{ marginTop: '6px', fontWeight: 650 }}>{value}</div></div>)}</div></section>
 
@@ -83,11 +86,11 @@ export default async function HikeDetailPage({ params }: Props) {
         </div>
 
         <aside style={{ position: 'sticky', top: '96px', border: '1px solid var(--sand-line)', background: 'var(--warm-white)', padding: '24px' }}>
-          <p style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>{bookingType === 'scheduled_group' ? 'Scheduled group hike' : bookingType === 'private' ? 'Private / on-demand' : 'On-demand hike'}</p>
+          <p style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>{bookingLabel}</p>
           <h2 style={{ fontSize: '30px', marginTop: '8px' }}>{bookingType === 'scheduled_group' ? (hike.date || 'Date to be confirmed') : 'Choose your date'}</h2>
           <div style={{ marginTop: '20px', paddingTop: '18px', borderTop: '1px solid var(--sand-line)' }}><p style={{ fontSize: '12px', color: '#5a564f' }}>GROUP RATE</p><strong style={{ fontSize: '28px' }}>{hike.price_group_usd != null ? `$${hike.price_group_usd}` : hike.price}<span style={{ fontSize: '14px', fontWeight: 500 }}>{hike.price_group_usd != null ? '/person' : ''}</span></strong>{hike.price_solo_usd != null && <p style={{ marginTop: '4px', fontSize: '13px', color: '#5a564f' }}>Private / solo: ${hike.price_solo_usd}</p>}</div>
           {isScheduled && <div style={{ marginTop: '18px', fontSize: '12.5px', color: available && spots <= 4 ? 'var(--ember)' : '#6b675f', fontWeight: available && spots <= 4 ? 600 : 400 }}>{available ? `${spots} spots left` : 'Fully booked'}</div>}
-          <Link href={available ? `/enquire?interest=hike&ref=${encodeURIComponent(hike.name)}` : '/enquire?interest=private_hike'} style={{ display: 'block', textAlign: 'center', marginTop: '16px', background: 'var(--ember)', color: 'var(--warm-white)', padding: '14px 20px', fontSize: '14px', fontWeight: 600 }}>{available ? 'Enquire / book' : 'Ask about a private hike'}</Link>
+          <Link href={available ? `/enquire?interest=${bookingType === 'scheduled_group' ? 'hike' : bookingType === 'private' ? 'private_hike' : 'private_hike'}&ref=${encodeURIComponent(hike.name)}` : '/enquire?interest=private_hike'} style={{ display: 'block', textAlign: 'center', marginTop: '16px', background: 'var(--ember)', color: 'var(--warm-white)', padding: '14px 20px', fontSize: '14px', fontWeight: 600 }}>{available ? bookingType === 'scheduled_group' ? 'Enquire / join this hike' : bookingType === 'private' ? 'Plan a private hike' : 'Plan this hike' : 'Ask about a private hike'}</Link>
           <p style={{ marginTop: '14px', fontSize: '12px', lineHeight: 1.6, color: '#5a564f' }}>Not sure if this route is right for you? Send an enquiry and we&apos;ll help you choose.</p>
         </aside>
       </div>
