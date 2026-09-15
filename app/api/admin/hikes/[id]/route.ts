@@ -32,6 +32,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { data: existing, error: existingError } = await admin.from('hikes').select('trail_condition_status, trail_condition_note').eq('id', id).single()
     if (existingError) return NextResponse.json({ error: 'Hike not found' }, { status: 404 })
     const note = typeof body.trail_condition_note === 'string' ? body.trail_condition_note.trim() : ''
+    if (body.trail_condition_status !== 'open' && !note) return NextResponse.json({ error: 'Add a short operational note when a route is not open.' }, { status: 400 })
     const changed = body.trail_condition_status !== existing.trail_condition_status || note !== (existing.trail_condition_note || '')
     const { data, error } = await admin.from('hikes').update({
       trail_condition_status: body.trail_condition_status,
@@ -64,9 +65,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const noteChanged = body.trail_condition_note !== undefined && body.trail_condition_note !== existing.trail_condition_note
     const trailConditionPayload = hasStatus || body.trail_condition_note !== undefined ? {
       ...(hasStatus ? { trail_condition_status: body.trail_condition_status } : {}),
-      ...(body.trail_condition_note !== undefined ? { trail_condition_note: body.trail_condition_note || null } : {}),
+      ...(body.trail_condition_note !== undefined ? { trail_condition_note: typeof body.trail_condition_note === 'string' ? body.trail_condition_note.trim() || null : null } : {}),
       ...(statusChanged || noteChanged ? { trail_condition_updated_at: new Date().toISOString() } : {}),
     } : {}
+    if (hasStatus && body.trail_condition_status !== 'open' && body.trail_condition_note === undefined && existing.trail_condition_note == null) return NextResponse.json({ error: 'Add a short operational note when a route is not open.' }, { status: 400 })
     const { data, error } = await admin.from('hikes').update({
       name, difficulty, date: date || null, duration, location, price,
       spots_total: spots_total == null ? 10 : Number(spots_total),
