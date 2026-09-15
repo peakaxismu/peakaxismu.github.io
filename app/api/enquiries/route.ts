@@ -31,9 +31,13 @@ export async function POST(request: Request) {
 
     const supabase = await createClient()
 
-    // Scheduled-hike enquiries must reference an actual published scheduled route.
-    // This prevents stale/forged form submissions from creating misleading bookings.
-    if (interest_type === 'hike' && cleanRef) {
+    // Scheduled-hike enquiries must identify an actual published scheduled route.
+    // This prevents stale/forged requests from creating misleading booking leads.
+    if (interest_type === 'hike') {
+      if (!cleanRef) {
+        return NextResponse.json({ error: 'Please select a scheduled hike before submitting.' }, { status: 400 })
+      }
+
       const { data: hike, error: hikeLookupError } = await supabase
         .from('hikes')
         .select('id')
