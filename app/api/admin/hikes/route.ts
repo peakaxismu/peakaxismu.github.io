@@ -7,6 +7,7 @@ const practicalFields = [
   'fitness_required','terrain','what_to_bring','included','excluded','safety_info',
   'weather_policy','age_requirements','min_participants','max_participants',
   'experience_types','region','booking_type','rating_label',
+  'trail_condition_status','trail_condition_note','trail_condition_updated_at',
 ] as const
 
 function practicalPayload(body: Record<string, unknown>) {
@@ -21,6 +22,10 @@ function normaliseBookingType(value: unknown) {
   return value === 'scheduled_group' || value === 'private' || value === 'on_demand' ? value : 'on_demand'
 }
 
+function normaliseTrailCondition(value: unknown) {
+  return value === 'conditions_to_confirm' || value === 'temporarily_unsuitable' || value === 'closed' ? value : 'open'
+}
+
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
@@ -30,6 +35,7 @@ export async function POST(request: Request) {
     const body = await request.json() as Record<string, unknown>
     const { name, difficulty, date, duration, location, price, spots_total, spots_remaining, description, status } = body
     const bookingType = normaliseBookingType(body.booking_type)
+    const trailConditionStatus = normaliseTrailCondition(body.trail_condition_status)
     if (!name || !difficulty || !duration || !location || !price || (bookingType === 'scheduled_group' && !date)) {
       return NextResponse.json({ error: 'Missing required hike fields' }, { status: 400 })
     }
@@ -41,7 +47,7 @@ export async function POST(request: Request) {
       spots_remaining: spots_remaining == null ? (spots_total == null ? 10 : Number(spots_total)) : Number(spots_remaining),
       description: description || null,
       status: status || 'published',
-      ...practicalPayload({ ...body, booking_type: bookingType, rating_label: body.rating_label || 'Peak Axis rating' }),
+      ...practicalPayload({ ...body, booking_type: bookingType, rating_label: body.rating_label || 'Peak Axis rating', trail_condition_status: trailConditionStatus }),
     }).select()
 
     if (error) {
