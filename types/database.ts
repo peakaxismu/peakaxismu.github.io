@@ -1,5 +1,6 @@
 export type HikeDifficulty = 'easy' | 'moderate' | 'challenging'
 export type HikeStatus = 'draft' | 'published'
+export type HikeBookingType = 'scheduled_group' | 'on_demand' | 'private'
 
 export interface Hike {
   id: string
@@ -20,4 +21,23 @@ export interface Hike {
   date?: string
   spots_total?: number
   spots_remaining?: number
+  distance_km?: number | null
+  elevation_gain_m?: number | null
+  starting_point?: string | null
+  meeting_point?: string | null
+  transport_options?: string | null
+  fitness_required?: string | null
+  terrain?: string | null
+  what_to_bring?: string[]
+  included?: string[]
+  excluded?: string[]
+  safety_info?: string | null
+  weather_policy?: string | null
+  age_requirements?: string | null
+  min_participants?: number | null
+  max_participants?: number | null
+  experience_types?: string[]
+  region?: string | null
+  booking_type?: HikeBookingType
+  rating_label?: string
 }
