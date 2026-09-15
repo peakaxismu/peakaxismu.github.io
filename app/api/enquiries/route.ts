@@ -31,6 +31,27 @@ export async function POST(request: Request) {
 
     const supabase = await createClient()
 
+    // Scheduled-hike enquiries must reference an actual published scheduled route.
+    // This prevents stale/forged form submissions from creating misleading bookings.
+    if (interest_type === 'hike' && cleanRef) {
+      const { data: hike, error: hikeLookupError } = await supabase
+        .from('hikes')
+        .select('id')
+        .eq('name', cleanRef)
+        .eq('status', 'published')
+        .eq('booking_type', 'scheduled_group')
+        .maybeSingle()
+
+      if (hikeLookupError) {
+        console.error('Supabase hike validation error:', hikeLookupError)
+        return NextResponse.json({ error: 'Unable to validate the selected hike. Please try again.' }, { status: 500 })
+      }
+
+      if (!hike) {
+        return NextResponse.json({ error: 'The selected scheduled hike is no longer available. Please choose another option.' }, { status: 400 })
+      }
+    }
+
     const { data, error } = await supabase
       .from('enquiries')
       .insert({
