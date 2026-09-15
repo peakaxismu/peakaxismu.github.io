@@ -47,11 +47,12 @@ export default async function HikeDetailPage({ params }: Props) {
     : bookingType === 'private'
       ? 'A private outing arranged around your group and preferred date.'
       : 'No fixed public departure. Tell us when you want to go and we will arrange the route around conditions and availability.'
+  const hikeRef = encodeURIComponent(hike.name)
   const enquiryHref = routeUnavailable
-    ? '/enquire?interest=private_hike'
+    ? `/enquire?interest=private_hike&ref=${hikeRef}`
     : available
-      ? `/enquire?interest=${bookingType === 'scheduled_group' ? 'hike' : 'private_hike'}&ref=${encodeURIComponent(hike.name)}`
-      : '/enquire?interest=private_hike'
+      ? `/enquire?interest=${bookingType === 'scheduled_group' ? 'hike' : 'private_hike'}&ref=${hikeRef}`
+      : `/enquire?interest=private_hike&ref=${hikeRef}`
 
   const condition = trailStatus === 'conditions_to_confirm'
     ? { title: 'Conditions to confirm', body: hike.trail_condition_note || 'We are checking current route, weather and access conditions before confirming this hike.', tone: 'caution' }
