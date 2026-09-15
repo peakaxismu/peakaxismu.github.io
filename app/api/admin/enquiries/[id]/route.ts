@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+const STATUSES = ['new', 'contacted', 'quoted', 'confirmed', 'completed', 'closed'] as const
+
+type Status = typeof STATUSES[number]
+
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -11,7 +15,7 @@ export async function PATCH(
     const body = await request.json()
     const { status } = body
 
-    if (!['new', 'contacted', 'closed'].includes(status)) {
+    if (!STATUSES.includes(status as Status)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }
 
