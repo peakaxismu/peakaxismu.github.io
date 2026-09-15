@@ -29,12 +29,14 @@ export default async function HikeDetailPage({ params }: Props) {
   const hike = (await getHikes()).find((item) => slugify(item.name) === slug)
   if (!hike) notFound()
   const spots = hike.spots_remaining ?? 0
-  const available = spots > 0
+  const isScheduled = hike.booking_type === 'scheduled_group'
+  const available = !isScheduled || spots > 0
   const bring = list(hike.what_to_bring)
   const included = list(hike.included)
   const excluded = list(hike.excluded)
   const experienceTypes = list(hike.experience_types)
-  const bookingType = hike.booking_type === 'scheduled_group' ? 'scheduled_group' : hike.booking_type === 'private' ? 'private' : 'on_demand'
+  const bookingType = hike.booking_type === 'private' ? 'private' : isScheduled ? 'scheduled_group' : 'on_demand'
+  const ratingLabel = hike.rating_label || 'Peak Axis rating'
 
   const facts = [
     ['Difficulty', valueOr(hike.difficulty_numeric || hike.difficulty)],
@@ -53,9 +55,9 @@ export default async function HikeDetailPage({ params }: Props) {
       <Link href="/hikes" style={{ display: 'inline-block', marginBottom: '20px', fontSize: '14px', fontWeight: 600 }}>← All hikes</Link>
       <div style={{ maxWidth: '900px' }}>
         <div style={{ marginBottom: '16px', display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center', fontSize: '13.5px', color: '#6b675f' }}>
-          <span style={{ fontWeight: 700, color: hike.difficulty === 'challenging' ? 'var(--ember)' : hike.difficulty === 'moderate' ? '#a3720b' : 'var(--teal)', textTransform: 'capitalize' }}>{hike.difficulty} · {hike.difficulty_numeric}</span>
+          <span style={{ fontWeight: 700, color: hike.difficulty === 'challenging' ? 'var(--ember)' : hike.difficulty === 'moderate' ? '#a3720b' : 'var(--teal)', textTransform: 'capitalize' }}>{hike.difficulty}{hike.difficulty_numeric ? ` · ${hike.difficulty_numeric}` : ''}</span>
           <span>⏱ {hike.duration}</span><span>📍 {hike.location}</span>
-          {hike.rating_label && <span style={{ fontWeight: 700 }}>★ {hike.overall_rating}/10 · {hike.rating_label}</span>}
+          {hike.overall_rating != null && <span style={{ fontWeight: 700 }}>★ {hike.overall_rating}/10 · {ratingLabel}</span>}
         </div>
         <h1 style={{ fontSize: 'clamp(40px, 6vw, 64px)' }}>{hike.name}</h1>
         <p style={{ marginTop: '18px', maxWidth: '780px', fontSize: '17px', lineHeight: 1.7, color: '#3d3a36' }}>{hike.description || `Join Peak Axis for ${hike.name}, a guided ${hike.hike_type.toLowerCase()} experience in Mauritius.`}</p>
@@ -73,35 +75,19 @@ export default async function HikeDetailPage({ params }: Props) {
 
           <section style={{ marginTop: '38px' }}><h2 style={{ fontSize: '32px', marginBottom: '18px' }}>What you&apos;ll experience</h2><div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>{[hike.main_attraction, ...experienceTypes].filter(Boolean).map((item, i) => <div key={`${item}-${i}`} style={{ padding: '12px 15px', border: '1px solid var(--sand-line)', background: 'rgba(250,248,243,.35)' }}>✦ {item}</div>)}</div></section>
 
-          {[
-            ['What to bring', bring, 'Bring the essentials for a comfortable day outdoors.'],
-            ["What's included", included, 'Included in the listed hike price.'],
-            ["What's not included", excluded, 'These items or services are not included in the listed price.'],
-          ].map(([title, items, intro]) => <section key={title as string} style={{ marginTop: '38px' }}><h2 style={{ fontSize: '30px', marginBottom: '10px' }}>{title as string}</h2><p style={{ color: '#5a564f', marginBottom: '12px' }}>{intro as string}</p>{(items as string[]).length ? <ul style={{ paddingLeft: '20px', lineHeight: 1.9 }}>{(items as string[]).map((item) => <li key={item}>{item}</li>)}</ul> : <p style={{ color: '#777168' }}>To be confirmed — we&apos;ll provide the final details before booking.</p>}</section>)}
+          {[["What to bring", bring, 'Bring the essentials for a comfortable day outdoors.'],["What's included", included, 'Included in the listed hike price.'],["What's not included", excluded, 'These items or services are not included in the listed price.']].map(([title, items, intro]) => <section key={title as string} style={{ marginTop: '38px' }}><h2 style={{ fontSize: '30px', marginBottom: '10px' }}>{title as string}</h2><p style={{ color: '#5a564f', marginBottom: '12px' }}>{intro as string}</p>{(items as string[]).length ? <ul style={{ paddingLeft: '20px', lineHeight: 1.9 }}>{(items as string[]).map(item => <li key={item}>{item}</li>)}</ul> : <p style={{ color: '#777168' }}>To be confirmed — we&apos;ll provide the final details before booking.</p>}</section>)}
 
-          <section style={{ marginTop: '38px', display: 'grid', gap: '18px' }}>
-            <InfoSection title="Meeting point" value={hike.meeting_point} />
-            <InfoSection title="Starting point" value={hike.starting_point} />
-            <InfoSection title="Getting there" value={hike.transport_options} />
-            <InfoSection title="Safety" value={hike.safety_info} />
-            <InfoSection title="Weather policy" value={hike.weather_policy} />
-          </section>
+          <section style={{ marginTop: '38px', display: 'grid', gap: '18px' }}><InfoSection title="Meeting point" value={hike.meeting_point} /><InfoSection title="Starting point" value={hike.starting_point} /><InfoSection title="Getting there" value={hike.transport_options} /><InfoSection title="Safety" value={hike.safety_info} /><InfoSection title="Weather policy" value={hike.weather_policy} /></section>
 
-          <section style={{ marginTop: '42px' }}><h2 style={{ fontSize: '32px', marginBottom: '16px' }}>FAQ</h2><div style={{ display: 'grid', gap: '10px' }}>
-            <Faq title="Is this hike right for me?" answer={`This is a ${hike.difficulty} route rated ${hike.difficulty_numeric}. Fitness requirement: ${valueOr(hike.fitness_required)}.`} />
-            <Faq title="How do I join?" answer={bookingType === 'scheduled_group' ? 'Choose a published date and join a scheduled group hike.' : bookingType === 'private' ? 'Choose your preferred date and hike privately with your own group.' : 'This hike is currently on demand. Send an enquiry and Peak Axis will help arrange a suitable date.'} />
-            <Faq title="What happens if the weather is bad?" answer={valueOr(hike.weather_policy, 'The guide team will assess conditions and communicate any cancellation or rescheduling decision.')}/>
-            <Faq title="Can children join?" answer={valueOr(hike.age_requirements)} />
-            <Faq title="How many people can join?" answer={hike.min_participants || hike.max_participants ? `Minimum: ${valueOr(hike.min_participants, 'not specified')}. Maximum: ${valueOr(hike.max_participants, 'not specified')}.` : 'Group size to be confirmed for this route.'} />
-          </div></section>
+          <section style={{ marginTop: '42px' }}><h2 style={{ fontSize: '32px', marginBottom: '16px' }}>FAQ</h2><div style={{ display: 'grid', gap: '10px' }}><Faq title="Is this hike right for me?" answer={`This is a ${hike.difficulty} route${hike.difficulty_numeric ? ` rated ${hike.difficulty_numeric}` : ''}. Fitness requirement: ${valueOr(hike.fitness_required)}.`} /><Faq title="How do I join?" answer={bookingType === 'scheduled_group' ? 'Choose a published date and join a scheduled group hike.' : bookingType === 'private' ? 'Choose your preferred date and hike privately with your own group.' : 'This hike is currently on demand. Send an enquiry and Peak Axis will help arrange a suitable date.'} /><Faq title="What happens if the weather is bad?" answer={valueOr(hike.weather_policy, 'The guide team will assess conditions and communicate any cancellation or rescheduling decision.')} /><Faq title="Can children join?" answer={valueOr(hike.age_requirements)} /><Faq title="How many people can join?" answer={hike.min_participants || hike.max_participants ? `Minimum: ${valueOr(hike.min_participants, 'not specified')}. Maximum: ${valueOr(hike.max_participants, 'not specified')}.` : 'Group size to be confirmed for this route.'} /></div></section>
         </div>
 
         <aside style={{ position: 'sticky', top: '96px', border: '1px solid var(--sand-line)', background: 'var(--warm-white)', padding: '24px' }}>
-          <p style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>{bookingType === 'scheduled_group' ? 'Scheduled group hike' : bookingType === 'private' ? 'Private / On-demand' : 'On-demand hike'}</p>
+          <p style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>{bookingType === 'scheduled_group' ? 'Scheduled group hike' : bookingType === 'private' ? 'Private / on-demand' : 'On-demand hike'}</p>
           <h2 style={{ fontSize: '30px', marginTop: '8px' }}>{bookingType === 'scheduled_group' ? (hike.date || 'Date to be confirmed') : 'Choose your date'}</h2>
-          <div style={{ marginTop: '20px', paddingTop: '18px', borderTop: '1px solid var(--sand-line)' }}><p style={{ fontSize: '12px', color: '#5a564f' }}>GROUP RATE</p><strong style={{ fontSize: '28px' }}>${hike.price_group_usd}<span style={{ fontSize: '14px', fontWeight: 500 }}>/person</span></strong><p style={{ marginTop: '4px', fontSize: '13px', color: '#5a564f' }}>Private / solo: ${hike.price_solo_usd}</p></div>
-          {bookingType === 'scheduled_group' && <div style={{ marginTop: '18px', fontSize: '12.5px', color: available && spots <= 4 ? 'var(--ember)' : '#6b675f', fontWeight: available && spots <= 4 ? 600 : 400 }}>{available ? `${spots} spots left` : 'Fully booked'}</div>}
-          <Link href={available ? `/enquire?interest=hike&ref=${encodeURIComponent(hike.name)}` : '/enquire?interest=private_hike'} style={{ display: 'block', textAlign: 'center', marginTop: '16px', background: 'var(--ember)', color: 'var(--warm-white)', padding: '14px 20px', fontSize: '14px', fontWeight: 600 }}>{available ? 'Book your spot' : 'Ask about a private hike'}</Link>
+          <div style={{ marginTop: '20px', paddingTop: '18px', borderTop: '1px solid var(--sand-line)' }}><p style={{ fontSize: '12px', color: '#5a564f' }}>GROUP RATE</p><strong style={{ fontSize: '28px' }}>{hike.price_group_usd != null ? `$${hike.price_group_usd}` : hike.price}<span style={{ fontSize: '14px', fontWeight: 500 }}>{hike.price_group_usd != null ? '/person' : ''}</span></strong>{hike.price_solo_usd != null && <p style={{ marginTop: '4px', fontSize: '13px', color: '#5a564f' }}>Private / solo: ${hike.price_solo_usd}</p>}</div>
+          {isScheduled && <div style={{ marginTop: '18px', fontSize: '12.5px', color: available && spots <= 4 ? 'var(--ember)' : '#6b675f', fontWeight: available && spots <= 4 ? 600 : 400 }}>{available ? `${spots} spots left` : 'Fully booked'}</div>}
+          <Link href={available ? `/enquire?interest=hike&ref=${encodeURIComponent(hike.name)}` : '/enquire?interest=private_hike'} style={{ display: 'block', textAlign: 'center', marginTop: '16px', background: 'var(--ember)', color: 'var(--warm-white)', padding: '14px 20px', fontSize: '14px', fontWeight: 600 }}>{available ? 'Enquire / book' : 'Ask about a private hike'}</Link>
           <p style={{ marginTop: '14px', fontSize: '12px', lineHeight: 1.6, color: '#5a564f' }}>Not sure if this route is right for you? Send an enquiry and we&apos;ll help you choose.</p>
         </aside>
       </div>
@@ -111,7 +97,7 @@ export default async function HikeDetailPage({ params }: Props) {
 }
 
 function InfoSection({ title, value }: { title: string; value?: string | null }) {
-  return <div style={{ padding: '20px', border: '1px solid var(--sand-line)', background: 'rgba(250,248,243,.3)' }}><h3 style={{ fontSize: '20px', marginBottom: '8px' }}>{title}</h3><p style={{ color: value ? '#3d3a36' : '#777168', lineHeight: 1.7 }}>{value || 'To be confirmed — we&apos;ll provide the final details before booking.'}</p></div>
+  return <div style={{ padding: '20px', border: '1px solid var(--sand-line)', background: 'rgba(250,248,243,.3)' }}><h3 style={{ fontSize: '20px', marginBottom: '8px' }}>{title}</h3><p style={{ color: value ? '#3d3a36' : '#777168', lineHeight: 1.7 }}>{value || "To be confirmed — we'll provide the final details before booking."}</p></div>
 }
 
 function Faq({ title, answer }: { title: string; answer: string }) {
