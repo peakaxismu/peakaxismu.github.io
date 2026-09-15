@@ -1,0 +1,16 @@
+# Local Supabase configuration for reproducible migrations and pgTAP tests.
+# Generated from the documented minimal CLI configuration shape.
+project_id = "peakaxis"
+
+[db]
+major_version = 17
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+
+[storage]
+enabled = true
+
+[analytics]
+enabled = false
