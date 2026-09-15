@@ -3,148 +3,49 @@
 import { useState } from 'react'
 
 interface Hike {
-  id: string
-  name: string
-  difficulty: 'easy' | 'moderate' | 'challenging'
-  date: string
-  duration: string
-  location: string
-  price: string
-  spots_total: number
-  spots_remaining: number
-  description: string | null
-  status: 'draft' | 'published'
+  id: string; name: string; difficulty: 'easy'|'moderate'|'challenging'; date: string; duration: string; location: string; price: string
+  spots_total: number; spots_remaining: number; description: string|null; status: 'draft'|'published'
+  hike_type?: string; difficulty_numeric?: string; scenery_rating?: number; overall_rating?: number; main_attraction?: string
+  price_solo_usd?: number; price_group_usd?: number; distance_km?: number|null; elevation_gain_m?: number|null
+  starting_point?: string|null; meeting_point?: string|null; transport_options?: string|null; fitness_required?: string|null; terrain?: string|null
+  what_to_bring?: string[]; included?: string[]; excluded?: string[]; safety_info?: string|null; weather_policy?: string|null
+  age_requirements?: string|null; min_participants?: number|null; max_participants?: number|null; experience_types?: string[]
+  region?: string|null; booking_type?: 'scheduled_group'|'on_demand'|'private'; rating_label?: string
 }
+
+const textFields = [
+  ['meeting_point','Meeting point'],['starting_point','Starting point'],['transport_options','Getting there / transport'],['fitness_required','Required fitness'],['terrain','Terrain'],
+  ['safety_info','Safety information'],['weather_policy','Weather policy'],['age_requirements','Age requirements'],['region','Region'],['rating_label','Rating label'],
+] as const
+const arrayFields = [
+  ['what_to_bring','What to bring'],['included','What’s included'],['excluded','What’s not included'],['experience_types','Experience tags'],
+] as const
 
 export default function HikesAdminClient({ initialHikes }: { initialHikes: Hike[] }) {
-  const [hikes, setHikes] = useState<Hike[]>(initialHikes)
-  const [editingHike, setEditingHike] = useState<Partial<Hike> | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-
-  const openCreateModal = () => {
-    setEditingHike({
-      name: '', difficulty: 'moderate', date: '', duration: 'Half-day', location: '',
-      price: 'Rs 900', spots_total: 10, spots_remaining: 10, description: '', status: 'published',
-    })
-    setIsModalOpen(true)
-  }
-
-  const openEditModal = (hike: Hike) => {
-    setEditingHike({ ...hike })
-    setIsModalOpen(true)
-  }
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!editingHike) return
-    setLoading(true)
-
-    try {
-      const isEdit = Boolean(editingHike.id)
-      const url = isEdit ? `/api/admin/hikes/${editingHike.id}` : '/api/admin/hikes'
-      const res = await fetch(url, {
-        method: isEdit ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingHike),
-      })
-
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok || !json.success || !Array.isArray(json.data) || !json.data[0]) {
-        alert(json.error || 'Failed to save hike')
-        return
-      }
-
-      const savedHike = json.data[0] as Hike
-      if (isEdit) {
-        setHikes((prev) => prev.map((h) => h.id === savedHike.id ? savedHike : h))
-      } else {
-        setHikes((prev) => [savedHike, ...prev])
-      }
-      setIsModalOpen(false)
-      setEditingHike(null)
-    } catch (error) {
-      console.error('Error saving hike:', error)
-      alert('Error saving hike')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this hike?')) return
-    try {
-      const res = await fetch(`/api/admin/hikes/${id}`, { method: 'DELETE' })
-      if (res.ok) setHikes((prev) => prev.filter((h) => h.id !== id))
-      else alert('Failed to delete hike')
-    } catch { alert('Error deleting hike') }
-  }
-
-  const toggleStatus = async (hike: Hike) => {
-    const newStatus = hike.status === 'published' ? 'draft' : 'published'
-    try {
-      const res = await fetch(`/api/admin/hikes/${hike.id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...hike, status: newStatus }),
-      })
-      if (res.ok) setHikes((prev) => prev.map((h) => h.id === hike.id ? { ...h, status: newStatus } : h))
-    } catch { alert('Error toggling status') }
-  }
-
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-        <div>
-          <h1 style={{ fontFamily: 'Big Shoulders Display', fontWeight: 900, fontSize: '36px', textTransform: 'uppercase' }}>Hikes Management</h1>
-          <p style={{ color: '#5a564f', fontSize: '15px', marginTop: '4px' }}>Add, edit, or publish scheduled group hikes on the site.</p>
-        </div>
-        <button onClick={openCreateModal} style={{ background: 'var(--ember)', color: '#FAF8F3', border: 'none', padding: '12px 24px', fontFamily: 'Inter', fontSize: '14.5px', fontWeight: 600, cursor: 'pointer' }}>+ Add New Hike</button>
-      </div>
-
-      <div style={{ background: 'var(--warm-white)', border: '1px solid var(--sand-line)', padding: '24px' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
-          <thead><tr style={{ borderBottom: '2px solid var(--sand-line)' }}>
-            {['Route Name','Difficulty','Date & Duration','Price & Spots','Status','Actions'].map((label) => <th key={label} style={{ padding: '12px 16px', fontSize: '12px', textTransform: 'uppercase', color: '#5a564f' }}>{label}</th>)}
-          </tr></thead>
-          <tbody>{hikes.map((h) => (
-            <tr key={h.id} style={{ borderBottom: '1px solid var(--sand-line)' }}>
-              <td style={{ padding: '16px' }}><div style={{ fontWeight: 600, fontSize: '15px' }}>{h.name}</div><div style={{ fontSize: '12.5px', color: '#5a564f' }}>📍 {h.location}</div></td>
-              <td style={{ padding: '16px', textTransform: 'capitalize' }}><span className={`diff diff-${h.difficulty}`}>{h.difficulty}</span></td>
-              <td style={{ padding: '16px' }}><div>📅 {h.date}</div><div style={{ fontSize: '12.5px', color: '#5a564f' }}>⏱ {h.duration}</div></td>
-              <td style={{ padding: '16px' }}><div style={{ fontWeight: 600 }}>{h.price}</div><div style={{ fontSize: '12.5px', color: '#5a564f' }}>{h.spots_remaining} / {h.spots_total} spots left</div></td>
-              <td style={{ padding: '16px' }}><button onClick={() => toggleStatus(h)} style={{ padding: '4px 10px', fontSize: '11px', fontWeight: 700, border: 'none', cursor: 'pointer', textTransform: 'uppercase', background: h.status === 'published' ? 'var(--teal)' : '#5A564F', color: '#FFF' }}>{h.status}</button></td>
-              <td style={{ padding: '16px' }}><div style={{ display: 'flex', gap: '8px' }}><button onClick={() => openEditModal(h)} style={{ background: 'none', border: '1px solid var(--ink)', padding: '4px 10px', fontSize: '12.5px', cursor: 'pointer' }}>Edit</button><button onClick={() => handleDelete(h.id)} style={{ background: 'none', border: '1px solid #C1440E', color: '#C1440E', padding: '4px 10px', fontSize: '12.5px', cursor: 'pointer' }}>Delete</button></div></td>
-            </tr>
-          ))}</tbody>
-        </table>
-      </div>
-
-      {isModalOpen && editingHike && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }}>
-          <div style={{ background: 'var(--warm-white)', border: '1px solid var(--sand-line)', width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', padding: '32px' }}>
-            <h2 style={{ fontFamily: 'Big Shoulders Display', fontWeight: 900, fontSize: '28px', textTransform: 'uppercase', marginBottom: '20px' }}>{editingHike.id ? 'Edit Hike' : 'Create New Hike'}</h2>
-            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Route Name *</label><input type="text" required value={editingHike.name || ''} onChange={(e) => setEditingHike({ ...editingHike, name: e.target.value })} style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }} /></div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Difficulty *</label><select value={editingHike.difficulty || 'moderate'} onChange={(e) => setEditingHike({ ...editingHike, difficulty: e.target.value as Hike['difficulty'] })} style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }}><option value="easy">Easy</option><option value="moderate">Moderate</option><option value="challenging">Challenging</option></select></div>
-                <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Location *</label><input type="text" required value={editingHike.location || ''} onChange={(e) => setEditingHike({ ...editingHike, location: e.target.value })} style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }} /></div>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Scheduled Date *</label><input type="text" required value={editingHike.date || ''} onChange={(e) => setEditingHike({ ...editingHike, date: e.target.value })} placeholder="e.g. Sat 12 Sep" style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }} /></div>
-                <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Duration *</label><input type="text" required value={editingHike.duration || ''} onChange={(e) => setEditingHike({ ...editingHike, duration: e.target.value })} placeholder="e.g. Half-day / 4 hours" style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }} /></div>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
-                <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Price *</label><input type="text" required value={editingHike.price || ''} onChange={(e) => setEditingHike({ ...editingHike, price: e.target.value })} placeholder="Rs 900" style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }} /></div>
-                <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Total Spots</label><input type="number" value={editingHike.spots_total ?? 10} onChange={(e) => setEditingHike({ ...editingHike, spots_total: Number(e.target.value) })} style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }} /></div>
-                <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Remaining Spots</label><input type="number" value={editingHike.spots_remaining ?? 10} onChange={(e) => setEditingHike({ ...editingHike, spots_remaining: Number(e.target.value) })} style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }} /></div>
-              </div>
-              <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Description</label><textarea rows={3} value={editingHike.description || ''} onChange={(e) => setEditingHike({ ...editingHike, description: e.target.value })} style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }} /></div>
-              <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Status</label><select value={editingHike.status || 'published'} onChange={(e) => setEditingHike({ ...editingHike, status: e.target.value as Hike['status'] })} style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }}><option value="published">Published</option><option value="draft">Draft</option></select></div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' }}><button type="button" onClick={() => { setIsModalOpen(false); setEditingHike(null) }} style={{ padding: '10px 18px', background: 'transparent', border: '1px solid var(--sand-line)', cursor: 'pointer' }}>Cancel</button><button type="submit" disabled={loading} style={{ padding: '10px 24px', background: 'var(--ember)', color: '#FFF', border: 'none', cursor: loading ? 'wait' : 'pointer', opacity: loading ? 0.7 : 1 }}>{loading ? 'Saving…' : 'Save Hike'}</button></div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  )
+  const [hikes,setHikes]=useState<Hike[]>(initialHikes); const [editingHike,setEditingHike]=useState<Partial<Hike>|null>(null); const [isModalOpen,setIsModalOpen]=useState(false); const [loading,setLoading]=useState(false)
+  const openCreateModal=()=>{setEditingHike({name:'',difficulty:'moderate',date:'On Demand',duration:'Half-day',location:'',price:'Rs 900',spots_total:10,spots_remaining:10,description:'',status:'published',booking_type:'on_demand',what_to_bring:[],included:[],excluded:[],experience_types:[],rating_label:'Peak Axis rating'});setIsModalOpen(true)}
+  const openEditModal=(h:Hike)=>{setEditingHike({...h});setIsModalOpen(true)}
+  const handleSave=async(e:React.FormEvent)=>{e.preventDefault();if(!editingHike)return;setLoading(true);try{const isEdit=Boolean(editingHike.id);const res=await fetch(isEdit?`/api/admin/hikes/${editingHike.id}`:'/api/admin/hikes',{method:isEdit?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(editingHike)});const json=await res.json().catch(()=>({}));if(!res.ok||!json.success||!json.data?.[0]){alert(json.error||'Failed to save hike');return}const saved=json.data[0] as Hike;setHikes(p=>isEdit?p.map(h=>h.id===saved.id?saved:h):[saved,...p]);setIsModalOpen(false);setEditingHike(null)}catch(err){console.error(err);alert('Error saving hike')}finally{setLoading(false)}}
+  const handleDelete=async(id:string)=>{if(!confirm('Are you sure you want to delete this hike?'))return;const res=await fetch(`/api/admin/hikes/${id}`,{method:'DELETE'});if(res.ok)setHikes(p=>p.filter(h=>h.id!==id));else alert('Failed to delete hike')}
+  const toggleStatus=async(h:Hike)=>{const status=h.status==='published'?'draft':'published';const res=await fetch(`/api/admin/hikes/${h.id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({...h,status})});if(res.ok)setHikes(p=>p.map(x=>x.id===h.id?{...x,status}:x))}
+  const set=(key:string,value:unknown)=>setEditingHike(p=>p?{...p,[key]:value}:p)
+  const inputStyle={width:'100%',padding:'10px',border:'1px solid var(--sand-line)',background:'var(--warm-white)'}
+  const labelStyle={display:'block',fontSize:'11px',fontWeight:700,textTransform:'uppercase' as const,marginBottom:'5px',letterSpacing:'.04em'}
+  return <div>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'24px',gap:'20px'}}><div><h1 style={{fontFamily:'Big Shoulders Display',fontWeight:900,fontSize:'36px',textTransform:'uppercase'}}>Hikes Management</h1><p style={{color:'#5a564f',fontSize:'15px',marginTop:'4px'}}>Manage routes, practical trail information, ratings and booking details.</p></div><button onClick={openCreateModal} style={{background:'var(--ember)',color:'#FAF8F3',border:'none',padding:'12px 24px',fontSize:'14.5px',fontWeight:600,cursor:'pointer'}}>+ Add New Hike</button></div>
+    <div style={{background:'var(--warm-white)',border:'1px solid var(--sand-line)',padding:'24px',overflowX:'auto'}}><table style={{width:'100%',borderCollapse:'collapse',textAlign:'left',fontSize:'14px'}}><thead><tr style={{borderBottom:'2px solid var(--sand-line)'}}>{['Route','Difficulty','Format','Price & Spots','Status','Actions'].map(x=><th key={x} style={{padding:'12px 16px',fontSize:'12px',textTransform:'uppercase',color:'#5a564f'}}>{x}</th>)}</tr></thead><tbody>{hikes.map(h=><tr key={h.id} style={{borderBottom:'1px solid var(--sand-line)'}}><td style={{padding:'16px'}}><div style={{fontWeight:600,fontSize:'15px'}}>{h.name}</div><div style={{fontSize:'12.5px',color:'#5a564f'}}>📍 {h.location}</div></td><td style={{padding:'16px',textTransform:'capitalize'}}><span className={`diff diff-${h.difficulty}`}>{h.difficulty}</span></td><td style={{padding:'16px'}}><div>{h.booking_type==='scheduled_group'?'Scheduled group':h.booking_type==='private'?'Private / on-demand':'On-demand'}</div><div style={{fontSize:'12.5px',color:'#5a564f'}}>⏱ {h.duration}</div></td><td style={{padding:'16px'}}><div style={{fontWeight:600}}>{h.price}</div><div style={{fontSize:'12.5px',color:'#5a564f'}}>{h.spots_remaining} / {h.spots_total} spots</div></td><td style={{padding:'16px'}}><button onClick={()=>toggleStatus(h)} style={{padding:'4px 10px',fontSize:'11px',fontWeight:700,border:'none',cursor:'pointer',textTransform:'uppercase',background:h.status==='published'?'var(--teal)':'#5A564F',color:'#FFF'}}>{h.status}</button></td><td style={{padding:'16px'}}><div style={{display:'flex',gap:'8px'}}><button onClick={()=>openEditModal(h)} style={{background:'none',border:'1px solid var(--ink)',padding:'4px 10px',fontSize:'12.5px',cursor:'pointer'}}>Edit</button><button onClick={()=>handleDelete(h.id)} style={{background:'none',border:'1px solid #C1440E',color:'#C1440E',padding:'4px 10px',fontSize:'12.5px',cursor:'pointer'}}>Delete</button></div></td></tr>)}</tbody></table></div>
+    {isModalOpen&&editingHike&&<div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.5)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:100,padding:'20px'}}><div style={{background:'var(--warm-white)',border:'1px solid var(--sand-line)',width:'100%',maxWidth:'820px',maxHeight:'92vh',overflowY:'auto',padding:'32px'}}><h2 style={{fontFamily:'Big Shoulders Display',fontWeight:900,fontSize:'28px',textTransform:'uppercase',marginBottom:'8px'}}>{editingHike.id?'Edit Hike':'Create New Hike'}</h2><p style={{fontSize:'13px',color:'#5a564f',marginBottom:'22px'}}>Fill in practical details customers need before booking. Leave unknown facts blank rather than guessing.</p><form onSubmit={handleSave} style={{display:'flex',flexDirection:'column',gap:'18px'}}>
+      <Section title="Basics"><div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:'14px'}}><Field label="Route name *"><input required value={editingHike.name||''} onChange={e=>set('name',e.target.value)} style={inputStyle}/></Field><Field label="Difficulty"><select value={editingHike.difficulty||'moderate'} onChange={e=>set('difficulty',e.target.value)} style={inputStyle}><option value="easy">Easy</option><option value="moderate">Moderate</option><option value="challenging">Challenging</option></select></Field></div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'14px'}}><Field label="Location *"><input required value={editingHike.location||''} onChange={e=>set('location',e.target.value)} style={inputStyle}/></Field><Field label="Experience type"><input value={editingHike.hike_type||''} onChange={e=>set('hike_type',e.target.value)} style={inputStyle}/></Field><Field label="Region"><input value={editingHike.region||''} onChange={e=>set('region',e.target.value)} style={inputStyle}/></Field></div><Field label="Description"><textarea rows={4} value={editingHike.description||''} onChange={e=>set('description',e.target.value)} style={inputStyle}/></Field></Section>
+      <Section title="Trail facts"><div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'14px'}}><Field label="Distance (km)"><input type="number" step="0.1" value={editingHike.distance_km??''} onChange={e=>set('distance_km',e.target.value?Number(e.target.value):null)} style={inputStyle}/></Field><Field label="Elevation gain (m)"><input type="number" value={editingHike.elevation_gain_m??''} onChange={e=>set('elevation_gain_m',e.target.value?Number(e.target.value):null)} style={inputStyle}/></Field><Field label="Duration *"><input required value={editingHike.duration||''} onChange={e=>set('duration',e.target.value)} style={inputStyle}/></Field><Field label="Difficulty score"><input value={editingHike.difficulty_numeric||''} onChange={e=>set('difficulty_numeric',e.target.value)} placeholder="e.g. 5/10" style={inputStyle}/></Field></div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'14px'}}><Field label="Terrain"><input value={editingHike.terrain||''} onChange={e=>set('terrain',e.target.value)} style={inputStyle}/></Field><Field label="Fitness required"><input value={editingHike.fitness_required||''} onChange={e=>set('fitness_required',e.target.value)} style={inputStyle}/></Field></div></Section>
+      <Section title="Meeting & logistics">{textFields.slice(0,2).map(([key,label])=><Field key={key} label={label}><input value={(editingHike as Record<string,unknown>)[key] as string||''} onChange={e=>set(key,e.target.value)} style={inputStyle}/></Field>)}<Field label="Transport / parking"><textarea rows={2} value={editingHike.transport_options||''} onChange={e=>set('transport_options',e.target.value)} style={inputStyle}/></Field></Section>
+      <Section title="Booking"><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'14px'}}><Field label="Booking format"><select value={editingHike.booking_type||'on_demand'} onChange={e=>set('booking_type',e.target.value)} style={inputStyle}><option value="scheduled_group">Join a scheduled group hike</option><option value="on_demand">On-demand</option><option value="private">Private / on-demand</option></select></Field><Field label="Scheduled date"><input value={editingHike.date||''} onChange={e=>set('date',e.target.value)} placeholder="e.g. Sat 12 Sep or On Demand" style={inputStyle}/></Field></div><div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'14px'}}><Field label="Price"><input required value={editingHike.price||''} onChange={e=>set('price',e.target.value)} style={inputStyle}/></Field><Field label="Group price (USD)"><input type="number" value={editingHike.price_group_usd??''} onChange={e=>set('price_group_usd',e.target.value?Number(e.target.value):null)} style={inputStyle}/></Field><Field label="Solo/private price (USD)"><input type="number" value={editingHike.price_solo_usd??''} onChange={e=>set('price_solo_usd',e.target.value?Number(e.target.value):null)} style={inputStyle}/></Field><Field label="Max participants"><input type="number" value={editingHike.max_participants??''} onChange={e=>set('max_participants',e.target.value?Number(e.target.value):null)} style={inputStyle}/></Field></div><div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'14px'}}><Field label="Min participants"><input type="number" value={editingHike.min_participants??''} onChange={e=>set('min_participants',e.target.value?Number(e.target.value):null)} style={inputStyle}/></Field><Field label="Minimum age / age rule"><input value={editingHike.age_requirements||''} onChange={e=>set('age_requirements',e.target.value)} style={inputStyle}/></Field><Field label="Remaining spots"><input type="number" value={editingHike.spots_remaining??10} onChange={e=>set('spots_remaining',Number(e.target.value))} style={inputStyle}/></Field></div></Section>
+      <Section title="Customer preparation">{arrayFields.map(([key,label])=><Field key={key} label={`${label} — one item per line`}><textarea rows={3} value={((editingHike as Record<string,unknown>)[key] as string[]||[]).join('\n')} onChange={e=>set(key,e.target.value.split('\n').map(x=>x.trim()).filter(Boolean))} style={inputStyle}/></Field>)}</Section>
+      <Section title="Safety & policy"><Field label="Safety information"><textarea rows={3} value={editingHike.safety_info||''} onChange={e=>set('safety_info',e.target.value)} style={inputStyle}/></Field><Field label="Weather policy"><textarea rows={3} value={editingHike.weather_policy||''} onChange={e=>set('weather_policy',e.target.value)} style={inputStyle}/></Field></Section>
+      <Section title="Ratings"><div style={{display:'grid',gridTemplateColumns:'1fr 1fr 2fr',gap:'14px'}}><Field label="Scenery /10"><input type="number" step="0.1" value={editingHike.scenery_rating??''} onChange={e=>set('scenery_rating',e.target.value?Number(e.target.value):null)} style={inputStyle}/></Field><Field label="Overall /10"><input type="number" step="0.1" value={editingHike.overall_rating??''} onChange={e=>set('overall_rating',e.target.value?Number(e.target.value):null)} style={inputStyle}/></Field><Field label="Rating attribution"><input value={editingHike.rating_label||'Peak Axis rating'} onChange={e=>set('rating_label',e.target.value)} style={inputStyle}/></Field></div></Section>
+      <Section title="Publishing"><Field label="Status"><select value={editingHike.status||'published'} onChange={e=>set('status',e.target.value)} style={inputStyle}><option value="published">Published</option><option value="draft">Draft</option></select></Field></Section>
+      <div style={{display:'flex',justifyContent:'flex-end',gap:'12px',marginTop:'6px'}}><button type="button" onClick={()=>{setIsModalOpen(false);setEditingHike(null)}} style={{padding:'10px 18px',background:'transparent',border:'1px solid var(--sand-line)',cursor:'pointer'}}>Cancel</button><button type="submit" disabled={loading} style={{padding:'10px 24px',background:'var(--ember)',color:'#FFF',border:'none',cursor:'pointer'}}>{loading?'Saving…':'Save Hike'}</button></div>
+    </form></div></div>}
+  </div>
 }
+function Section({title,children}:{title:string;children:React.ReactNode}){return <section style={{borderTop:'2px solid var(--sand-line)',paddingTop:'16px'}}><h3 style={{fontFamily:'Big Shoulders Display',fontSize:'22px',textTransform:'uppercase',marginBottom:'14px'}}>{title}</h3><div style={{display:'grid',gap:'14px'}}>{children}</div></section>}
+function Field({label,children}:{label:string;children:React.ReactNode}){return <div><label style={{display:'block',fontSize:'11px',fontWeight:700,textTransform:'uppercase',marginBottom:'5px',letterSpacing:'.04em'}}>{label}</label>{children}</div>}
