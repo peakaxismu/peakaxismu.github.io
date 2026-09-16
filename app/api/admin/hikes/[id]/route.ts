@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isAdminUser } from '@/lib/supabase/admin-auth'
 
 const practicalFields = [
   'distance_km','elevation_gain_m','starting_point','meeting_point','transport_options',
@@ -20,12 +21,17 @@ function practicalPayload(body: Record<string, unknown>) {
 function normaliseBookingType(value: unknown) { return value === 'scheduled_group' || value === 'private' || value === 'on_demand' ? value : 'on_demand' }
 function isTrailStatus(value: unknown): value is TrailStatus { return typeof value === 'string' && trailStatuses.includes(value as TrailStatus) }
 
+async function authorize() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  return { user, authorized: isAdminUser(user) }
+}
+
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { user, authorized } = await authorize()
+    if (!authorized) return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
     const body = await request.json() as Record<string, unknown>
     if (!isTrailStatus(body.trail_condition_status)) return NextResponse.json({ error: 'Invalid trail condition status' }, { status: 400 })
     const admin = createAdminClient()
@@ -41,17 +47,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }).eq('id', id).select('id,name,status,trail_condition_status,trail_condition_note,trail_condition_updated_at').single()
     if (error) return NextResponse.json({ error: 'Failed to update trail condition' }, { status: 500 })
     return NextResponse.json({ success: true, data })
-  } catch (err: unknown) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal server error' }, { status: 500 })
+  } catch {
+    return NextResponse.json({ error: 'Unable to update trail condition' }, { status: 500 })
   }
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { user, authorized } = await authorize()
+    if (!authorized) return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
     const body = await request.json() as Record<string, unknown>
     const { name, difficulty, date, duration, location, price, spots_total, spots_remaining, description, status } = body
     const bookingType = normaliseBookingType(body.booking_type)
@@ -80,20 +85,21 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (error) return NextResponse.json({ error: 'Failed to update hike' }, { status: 500 })
     if (!data || data.length === 0) return NextResponse.json({ error: 'Hike not found' }, { status: 404 })
     return NextResponse.json({ success: true, data })
-  } catch (err: unknown) { return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal server error' }, { status: 500 })
+  } catch {
+    return NextResponse.json({ error: 'Unable to update hike' }, { status: 500 })
   }
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { user, authorized } = await authorize()
+    if (!authorized) return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
     const admin = createAdminClient()
     const { error } = await admin.from('hikes').delete().eq('id', id)
     if (error) return NextResponse.json({ error: 'Failed to delete hike' }, { status: 500 })
     return NextResponse.json({ success: true })
-  } catch (err: unknown) { return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal server error' }, { status: 500 })
+  } catch {
+    return NextResponse.json({ error: 'Unable to delete hike' }, { status: 500 })
   }
 }
