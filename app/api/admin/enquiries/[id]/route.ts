@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isAdminUser } from '@/lib/supabase/admin-auth'
 
 const STATUSES = ['new', 'contacted', 'quoted', 'confirmed', 'completed', 'closed'] as const
 
@@ -22,8 +23,8 @@ export async function PATCH(
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!isAdminUser(user)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: user ? 403 : 401 })
     }
 
     const admin = createAdminClient()
@@ -41,6 +42,6 @@ export async function PATCH(
     return NextResponse.json({ success: true, data })
   } catch (err: unknown) {
     console.error('Admin enquiry PATCH failed:', err)
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Unable to update enquiry' }, { status: 500 })
   }
 }
