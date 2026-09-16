@@ -22,12 +22,10 @@ export default async function AdminHikesPage() {
             Pick an existing hike as the route template. The schedule flow copies its trail, customer, pricing, and safety information into a separate scheduled instance, then asks only for the date, capacity, and visibility.
           </p>
         </div>
-        <Link
-          href="/admin/hikes/schedule"
-          className="inline-flex shrink-0 items-center justify-center rounded-xl bg-emerald-400 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
-        >
-          Schedule a hike
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/admin/hikes/scheduled" className="inline-flex shrink-0 items-center justify-center rounded-xl border border-white/15 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">Manage departures</Link>
+          <Link href="/admin/hikes/schedule" className="inline-flex shrink-0 items-center justify-center rounded-xl bg-emerald-400 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300">Schedule a hike</Link>
+        </div>
       </div>
 
       <HikesAdminClient initialHikes={hikes || []} />
