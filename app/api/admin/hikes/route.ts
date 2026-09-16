@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isAdminUser } from '@/lib/supabase/admin-auth'
 
 const practicalFields = [
   'distance_km','elevation_gain_m','starting_point','meeting_point','transport_options',
@@ -12,9 +13,7 @@ const practicalFields = [
 
 function practicalPayload(body: Record<string, unknown>) {
   const payload: Record<string, unknown> = {}
-  for (const field of practicalFields) {
-    if (body[field] !== undefined) payload[field] = body[field]
-  }
+  for (const field of practicalFields) if (body[field] !== undefined) payload[field] = body[field]
   return payload
 }
 
@@ -30,7 +29,7 @@ export async function POST(request: Request) {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!isAdminUser(user)) return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
 
     const body = await request.json() as Record<string, unknown>
     const { name, difficulty, date, duration, location, price, spots_total, spots_remaining, description, status } = body
@@ -57,6 +56,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, data })
   } catch (err: unknown) {
     console.error('Admin hike POST failed:', err)
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Unable to create hike' }, { status: 500 })
   }
 }
