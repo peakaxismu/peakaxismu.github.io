@@ -23,6 +23,7 @@ export interface Hike {
   date?: string
   spots_total?: number
   spots_remaining?: number
+  source_hike_id?: string | null
   distance_km?: number | null
   elevation_gain_m?: number | null
   starting_point?: string | null
