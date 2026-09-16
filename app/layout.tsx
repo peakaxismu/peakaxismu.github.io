@@ -24,15 +24,11 @@ export const metadata: Metadata = {
   },
   description: 'Peak Axis is a Mauritius adventure company running guided hikes, La Réunion volcano expeditions, team terrain days, and group activities.',
   applicationName: 'Peak Axis',
-  alternates: {
-    canonical: '/',
-  },
   openGraph: {
     type: 'website',
     siteName: 'Peak Axis',
     title: 'Peak Axis — Adventure without borders',
     description: 'Guided hikes in Mauritius, volcano expeditions in La Réunion, and outdoor experiences built around real terrain.',
-    url: siteUrl,
     locale: 'en_MU',
   },
   twitter: {
