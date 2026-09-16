@@ -1,0 +1,21 @@
+revoke all on table public.enquiries from anon, authenticated;
+revoke all on table public.expeditions from anon, authenticated;
+revoke all on table public.hikes from anon, authenticated;
+revoke all on table public.homepage_content from anon, authenticated;
+revoke all on table public.instagram_posts from anon, authenticated;
+revoke all on table public.journal_posts from anon, authenticated;
+revoke all on table public.site_settings from anon, authenticated;
+revoke all on table public.team_building_packages from anon, authenticated;
+revoke all on table public.testimonials from anon, authenticated;
+revoke all on table public.waterfalls from anon, authenticated;
+
+grant insert on table public.enquiries to anon;
+grant select on table public.expeditions to anon, authenticated;
+grant select on table public.hikes to anon, authenticated;
+grant select on table public.homepage_content to anon, authenticated;
+grant select on table public.instagram_posts to anon, authenticated;
+grant select on table public.journal_posts to anon, authenticated;
+grant select on table public.site_settings to anon, authenticated;
+grant select on table public.team_building_packages to anon, authenticated;
+grant select on table public.testimonials to anon, authenticated;
+grant select on table public.waterfalls to anon, authenticated;
