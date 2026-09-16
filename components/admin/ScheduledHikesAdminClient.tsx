@@ -6,10 +6,10 @@ type Hike = {
   id: string
   name: string
   date: string | null
-  status: string
+  status: 'draft' | 'published' | 'retired'
   spots_total: number | null
   spots_remaining: number | null
-  trail_condition_status: 'open' | 'temporarily_unsuitable' | 'closed' | null
+  trail_condition_status: 'open' | 'conditions_to_confirm' | 'temporarily_unsuitable' | 'closed' | null
   trail_condition_note: string | null
   difficulty: string
   location: string
@@ -64,11 +64,11 @@ export default function ScheduledHikesAdminClient({ initialHikes }: { initialHik
             <label className="space-y-1 text-sm text-white/65">Date<input type="date" defaultValue={hike.date || ''} onBlur={(event) => event.currentTarget.value !== (hike.date || '') && save(hike, { date: event.currentTarget.value })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white" /></label>
             <label className="space-y-1 text-sm text-white/65">Total capacity<input type="number" min="1" defaultValue={hike.spots_total ?? 1} onBlur={(event) => save(hike, { spots_total: Number(event.currentTarget.value) })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white" /></label>
             <label className="space-y-1 text-sm text-white/65">Remaining spots<input type="number" min="0" max={hike.spots_total ?? undefined} defaultValue={hike.spots_remaining ?? 0} onBlur={(event) => save(hike, { spots_remaining: Number(event.currentTarget.value) })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white" /></label>
-            <label className="space-y-1 text-sm text-white/65">Visibility<select defaultValue={hike.status} onChange={(event) => save(hike, { status: event.target.value })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white"><option value="draft">Draft / hidden</option><option value="published">Published</option></select></label>
+            <label className="space-y-1 text-sm text-white/65">Visibility<select defaultValue={hike.status} onChange={(event) => save(hike, { status: event.target.value })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white"><option value="draft">Draft / hidden</option><option value="published">Published</option><option value="retired">Retired</option></select></label>
           </div>
 
           <div className="mt-5 grid gap-4 lg:grid-cols-[220px_1fr]">
-            <label className="space-y-1 text-sm text-white/65">Trail condition<select defaultValue={hike.trail_condition_status || 'open'} onChange={(event) => save(hike, { trail_condition_status: event.target.value })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white"><option value="open">Open</option><option value="temporarily_unsuitable">Temporarily unsuitable</option><option value="closed">Closed</option></select></label>
+            <label className="space-y-1 text-sm text-white/65">Trail condition<select defaultValue={hike.trail_condition_status || 'open'} onChange={(event) => save(hike, { trail_condition_status: event.target.value })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white"><option value="open">Open</option><option value="conditions_to_confirm">Conditions to confirm</option><option value="temporarily_unsuitable">Temporarily unsuitable</option><option value="closed">Closed</option></select></label>
             <label className="space-y-1 text-sm text-white/65">Operational note<textarea defaultValue={hike.trail_condition_note || ''} onBlur={(event) => save(hike, { trail_condition_note: event.currentTarget.value })} rows={2} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white" placeholder="Add a note for weather, access, footing, or other departure-specific conditions." /></label>
           </div>
 
