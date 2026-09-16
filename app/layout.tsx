@@ -14,7 +14,7 @@ const inter = Inter({
   display: 'swap',
 })
 
-const siteUrl = 'https://peakaxismu-github-io.vercel.app'
+const siteUrl = 'https://peakaxis.mu'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
