@@ -3,12 +3,16 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { isAdminUser } from '@/lib/supabase/admin-auth'
 
-export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!isAdminUser(user)) return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
+async function requireAdmin() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  return isAdminUser(user) ? null : NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
+}
 
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireAdmin()
+  if (denied) return denied
+  try {
     const { id } = await params
     const body = await request.json() as { date?: string; spots_total?: number; spots_remaining?: number; status?: 'draft' | 'published' }
     const date = body.date?.trim()
@@ -17,6 +21,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const admin = createAdminClient()
     const { data: source, error: sourceError } = await admin.from('hikes').select('*').eq('id', id).single()
     if (sourceError || !source) return NextResponse.json({ error: 'Source hike not found' }, { status: 404 })
+    if (source.booking_type === 'scheduled_group') return NextResponse.json({ error: 'A scheduled departure cannot be used as a route template' }, { status: 400 })
 
     const total = body.spots_total == null ? (source.max_participants || source.spots_total || 10) : Number(body.spots_total)
     const remaining = body.spots_remaining == null ? total : Number(body.spots_remaining)
@@ -24,12 +29,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: 'Enter valid group capacity values' }, { status: 400 })
     }
 
-    const scheduledName = `${source.name} — ${date}`
     const clone = { ...source }
     delete clone.id
     delete clone.created_at
     delete clone.source_hike_id
-    clone.name = scheduledName
+    clone.name = `${source.name} — ${date}`
     clone.source_hike_id = source.id
     clone.booking_type = 'scheduled_group'
     clone.date = date
@@ -48,5 +52,42 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ success: true, data })
   } catch {
     return NextResponse.json({ error: 'Unable to schedule hike' }, { status: 500 })
+  }
+}
+
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const denied = await requireAdmin()
+  if (denied) return denied
+  try {
+    const { id } = await params
+    const body = await request.json() as Record<string, unknown>
+    const allowed = ['date', 'spots_total', 'spots_remaining', 'status', 'trail_condition_status', 'trail_condition_note']
+    const patch = Object.fromEntries(Object.entries(body).filter(([key]) => allowed.includes(key))) as Record<string, unknown>
+    if (!Object.keys(patch).length) return NextResponse.json({ error: 'No supported changes supplied' }, { status: 400 })
+
+    if (patch.date !== undefined && (typeof patch.date !== 'string' || !patch.date.trim())) return NextResponse.json({ error: 'A scheduled date is required' }, { status: 400 })
+    if (patch.status !== undefined && patch.status !== 'draft' && patch.status !== 'published') return NextResponse.json({ error: 'Invalid visibility status' }, { status: 400 })
+    if (patch.trail_condition_status !== undefined && !['open', 'temporarily_unsuitable', 'closed'].includes(String(patch.trail_condition_status))) return NextResponse.json({ error: 'Invalid trail condition' }, { status: 400 })
+
+    const admin = createAdminClient()
+    const { data: current, error: currentError } = await admin.from('hikes').select('id,booking_type,source_hike_id,spots_total,spots_remaining').eq('id', id).single()
+    if (currentError || !current) return NextResponse.json({ error: 'Scheduled departure not found' }, { status: 404 })
+    if (current.booking_type !== 'scheduled_group' || !current.source_hike_id) return NextResponse.json({ error: 'Only scheduled departure instances can be edited here' }, { status: 400 })
+
+    const total = patch.spots_total === undefined ? Number(current.spots_total || 0) : Number(patch.spots_total)
+    const remaining = patch.spots_remaining === undefined ? Number(current.spots_remaining || 0) : Number(patch.spots_remaining)
+    if (!Number.isInteger(total) || total < 1 || !Number.isInteger(remaining) || remaining < 0 || remaining > total) return NextResponse.json({ error: 'Enter valid group capacity values' }, { status: 400 })
+    patch.spots_total = total
+    patch.spots_remaining = remaining
+    if (patch.trail_condition_status !== undefined) patch.trail_condition_updated_at = new Date().toISOString()
+
+    const { data, error } = await admin.from('hikes').update(patch).eq('id', id).select().single()
+    if (error) {
+      console.error('Scheduled hike update failed:', error)
+      return NextResponse.json({ error: 'Failed to update scheduled hike' }, { status: 500 })
+    }
+    return NextResponse.json({ success: true, data })
+  } catch {
+    return NextResponse.json({ error: 'Unable to update scheduled hike' }, { status: 500 })
   }
 }
