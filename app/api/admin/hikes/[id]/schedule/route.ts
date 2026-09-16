@@ -9,6 +9,10 @@ async function requireAdmin() {
   return isAdminUser(user) ? null : NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
 }
 
+const validConditions = ['open', 'conditions_to_confirm', 'temporarily_unsuitable', 'closed']
+const validStatuses = ['draft', 'published', 'retired']
+const validDate = (value: unknown): value is string => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value.trim())
+
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const denied = await requireAdmin()
   if (denied) return denied
@@ -16,11 +20,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const { id } = await params
     const body = await request.json() as { date?: string; spots_total?: number; spots_remaining?: number; status?: 'draft' | 'published' }
     const date = body.date?.trim()
-    if (!date) return NextResponse.json({ error: 'A scheduled date is required' }, { status: 400 })
+    if (!validDate(date)) return NextResponse.json({ error: 'Enter a valid scheduled date (YYYY-MM-DD)' }, { status: 400 })
 
     const admin = createAdminClient()
     const { data: source, error: sourceError } = await admin.from('hikes').select('*').eq('id', id).single()
     if (sourceError || !source) return NextResponse.json({ error: 'Source hike not found' }, { status: 404 })
+    if (source.status !== 'published') return NextResponse.json({ error: 'Only published hikes can be scheduled' }, { status: 400 })
     if (source.booking_type === 'scheduled_group') return NextResponse.json({ error: 'A scheduled departure cannot be used as a route template' }, { status: 400 })
 
     const total = body.spots_total == null ? (source.max_participants || source.spots_total || 10) : Number(body.spots_total)
@@ -45,6 +50,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const { data, error } = await admin.from('hikes').insert(clone).select().single()
     if (error) {
       console.error('Scheduled hike creation failed:', error)
+      if (error.code === '23505') return NextResponse.json({ error: 'A departure for this route and date already exists' }, { status: 409 })
       return NextResponse.json({ error: 'Failed to schedule hike' }, { status: 500 })
     }
     return NextResponse.json({ success: true, data })
@@ -62,9 +68,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const allowed = ['date', 'spots_total', 'spots_remaining', 'status', 'trail_condition_status', 'trail_condition_note']
     const patch = Object.fromEntries(Object.entries(body).filter(([key]) => allowed.includes(key))) as Record<string, unknown>
     if (!Object.keys(patch).length) return NextResponse.json({ error: 'No supported changes supplied' }, { status: 400 })
-    if (patch.date !== undefined && (typeof patch.date !== 'string' || !patch.date.trim())) return NextResponse.json({ error: 'A scheduled date is required' }, { status: 400 })
-    if (patch.status !== undefined && !['draft', 'published', 'retired'].includes(String(patch.status))) return NextResponse.json({ error: 'Invalid visibility status' }, { status: 400 })
-    if (patch.trail_condition_status !== undefined && !['open', 'conditions_to_confirm', 'temporarily_unsuitable', 'closed'].includes(String(patch.trail_condition_status))) return NextResponse.json({ error: 'Invalid trail condition' }, { status: 400 })
+    if (patch.date !== undefined && !validDate(patch.date)) return NextResponse.json({ error: 'Enter a valid scheduled date (YYYY-MM-DD)' }, { status: 400 })
+    if (patch.status !== undefined && !validStatuses.includes(String(patch.status))) return NextResponse.json({ error: 'Invalid visibility status' }, { status: 400 })
+    if (patch.trail_condition_status !== undefined && !validConditions.includes(String(patch.trail_condition_status))) return NextResponse.json({ error: 'Invalid trail condition' }, { status: 400 })
 
     const admin = createAdminClient()
     const { data: current, error: currentError } = await admin.from('hikes').select('id,booking_type,source_hike_id,spots_total,spots_remaining').eq('id', id).single()
@@ -81,6 +87,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { data, error } = await admin.from('hikes').update(patch).eq('id', id).select().single()
     if (error) {
       console.error('Scheduled hike update failed:', error)
+      if (error.code === '23505') return NextResponse.json({ error: 'A departure for this route and date already exists' }, { status: 409 })
       return NextResponse.json({ error: 'Failed to update scheduled hike' }, { status: 500 })
     }
     return NextResponse.json({ success: true, data })
