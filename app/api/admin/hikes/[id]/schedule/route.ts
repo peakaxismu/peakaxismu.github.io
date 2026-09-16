@@ -25,9 +25,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const total = body.spots_total == null ? (source.max_participants || source.spots_total || 10) : Number(body.spots_total)
     const remaining = body.spots_remaining == null ? total : Number(body.spots_remaining)
-    if (!Number.isInteger(total) || total < 1 || !Number.isInteger(remaining) || remaining < 0 || remaining > total) {
-      return NextResponse.json({ error: 'Enter valid group capacity values' }, { status: 400 })
-    }
+    if (!Number.isInteger(total) || total < 1 || !Number.isInteger(remaining) || remaining < 0 || remaining > total) return NextResponse.json({ error: 'Enter valid group capacity values' }, { status: 400 })
 
     const clone = { ...source }
     delete clone.id
@@ -64,10 +62,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const allowed = ['date', 'spots_total', 'spots_remaining', 'status', 'trail_condition_status', 'trail_condition_note']
     const patch = Object.fromEntries(Object.entries(body).filter(([key]) => allowed.includes(key))) as Record<string, unknown>
     if (!Object.keys(patch).length) return NextResponse.json({ error: 'No supported changes supplied' }, { status: 400 })
-
     if (patch.date !== undefined && (typeof patch.date !== 'string' || !patch.date.trim())) return NextResponse.json({ error: 'A scheduled date is required' }, { status: 400 })
-    if (patch.status !== undefined && patch.status !== 'draft' && patch.status !== 'published') return NextResponse.json({ error: 'Invalid visibility status' }, { status: 400 })
-    if (patch.trail_condition_status !== undefined && !['open', 'temporarily_unsuitable', 'closed'].includes(String(patch.trail_condition_status))) return NextResponse.json({ error: 'Invalid trail condition' }, { status: 400 })
+    if (patch.status !== undefined && !['draft', 'published', 'retired'].includes(String(patch.status))) return NextResponse.json({ error: 'Invalid visibility status' }, { status: 400 })
+    if (patch.trail_condition_status !== undefined && !['open', 'conditions_to_confirm', 'temporarily_unsuitable', 'closed'].includes(String(patch.trail_condition_status))) return NextResponse.json({ error: 'Invalid trail condition' }, { status: 400 })
 
     const admin = createAdminClient()
     const { data: current, error: currentError } = await admin.from('hikes').select('id,booking_type,source_hike_id,spots_total,spots_remaining').eq('id', id).single()
