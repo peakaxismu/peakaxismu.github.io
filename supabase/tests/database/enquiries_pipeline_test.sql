@@ -23,7 +23,7 @@ select results_eq(
       and conname = 'enquiries_status_check'
   $$,
   $$
-    values ('CHECK ((status = ANY (ARRAY[''new''::text, ''contacted''::text, ''quoted''::text, ''confirmed''::text, ''completed''::text, ''closed''::text])))')
+    values ('CHECK ((status = ANY (ARRAY[''new''::text, ''contacted''::text, ''quoted''::text, ''awaiting_reply''::text, ''confirmed''::text, ''completed''::text, ''closed''::text])))')
   $$,
   'enquiries status constraint should contain the complete lifecycle'
 );
