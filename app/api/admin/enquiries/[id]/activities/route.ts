@@ -3,6 +3,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { isAdminUser } from '@/lib/supabase/admin-auth'
 
+const ACTIVITY_TYPES = ['note', 'follow_up', 'quote', 'reply_copied'] as const
+
+type ActivityType = typeof ACTIVITY_TYPES[number]
+
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
@@ -23,10 +27,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   try {
     const { id } = await params
     const body = await request.json()
-    const type = typeof body.type === 'string' ? body.type : 'note'
+    const type = typeof body.type === 'string' ? body.type as ActivityType : 'note'
     const text = typeof body.body === 'string' ? body.body.trim() : ''
     if (!text) return NextResponse.json({ error: 'Activity text is required' }, { status: 400 })
-    if (!['note', 'follow_up', 'quote'].includes(type)) return NextResponse.json({ error: 'Invalid activity type' }, { status: 400 })
+    if (!ACTIVITY_TYPES.includes(type)) return NextResponse.json({ error: 'Invalid activity type' }, { status: 400 })
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!isAdminUser(user)) return NextResponse.json({ error: 'Forbidden' }, { status: user ? 403 : 401 })
