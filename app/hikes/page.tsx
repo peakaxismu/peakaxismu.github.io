@@ -5,12 +5,10 @@ export const revalidate = 0
 
 export default async function HikesPage() {
   const supabase = await createClient()
-
-  const { data: hikes } = await supabase
-    .from('hikes')
-    .select('*')
-    .eq('status', 'published')
-    .order('created_at', { ascending: true })
+  const [{ data: hikes }, { data: media }] = await Promise.all([
+    supabase.from('hikes').select('*').eq('status', 'published').order('created_at', { ascending: true }),
+    supabase.from('hike_media').select('id,hike_id,image_url,is_main,sort_order').order('is_main', { ascending: false }).order('sort_order', { ascending: true }),
+  ])
 
   return (
     <div id="view-hikes" className="view active" style={{ display: 'block' }}>
@@ -27,8 +25,7 @@ export default async function HikesPage() {
           <p>No group of your own? Join one of ours. Every hike runs with a guide, a fixed group size, and a route chosen for the season.</p>
         </div>
       </section>
-
-      <HikesClientList hikes={hikes || []} />
+      <HikesClientList hikes={hikes || []} media={media || []} />
       <style>{`.pagehead{position:relative;overflow:hidden;background:#211f1d;color:#fffaf2;padding:88px 0 72px;min-height:430px;display:flex;align-items:center}.hero-scape{position:absolute;inset:0;width:100%;height:100%;opacity:.95}.hero-inner{position:relative;z-index:1}.pagehead .kicker{color:#c1440e;font-size:12px;font-weight:800;letter-spacing:.12em;margin-bottom:16px}.pagehead h1{font-family:var(--font-display),sans-serif;font-size:clamp(48px,7.5vw,88px);line-height:.88;text-transform:uppercase;max-width:900px;color:#fffaf2}.pagehead p{margin-top:24px;font-size:19px;line-height:1.6;color:#c9c5bc;max-width:680px}@media(max-width:700px){.pagehead{min-height:390px;padding:72px 0 58px}}`}</style>
     </div>
   )
