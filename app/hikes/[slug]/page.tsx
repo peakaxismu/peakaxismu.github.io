@@ -4,11 +4,10 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import type { Hike } from '@/types/database'
 
-// Keep this file on the main branch so CI builds the same parser-valid source.
 export const revalidate = 0
 type Props = { params: Promise<{ slug: string }> }
 type Media = { id:string; hike_id:string; image_url:string; is_main:boolean; sort_order:number }
-const slugify=(v:string)=>v.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
+const slugify=(v:string)=>v.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'-')
 const valueOr=(v:string|number|null|undefined,f='To be confirmed')=>v===null||v===undefined||v===''?f:String(v)
 const list=(v?:string[])=>v?.filter(Boolean)||[]
 
@@ -28,7 +27,7 @@ export default async function HikeDetailPage({params}:Props){
  const facts=[['Difficulty',valueOr(hike.difficulty_numeric||hike.difficulty)],['Distance',hike.distance_km!=null?`${hike.distance_km} km`:'To be confirmed'],['Duration',valueOr(hike.duration)],['Elevation gain',hike.elevation_gain_m!=null?`${hike.elevation_gain_m} m`:'To be confirmed'],['Location',valueOr(hike.location)],['Terrain',valueOr(hike.terrain)],['Fitness required',valueOr(hike.fitness_required)],['Minimum age',valueOr(hike.age_requirements)],['Group size',hike.min_participants||hike.max_participants?`${valueOr(hike.min_participants,'—')}–${valueOr(hike.max_participants,'—')}`:'To be confirmed']]
  return <div className="view active" style={{display:'block'}}><section className="pagehead" style={{padding:'60px 0 36px'}}><div className="wrap"><Link href="/hikes" style={{display:'inline-block',marginBottom:20,fontSize:14,fontWeight:600}}>← All hikes</Link><div style={{maxWidth:940}}><div style={{marginBottom:16,display:'flex',gap:14,flexWrap:'wrap',fontSize:13.5,color:'#6b675f'}}><span style={{fontWeight:700,textTransform:'capitalize'}}>{hike.difficulty}{hike.difficulty_numeric?` · ${hike.difficulty_numeric}`:''}</span><span>⏱ {hike.duration}</span><span>📍 {hike.location}</span>{hike.overall_rating!=null&&<span style={{fontWeight:700}}>★ {hike.overall_rating}/10</span>}</div><h1 style={{fontSize:'clamp(40px,6vw,64px)'}}>{hike.name}</h1><p style={{marginTop:18,maxWidth:780,fontSize:17,lineHeight:1.7,color:'#3d3a36'}}>{hike.description||`Join Peak Axis for ${hike.name}, a guided hike in Mauritius.`}</p></div></div></section>
  <main className="wrap" style={{paddingTop:10,paddingBottom:80}}><div className="detail-grid"><div>
-  <div className="hero-photo">{main?<img src={main.image_url} alt={hike.name} priority/>:<div className="hero-fallback" aria-hidden="true"/>}</div>
+  <div className="hero-photo">{main?<img src={main.image_url} alt={hike.name}/>:<div className="hero-fallback" aria-hidden="true"/>}</div>
   {gallery.length>0&&<section style={{marginTop:18}}><div className="gallery-grid">{gallery.map((m,i)=><img key={m.id} src={m.image_url} alt={`${hike.name} gallery ${i+1}`} loading="lazy"/>)}</div></section>}
   <section className="logistics"><div><b>DISTANCE</b><span>{hike.distance_km!=null?`${hike.distance_km} km`:'TBC'}</span></div><div><b>ELEVATION</b><span>{hike.elevation_gain_m!=null?`${hike.elevation_gain_m} m`:'TBC'}</span></div><div><b>DURATION</b><span>{hike.duration}</span></div><div><b>FITNESS</b><span>{hike.fitness_required||'TBC'}</span></div></section>
   <section className="content-section"><h2>The experience</h2><p>{hike.description||`A guided route built around ${hike.main_attraction?.toLowerCase()||'the landscape of Mauritius'}.`}</p></section>
