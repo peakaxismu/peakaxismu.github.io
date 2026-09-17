@@ -42,6 +42,17 @@ export default function ScheduledHikesAdminClient({ initialHikes }: { initialHik
     }
   }
 
+  function formatMurPrice(value: string) {
+    const trimmed = value.trim()
+    if (!trimmed) return ''
+    const numeric = trimmed.replace(/^(mur|rs|rs\.)\s*/i, '').replace(/,/g, '').trim()
+    if (/^\d+(?:\.\d{1,2})?$/.test(numeric)) {
+      const amount = Number(numeric)
+      return `MUR ${amount.toLocaleString('en-MU', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
+    }
+    return /^mur\s/i.test(trimmed) ? trimmed : `MUR ${trimmed}`
+  }
+
   if (!hikes.length) {
     return <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-sm text-white/60">No scheduled departures yet. Create one from the schedule flow.</div>
   }
@@ -60,8 +71,9 @@ export default function ScheduledHikesAdminClient({ initialHikes }: { initialHik
             <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/70">{hike.status}</span>
           </div>
 
-          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <label className="space-y-1 text-sm text-white/65">Date<input type="date" defaultValue={hike.date || ''} onBlur={(event) => event.currentTarget.value !== (hike.date || '') && save(hike, { date: event.currentTarget.value })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white" /></label>
+            <label className="space-y-1 text-sm text-white/65">Price (MUR)<input type="text" defaultValue={hike.price || ''} onBlur={(event) => { const value = formatMurPrice(event.currentTarget.value); event.currentTarget.value = value; if (value !== hike.price) save(hike, { price: value }) }} placeholder="MUR 2,500" inputMode="decimal" className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white" /></label>
             <label className="space-y-1 text-sm text-white/65">Total capacity<input type="number" min="1" defaultValue={hike.spots_total ?? 1} onBlur={(event) => save(hike, { spots_total: Number(event.currentTarget.value) })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white" /></label>
             <label className="space-y-1 text-sm text-white/65">Remaining spots<input type="number" min="0" max={hike.spots_total ?? undefined} defaultValue={hike.spots_remaining ?? 0} onBlur={(event) => save(hike, { spots_remaining: Number(event.currentTarget.value) })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white" /></label>
             <label className="space-y-1 text-sm text-white/65">Visibility<select defaultValue={hike.status} onChange={(event) => save(hike, { status: event.target.value })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white"><option value="draft">Draft / hidden</option><option value="published">Published</option><option value="retired">Retired</option></select></label>
