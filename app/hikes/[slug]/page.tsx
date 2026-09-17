@@ -6,124 +6,35 @@ import type { Hike } from '@/types/database'
 
 export const revalidate = 0
 type Props = { params: Promise<{ slug: string }> }
-const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-const valueOr = (value: string | number | null | undefined, fallback = 'To be confirmed') => value === null || value === undefined || value === '' ? fallback : String(value)
-const list = (items?: string[]) => items?.filter(Boolean) ?? []
+type Media = { id:string; hike_id:string; image_url:string; is_main:boolean; sort_order:number }
+const slugify=(v:string)=>v.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
+const valueOr=(v:string|number|null|undefined,f='To be confirmed')=>v===null||v===undefined||v===''?f:String(v)
+const list=(v?:string[])=>v?.filter(Boolean)||[]
 
-async function getHikes() {
-  const supabase = await createClient()
-  const { data } = await supabase.from('hikes').select('*').eq('status', 'published').order('created_at', { ascending: true })
-  return (data || []) as Hike[]
+async function getData(slug:string){
+ const supabase=await createClient(); const [{data:hikes},{data:media}]=await Promise.all([supabase.from('hikes').select('*').eq('status','published').order('created_at',{ascending:true}),supabase.from('hike_media').select('id,hike_id,image_url,is_main,sort_order').order('is_main',{ascending:false}).order('sort_order',{ascending:true})]); return {hike:(hikes||[]).find((h:Hike)=>slugify(h.name)===slug) as Hike|undefined,media:(media||[]) as Media[]}
 }
+export async function generateMetadata({params}:Props):Promise<Metadata>{const {slug}=await params;const {hike}=await getData(slug);if(!hike)return{title:'Hike not found | Peak Axis'};return{title:`${hike.name} | Peak Axis Mauritius`,description:hike.description||`${hike.name} — guided adventure in Mauritius.`}}
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params
-  const hike = (await getHikes()).find((item) => slugify(item.name) === slug)
-  if (!hike) return { title: 'Hike not found | Peak Axis' }
-  const type = (hike.hike_type || 'guided hike').toLowerCase()
-  return { title: `${hike.name} | Peak Axis Mauritius`, description: hike.description || `${hike.name} — ${type} adventure in Mauritius. ${hike.difficulty} difficulty, ${hike.duration}.` }
-}
-
-export default async function HikeDetailPage({ params }: Props) {
-  const { slug } = await params
-  const hike = (await getHikes()).find((item) => slugify(item.name) === slug)
-  if (!hike) notFound()
-
-  const spots = hike.spots_remaining ?? 0
-  const isScheduled = hike.booking_type === 'scheduled_group'
-  const trailStatus = hike.trail_condition_status || 'open'
-  const routeUnavailable = trailStatus === 'temporarily_unsuitable' || trailStatus === 'closed'
-  const available = !isScheduled || spots > 0
-  const bring = list(hike.what_to_bring)
-  const included = list(hike.included)
-  const excluded = list(hike.excluded)
-  const experienceTypes = list(hike.experience_types)
-  const bookingType = hike.booking_type === 'private' ? 'private' : isScheduled ? 'scheduled_group' : 'on_demand'
-  const ratingLabel = hike.rating_label || 'Peak Axis rating'
-  const hikeType = (hike.hike_type || 'guided hike').toLowerCase()
-  const bookingLabel = bookingType === 'scheduled_group' ? 'Scheduled group hike' : bookingType === 'private' ? 'Private / on-demand' : 'On-demand hike'
-  const bookingDescription = bookingType === 'scheduled_group'
-    ? 'A published departure you can join with other hikers.'
-    : bookingType === 'private'
-      ? 'A private outing arranged around your group and preferred date.'
-      : 'No fixed public departure. Tell us when you want to go and we will arrange the route around conditions and availability.'
-  const hikeRef = encodeURIComponent(hike.name)
-  const enquiryHref = routeUnavailable
-    ? `/enquire?interest=private_hike&ref=${hikeRef}`
-    : available
-      ? `/enquire?interest=${bookingType === 'scheduled_group' ? 'hike' : 'private_hike'}&ref=${hikeRef}`
-      : `/enquire?interest=private_hike&ref=${hikeRef}`
-
-  const condition = trailStatus === 'conditions_to_confirm'
-    ? { title: 'Conditions to confirm', body: hike.trail_condition_note || 'We are checking current route, weather and access conditions before confirming this hike.', tone: 'caution' }
-    : trailStatus === 'temporarily_unsuitable'
-      ? { title: 'Temporarily unsuitable', body: hike.trail_condition_note || 'This route is not currently suitable for departure. Ask us about an alternative hike.', tone: 'danger' }
-      : trailStatus === 'closed'
-        ? { title: 'Route temporarily closed', body: hike.trail_condition_note || 'This route is currently closed. Ask us about an alternative hike.', tone: 'danger' }
-        : null
-
-  const facts = [
-    ['Difficulty', valueOr(hike.difficulty_numeric || hike.difficulty)],
-    ['Distance', hike.distance_km != null ? `${hike.distance_km} km` : 'To be confirmed'],
-    ['Duration', valueOr(hike.duration)],
-    ['Elevation gain', hike.elevation_gain_m != null ? `${hike.elevation_gain_m} m` : 'To be confirmed'],
-    ['Location', valueOr(hike.location)],
-    ['Terrain', valueOr(hike.terrain)],
-    ['Fitness required', valueOr(hike.fitness_required)],
-    ['Minimum age', valueOr(hike.age_requirements)],
-    ['Group size', hike.min_participants || hike.max_participants ? `${valueOr(hike.min_participants, '—')}–${valueOr(hike.max_participants, '—')}` : 'To be confirmed'],
-  ]
-
-  return <div className="view active" style={{ display: 'block' }}>
-    <section className="pagehead" style={{ padding: '60px 0 36px' }}><div className="wrap">
-      <Link href="/hikes" style={{ display: 'inline-block', marginBottom: '20px', fontSize: '14px', fontWeight: 600 }}>← All hikes</Link>
-      <div style={{ maxWidth: '940px' }}>
-        <div style={{ marginBottom: '16px', display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center', fontSize: '13.5px', color: '#6b675f' }}>
-          <span style={{ fontWeight: 700, color: hike.difficulty === 'challenging' ? 'var(--ember)' : hike.difficulty === 'moderate' ? '#a3720b' : 'var(--teal)', textTransform: 'capitalize' }}>{hike.difficulty}{hike.difficulty_numeric ? ` · ${hike.difficulty_numeric}` : ''}</span>
-          <span>⏱ {hike.duration}</span><span>📍 {hike.location}</span>
-          {hike.overall_rating != null && <span style={{ fontWeight: 700 }}>★ {hike.overall_rating}/10 · {ratingLabel}</span>}
-        </div>
-        <h1 style={{ fontSize: 'clamp(40px, 6vw, 64px)' }}>{hike.name}</h1>
-        <p style={{ marginTop: '18px', maxWidth: '780px', fontSize: '17px', lineHeight: 1.7, color: '#3d3a36' }}>{hike.description || `Join Peak Axis for ${hike.name}, a guided ${hikeType} experience in Mauritius.`}</p>
-        {condition && <div style={{ marginTop: '22px', padding: '16px 18px', border: '1px solid var(--sand-line)', borderLeft: `4px solid ${condition.tone === 'danger' ? 'var(--ember)' : '#a3720b'}`, background: condition.tone === 'danger' ? '#f7e7df' : '#f4edda' }}><div style={{ fontWeight: 850, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '.06em' }}>{condition.title}</div><p style={{ margin: '6px 0 0', color: '#514c44', lineHeight: 1.6 }}>{condition.body}</p>{hike.trail_condition_updated_at && <p style={{ margin: '8px 0 0', fontSize: '11px', color: '#777168' }}>Last updated {new Date(hike.trail_condition_updated_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}.</p>}</div>}
-      </div>
-    </div></section>
-
-    <main className="wrap" style={{ paddingTop: '10px', paddingBottom: '80px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.6fr) minmax(300px,.8fr)', gap: '32px', alignItems: 'start' }}>
-        <div>
-          <div style={{ width: '100%', aspectRatio: '16/7', background: 'var(--teal)', overflow: 'hidden' }} aria-hidden="true"><svg viewBox="0 0 800 360" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}><rect width="800" height="360" fill="var(--sand)"/><path d="M0 300 L150 130 L260 230 L390 70 L520 220 L650 110 L800 260 L800 360 L0 360Z" fill="var(--teal)"/></svg></div>
-          <section style={{ marginTop: '22px', display: 'grid', gridTemplateColumns: 'repeat(4,minmax(0,1fr))', border: '1px solid var(--sand-line)', background: 'var(--warm-white)' }} className="hike-logistics-strip">
-            {[['DISTANCE', hike.distance_km != null ? `${hike.distance_km} km` : 'TBC'], ['ELEVATION', hike.elevation_gain_m != null ? `${hike.elevation_gain_m} m` : 'TBC'], ['DURATION', hike.duration], ['FITNESS', hike.fitness_required || 'TBC']].map(([label, value]) => <div key={label} style={{ padding: '16px', borderRight: '1px solid var(--sand-line)' }}><div style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.09em', color: '#777168' }}>{label}</div><div style={{ marginTop: '6px', fontSize: '14px', fontWeight: 700, lineHeight: 1.35 }}>{value}</div></div>)}
-          </section>
-          <section style={{ marginTop: '36px' }}><h2 style={{ fontSize: '32px', marginBottom: '14px' }}>The experience</h2><p style={{ fontSize: '16px', maxWidth: '760px', color: '#3d3a36', lineHeight: 1.8 }}>{hike.description || `A guided ${hikeType} route built around ${hike.main_attraction?.toLowerCase() || 'the landscape of Mauritius'}.`}</p></section>
-          <section style={{ marginTop: '38px' }}><h2 style={{ fontSize: '32px', marginBottom: '18px' }}>Quick facts</h2><div className="hike-detail-facts" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', borderTop: '1px solid var(--sand-line)', borderLeft: '1px solid var(--sand-line)' }}>{facts.map(([label, value]) => <div key={label} style={{ padding: '17px', borderRight: '1px solid var(--sand-line)', borderBottom: '1px solid var(--sand-line)' }}><div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em', color: '#777168' }}>{label}</div><div style={{ marginTop: '6px', fontWeight: 650 }}>{value}</div></div>)}</div></section>
-          <section style={{ marginTop: '38px' }}><h2 style={{ fontSize: '32px', marginBottom: '18px' }}>What you&apos;ll experience</h2><div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>{[hike.main_attraction, ...experienceTypes].filter(Boolean).map((item, i) => <div key={`${item}-${i}`} style={{ padding: '12px 15px', border: '1px solid var(--sand-line)', background: 'rgba(250,248,243,.35)' }}>✦ {item}</div>)}</div></section>
-          {[['What to bring', bring, 'Bring the essentials for a comfortable day outdoors.'],["What's included", included, 'Included in the listed hike price.'],["What's not included", excluded, 'These items or services are not included in the listed price.']].map(([title, items, intro]) => <section key={title as string} style={{ marginTop: '38px' }}><h2 style={{ fontSize: '30px', marginBottom: '10px' }}>{title as string}</h2><p style={{ color: '#5a564f', marginBottom: '12px' }}>{intro as string}</p>{(items as string[]).length ? <ul style={{ paddingLeft: '20px', lineHeight: 1.9 }}>{(items as string[]).map(item => <li key={item}>{item}</li>)}</ul> : <p style={{ color: '#777168' }}>To be confirmed — we&apos;ll provide the final details before booking.</p>}</section>)}
-          <section style={{ marginTop: '38px', display: 'grid', gap: '18px' }}><InfoSection title="Meeting point" value={hike.meeting_point} /><InfoSection title="Starting point" value={hike.starting_point} /><InfoSection title="Getting there" value={hike.transport_options} /><InfoSection title="Safety" value={hike.safety_info} /><InfoSection title="Weather policy" value={hike.weather_policy} /></section>
-          {hike.logistics_source && <p style={{ marginTop: '20px', fontSize: '11.5px', lineHeight: 1.6, color: '#777168' }}>Route logistics checked against: {hike.logistics_source}{hike.logistics_verified_at ? ` · ${new Date(hike.logistics_verified_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}` : ''}. Route conditions and access can change.</p>}
-          <section style={{ marginTop: '42px' }}><h2 style={{ fontSize: '32px', marginBottom: '16px' }}>FAQ</h2><div style={{ display: 'grid', gap: '10px' }}><Faq title="Is this hike right for me?" answer={`This is a ${hike.difficulty} route${hike.difficulty_numeric ? ` rated ${hike.difficulty_numeric}` : ''}. Fitness requirement: ${valueOr(hike.fitness_required)}.`} /><Faq title="How do I join?" answer={bookingDescription} /><Faq title="What happens if the weather is bad?" answer={valueOr(hike.weather_policy, 'The guide team will assess conditions and communicate any cancellation or rescheduling decision.')} /><Faq title="Can children join?" answer={valueOr(hike.age_requirements)} /><Faq title="How many people can join?" answer={hike.min_participants || hike.max_participants ? `Minimum: ${valueOr(hike.min_participants, 'not specified')}. Maximum: ${valueOr(hike.max_participants, 'not specified')}.` : 'Group size to be confirmed for this route.'} /></div></section>
-        </div>
-        <aside style={{ position: 'sticky', top: '96px', border: '1px solid var(--sand-line)', background: 'var(--warm-white)', padding: '24px', boxShadow: '0 12px 32px rgba(0,0,0,.05)' }}>
-          <div style={{ display: 'inline-flex', padding: '7px 10px', border: '1px solid var(--sand-line)', background: 'rgba(250,248,243,.7)', fontSize: '11px', fontWeight: 800, letterSpacing: '.08em', textTransform: 'uppercase' }}>{bookingLabel}</div>
-          <h2 style={{ fontSize: '30px', marginTop: '12px' }}>{bookingType === 'scheduled_group' ? (hike.date || 'Date to be confirmed') : 'Choose your date'}</h2>
-          <p style={{ marginTop: '8px', fontSize: '13px', lineHeight: 1.6, color: '#5a564f' }}>{bookingDescription}</p>
-          {condition && <div style={{ marginTop: '18px', padding: '13px', border: '1px solid var(--sand-line)', background: condition.tone === 'danger' ? '#f7e7df' : '#f4edda' }}><strong style={{ fontSize: '12px' }}>{condition.title}</strong><p style={{ margin: '6px 0 0', fontSize: '12px', lineHeight: 1.5 }}>{condition.body}</p></div>}
-          <div style={{ marginTop: '20px', paddingTop: '18px', borderTop: '1px solid var(--sand-line)' }}><p style={{ fontSize: '12px', color: '#5a564f' }}>GROUP RATE</p><strong style={{ fontSize: '28px' }}>{hike.price_group_usd != null ? `$${hike.price_group_usd}` : hike.price}<span style={{ fontSize: '14px', fontWeight: 500 }}>{hike.price_group_usd != null ? '/person' : ''}</span></strong>{hike.price_solo_usd != null && <p style={{ marginTop: '4px', fontSize: '13px', color: '#5a564f' }}>Private / solo: ${hike.price_solo_usd}</p>}</div>
-          {isScheduled && <div style={{ marginTop: '18px', fontSize: '12.5px', color: available && spots <= 4 ? 'var(--ember)' : '#6b675f', fontWeight: available && spots <= 4 ? 600 : 400 }}>{available ? `${spots} spots left` : 'Fully booked'}</div>}
-          <Link href={enquiryHref} style={{ display: 'block', textAlign: 'center', marginTop: '16px', background: 'var(--ember)', color: 'var(--warm-white)', padding: '14px 20px', fontSize: '14px', fontWeight: 700 }}>{routeUnavailable ? 'Ask about an alternative hike' : available ? bookingType === 'scheduled_group' ? 'Enquire / join this hike' : bookingType === 'private' ? 'Plan a private hike' : 'Plan this hike' : 'Ask about a private hike'}</Link>
-          <p style={{ marginTop: '14px', fontSize: '12px', lineHeight: 1.6, color: '#5a564f' }}>Not sure if this route is right for you? Send an enquiry and we&apos;ll help you choose.</p>
-        </aside>
-      </div>
-    </main>
-    <style>{`@media(max-width:760px){.wrap{padding-left:20px!important;padding-right:20px!important}main>div{grid-template-columns:1fr!important}main aside{position:static!important}.hike-detail-facts{grid-template-columns:1fr 1fr!important}.hike-logistics-strip{grid-template-columns:1fr 1fr!important}.hike-logistics-strip>div:nth-child(2){border-right:0}.hike-logistics-strip>div:nth-child(3){border-top:1px solid var(--sand-line)}}`}</style>
-  </div>
-}
-
-function InfoSection({ title, value }: { title: string; value?: string | null }) {
-  return <div style={{ padding: '20px', border: '1px solid var(--sand-line)', background: 'rgba(250,248,243,.3)' }}><h3 style={{ fontSize: '20px', marginBottom: '8px' }}>{title}</h3><p style={{ color: value ? '#3d3a36' : '#777168', lineHeight: 1.7 }}>{value || "To be confirmed — we'll provide the final details before booking."}</p></div>
-}
-
-function Faq({ title, answer }: { title: string; answer: string }) {
-  return <details style={{ border: '1px solid var(--sand-line)', padding: '15px 18px' }}><summary style={{ cursor: 'pointer', fontWeight: 650 }}>{title}</summary><p style={{ marginTop: '10px', color: '#5a564f', lineHeight: 1.7 }}>{answer}</p></details>
+export default async function HikeDetailPage({params}:Props){
+ const {slug}=await params; const {hike,media}=await getData(slug); if(!hike)notFound()
+ const hikeMedia=media.filter(m=>m.hike_id===hike.id),main=hikeMedia.find(m=>m.is_main)||hikeMedia[0],gallery=hikeMedia.filter(m=>m.id!==main?.id)
+ const spots=hike.spots_remaining??0,isScheduled=hike.booking_type==='scheduled_group',available=!isScheduled||spots>0
+ const trailStatus=hike.trail_condition_status||'open',routeUnavailable=trailStatus==='temporarily_unsuitable'||trailStatus==='closed'
+ const bookingType=hike.booking_type==='private'?'private':isScheduled?'scheduled_group':'on_demand',bookingLabel=bookingType==='scheduled_group'?'Scheduled group hike':bookingType==='private'?'Private / on-demand':'On-demand hike'
+ const enquiry=routeUnavailable?`/enquire?interest=private_hike&ref=${encodeURIComponent(hike.name)}`:available?`/enquire?interest=${bookingType==='scheduled_group'?'hike':'private_hike'}&ref=${encodeURIComponent(hike.name)}`:'/enquire?interest=private_hike'
+ const bring=list(hike.what_to_bring),included=list(hike.included),excluded=list(hike.excluded),experience=list(hike.experience_types)
+ const facts=[['Difficulty',valueOr(hike.difficulty_numeric||hike.difficulty)],['Distance',hike.distance_km!=null?`${hike.distance_km} km`:'To be confirmed'],['Duration',valueOr(hike.duration)],['Elevation gain',hike.elevation_gain_m!=null?`${hike.elevation_gain_m} m`:'To be confirmed'],['Location',valueOr(hike.location)],['Terrain',valueOr(hike.terrain)],['Fitness required',valueOr(hike.fitness_required)],['Minimum age',valueOr(hike.age_requirements)],['Group size',hike.min_participants||hike.max_participants?`${valueOr(hike.min_participants,'—')}–${valueOr(hike.max_participants,'—')}`:'To be confirmed']]
+ return <div className="view active" style={{display:'block'}}><section className="pagehead" style={{padding:'60px 0 36px'}}><div className="wrap"><Link href="/hikes" style={{display:'inline-block',marginBottom:20,fontSize:14,fontWeight:600}}>← All hikes</Link><div style={{maxWidth:940}}><div style={{marginBottom:16,display:'flex',gap:14,flexWrap:'wrap',fontSize:13.5,color:'#6b675f'}}><span style={{fontWeight:700,textTransform:'capitalize'}}>{hike.difficulty}{hike.difficulty_numeric?` · ${hike.difficulty_numeric}`:''}</span><span>⏱ {hike.duration}</span><span>📍 {hike.location}</span>{hike.overall_rating!=null&&<span style={{fontWeight:700}}>★ {hike.overall_rating}/10</span>}</div><h1 style={{fontSize:'clamp(40px,6vw,64px)'}}>{hike.name}</h1><p style={{marginTop:18,maxWidth:780,fontSize:17,lineHeight:1.7,color:'#3d3a36'}}>{hike.description||`Join Peak Axis for ${hike.name}, a guided hike in Mauritius.`}</p></div></div></section>
+ <main className="wrap" style={{paddingTop:10,paddingBottom:80}}><div className="detail-grid"><div>
+  <div className="hero-photo">{main?<img src={main.image_url} alt={hike.name} priority/>:<div className="hero-fallback" aria-hidden="true"/>}</div>
+  {gallery.length>0&&<section style={{marginTop:18}}><div className="gallery-grid">{gallery.map((m,i)=><img key={m.id} src={m.image_url} alt={`${hike.name} gallery ${i+1}`} loading="lazy"/></div></section>}
+  <section className="logistics"><div><b>DISTANCE</b><span>{hike.distance_km!=null?`${hike.distance_km} km`:'TBC'}</span></div><div><b>ELEVATION</b><span>{hike.elevation_gain_m!=null?`${hike.elevation_gain_m} m`:'TBC'}</span></div><div><b>DURATION</b><span>{hike.duration}</span></div><div><b>FITNESS</b><span>{hike.fitness_required||'TBC'}</span></div></section>
+  <section className="content-section"><h2>The experience</h2><p>{hike.description||`A guided route built around ${hike.main_attraction?.toLowerCase()||'the landscape of Mauritius'}.`}</p></section>
+  <section className="content-section"><h2>Quick facts</h2><div className="facts">{facts.map(([label,val])=><div key={label}><b>{label}</b><span>{val}</span></div>)}</div></section>
+  <section className="content-section"><h2>What you&apos;ll experience</h2><div className="chips">{[hike.main_attraction,...experience].filter(Boolean).map((x,i)=><span key={`${x}-${i}`}>✦ {x}</span>)}</div></section>
+  {[['What to bring',bring],['What’s included',included],['What’s not included',excluded]].map(([title,items])=><section className="content-section" key={title as string}><h2>{title as string}</h2>{(items as string[]).length?<ul>{(items as string[]).map(x=><li key={x}>{x}</li>)}</ul>:<p className="muted">To be confirmed — final details are provided before booking.</p>}</section>)}
+  <section className="content-section"><h2>Safety & logistics</h2>{[['Meeting point',hike.meeting_point],['Starting point',hike.starting_point],['Getting there',hike.transport_options],['Safety',hike.safety_info],['Weather policy',hike.weather_policy]].map(([label,val])=><div className="info" key={label as string}><b>{label as string}</b><p>{valueOr(val as string|null|undefined)}</p></div>)}</section>
+ </div><aside className="booking-card"><div className="booking-label">{bookingLabel}</div><h2>{isScheduled?(hike.date||'Date to be confirmed'):'Choose your date'}</h2><p>{bookingType==='scheduled_group'?'A published departure you can join with other hikers.':bookingType==='private'?'A private outing arranged around your group and preferred date.':'Tell us when you want to go and we will arrange the route around conditions and availability.'}</p><div className="price"><small>GROUP RATE</small><strong>{hike.price_group_usd!=null?`$${hike.price_group_usd}`:hike.price}</strong>{hike.price_group_usd!=null&&<span>/person</span>}</div>{isScheduled&&<div className="spots">{available?`${spots} spots left`:'Fully booked'}</div>}<Link href={enquiry} className="book-btn">{routeUnavailable?'Ask about an alternative hike':available?(bookingType==='scheduled_group'?'Enquire / join this hike':bookingType==='private'?'Plan a private hike':'Plan this hike'):'Ask about a private hike'}</Link></aside></div></main>
+ <style>{`.detail-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,.8fr);gap:32px;align-items:start}.hero-photo{width:100%;aspect-ratio:16/7;background:#e7e1d2;overflow:hidden}.hero-photo img{width:100%;height:100%;object-fit:cover;display:block}.hero-fallback{width:100%;height:100%;background:linear-gradient(145deg,#d9cfba,#1f4b4c 48%,#102b2b)}.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.gallery-grid img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#e7e1d2}.logistics{margin-top:22px;display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--sand-line);background:var(--warm-white)}.logistics div{padding:16px;border-right:1px solid var(--sand-line)}.logistics div:last-child{border-right:0}.logistics b,.facts b{display:block;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#777168}.logistics span{display:block;margin-top:6px;font-size:14px;font-weight:700}.content-section{margin-top:38px}.content-section h2{font-size:32px;margin-bottom:14px}.content-section p,.content-section li{font-size:15px;line-height:1.8;color:#3d3a36}.facts{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--sand-line);border-left:1px solid var(--sand-line)}.facts div{padding:16px;border-right:1px solid var(--sand-line);border-bottom:1px solid var(--sand-line)}.facts span{display:block;margin-top:6px;font-weight:650}.chips{display:flex;flex-wrap:wrap;gap:10px}.chips span{padding:12px 15px;border:1px solid var(--sand-line);background:rgba(250,248,243,.35)}.info{border-top:1px solid var(--sand-line);padding:13px 0}.info b{font-size:12px;text-transform:uppercase;letter-spacing:.06em}.info p{margin:5px 0 0;font-size:13px}.muted{color:#777168!important}.booking-card{position:sticky;top:96px;border:1px solid var(--sand-line);background:var(--warm-white);padding:24px;box-shadow:0 12px 32px rgba(0,0,0,.05)}.booking-label{display:inline-flex;padding:7px 10px;border:1px solid var(--sand-line);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.booking-card h2{font-size:30px;margin:12px 0 8px}.booking-card>p{font-size:13px;line-height:1.6;color:#5a564f}.price{margin-top:20px;padding-top:18px;border-top:1px solid var(--sand-line)}.price small{display:block;font-size:11px;color:#5a564f}.price strong{font-size:28px}.price span{font-size:14px;margin-left:4px}.spots{margin-top:16px;font-size:12px;font-weight:700}.book-btn{display:block;text-align:center;margin-top:16px;background:var(--ember);color:var(--warm-white);padding:14px 20px;font-size:14px;font-weight:700}@media(max-width:760px){.detail-grid{grid-template-columns:1fr}.booking-card{position:static}.logistics{grid-template-columns:1fr 1fr}.logistics div:nth-child(2){border-right:0}.logistics div:nth-child(n+3){border-top:1px solid var(--sand-line)}.facts{grid-template-columns:1fr 1fr}.gallery-grid{grid-template-columns:1fr 1fr}}`}</style></div>
 }
