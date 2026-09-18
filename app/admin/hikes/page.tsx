@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import HikesAdminClient from '@/components/admin/HikesAdminClient'
-import HikeMediaAdminPanel from '@/components/admin/HikeMediaAdminPanel'
 
 export const revalidate = 0
 
@@ -29,7 +28,6 @@ export default async function AdminHikesPage() {
         </div>
       </div>
 
-      <HikeMediaAdminPanel hikes={(hikes || []).map(({ id, name }) => ({ id, name }))} />
       <HikesAdminClient initialHikes={hikes || []} />
     </div>
   )
