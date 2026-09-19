@@ -87,7 +87,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('enquiries')
       .insert({
         name: cleanName,
@@ -100,13 +100,15 @@ export async function POST(request: Request) {
         message: cleanMessage,
         status: 'new',
       })
+      .select('id')
+      .single()
 
     if (error) {
       console.error('Supabase enquiry error:', error)
       return NextResponse.json({ error: 'Failed to submit enquiry. Please try again later.' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, data: { id: data.id } })
   } catch (err) {
     console.error('Enquiry request failed:', err)
     return NextResponse.json({ error: 'Invalid request. Please check your details and try again.' }, { status: 400 })
