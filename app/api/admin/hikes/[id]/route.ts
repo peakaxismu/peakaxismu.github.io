@@ -32,12 +32,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { id } = await params
     const { user, authorized } = await authorize()
     if (!authorized) return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
-    const body = await request.json() as Record<string, unknown>
-    if (!isTrailStatus(body.trail_condition_status)) return NextResponse.json({ error: 'Invalid trail condition status' }, { status: 400 })
+    const body = await request.json() as unknown
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    const input = body as Record<string, unknown>
+    if (!isTrailStatus(input.trail_condition_status)) return NextResponse.json({ error: 'Invalid trail condition status' }, { status: 400 })
     const admin = createAdminClient()
     const { data: existing, error: existingError } = await admin.from('hikes').select('trail_condition_status, trail_condition_note').eq('id', id).single()
     if (existingError) return NextResponse.json({ error: 'Hike not found' }, { status: 404 })
-    const note = typeof body.trail_condition_note === 'string' ? body.trail_condition_note.trim() : ''
+    const note = typeof input.trail_condition_note === 'string' ? body.trail_condition_note.trim() : ''
     if (body.trail_condition_status !== 'open' && !note) return NextResponse.json({ error: 'Add a short operational note when a route is not open.' }, { status: 400 })
     const changed = body.trail_condition_status !== existing.trail_condition_status || note !== (existing.trail_condition_note || '')
     const { data, error } = await admin.from('hikes').update({
