@@ -52,8 +52,8 @@ export async function POST(request: Request) {
       name, difficulty, date: date || null, duration, location, price,
       spots_total: spots_total == null ? 10 : Number(spots_total),
       spots_remaining: spots_remaining == null ? (spots_total == null ? 10 : Number(spots_total)) : Number(spots_remaining),
-      description: description || null,
-      status: status || 'published',
+      description: typeof description === 'string' ? description.trim() || null : null,
+      status: status === 'draft' ? 'draft' : 'published',
       ...practicalPayload({ ...body, booking_type: bookingType, rating_label: body.rating_label || 'Peak Axis rating', trail_condition_status: trailConditionStatus }),
     }).select()
 
