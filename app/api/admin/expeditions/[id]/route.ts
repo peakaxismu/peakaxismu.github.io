@@ -48,7 +48,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Missing required expedition fields' }, { status: 400 })
     }
 
-    if ((name as string).length > 200 || (destination as string).length > 300 || (price_from as string).length > 100) return NextResponse.json({ error: 'One or more fields are too long' }, { status: 400 })
+    if (name.length > 200 || destination.length > 300 || price_from.length > 100) return NextResponse.json({ error: 'One or more fields are too long' }, { status: 400 })
     if (status !== undefined && (typeof status !== 'string' || !['draft', 'published'].includes(status))) return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     const numericFields = [duration_days, group_size_min, group_size_max]
     if (numericFields.some((v) => v !== undefined && v !== null && v !== '' && !Number.isFinite(Number(v)))) return NextResponse.json({ error: 'Invalid numeric expedition field' }, { status: 400 })
