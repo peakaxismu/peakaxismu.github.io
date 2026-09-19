@@ -61,7 +61,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (!authorized) return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
     const rawBody = await request.json() as unknown
     if (!rawBody || typeof rawBody !== 'object' || Array.isArray(rawBody)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
-    const body = rawBody as Record<string, unknown>
+    const input = rawBody as Record<string, unknown>
     const { name, difficulty, date, duration, location, price, spots_total, spots_remaining, description, status } = body
     const bookingType = normaliseBookingType(body.booking_type)
     if (typeof name !== 'string' || typeof difficulty !== 'string' || typeof duration !== 'string' || typeof location !== 'string' || typeof price !== 'string' || !name.trim() || !difficulty.trim() || !duration.trim() || !location.trim() || !price.trim() || (bookingType === 'scheduled_group' && typeof date !== 'string')) return NextResponse.json({ error: 'Missing required hike fields' }, { status: 400 })
