@@ -26,7 +26,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
     }
 
-    const { name, email, phone, interest_type, reference_id, preferred_date, group_size, message } = body
+    const { name, email, phone, interest_type, reference_id, preferred_date, group_size, message, website } = body
+
+    if (typeof website === 'string' && website.trim()) {
+      return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
+    }
 
     if (typeof name !== 'string' || typeof email !== 'string' || typeof interest_type !== 'string') {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
