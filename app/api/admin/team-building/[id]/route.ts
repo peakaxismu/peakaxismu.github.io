@@ -20,7 +20,7 @@ export async function PUT(
     const { name, type, description, status } = body as Record<string, unknown>
     if ([name, type, description].some((v) => typeof v !== 'string' || !v.trim())) return NextResponse.json({ error: 'Name, type and description are required' }, { status: 400 })
     if (status !== undefined && (typeof status !== 'string' || !['draft', 'published'].includes(status))) return NextResponse.json({ error: 'Status must be draft or published' }, { status: 400 })
-    if (name.length > 200 || type.length > 100 || description.length > 10000) return NextResponse.json({ error: 'One or more fields are too long' }, { status: 400 })
+    if (typeof name !== 'string' || typeof type !== 'string' || typeof description !== 'string' || name.length > 200 || type.length > 100 || description.length > 10000) return NextResponse.json({ error: 'One or more fields are too long' }, { status: 400 })
 
     const { data, error } = await supabase
       .from('team_building_packages')
