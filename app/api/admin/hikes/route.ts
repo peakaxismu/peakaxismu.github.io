@@ -21,6 +21,8 @@ function normaliseBookingType(value: unknown) {
   return value === 'scheduled_group' || value === 'private' || value === 'on_demand' ? value : 'on_demand'
 }
 
+function validFiniteNumber(value: unknown) { return value == null || (typeof value === 'number' && Number.isFinite(value)) || (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value))) }
+
 function normaliseTrailCondition(value: unknown) {
   return value === 'conditions_to_confirm' || value === 'temporarily_unsuitable' || value === 'closed' ? value : 'open'
 }
@@ -35,9 +37,11 @@ export async function POST(request: Request) {
     const { name, difficulty, date, duration, location, price, spots_total, spots_remaining, description, status } = body
     const bookingType = normaliseBookingType(body.booking_type)
     const trailConditionStatus = normaliseTrailCondition(body.trail_condition_status)
-    if (!name || !difficulty || !duration || !location || !price || (bookingType === 'scheduled_group' && !date)) {
+    if (typeof name !== 'string' || typeof difficulty !== 'string' || typeof duration !== 'string' || typeof location !== 'string' || typeof price !== 'string' || !name.trim() || !difficulty.trim() || !duration.trim() || !location.trim() || !price.trim() || (bookingType === 'scheduled_group' && typeof date !== 'string')) {
       return NextResponse.json({ error: 'Missing required hike fields' }, { status: 400 })
     }
+
+    if (!validFiniteNumber(spots_total) || !validFiniteNumber(spots_remaining)) return NextResponse.json({ error: 'Invalid participant counts' }, { status: 400 })
 
     const admin = createAdminClient()
     const { data, error } = await admin.from('hikes').insert({
