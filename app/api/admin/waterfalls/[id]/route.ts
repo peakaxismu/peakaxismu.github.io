@@ -14,9 +14,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (!(await authorized())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const { id } = await params
     const body = await request.json()
-    const { name, location, duration, status, short_line } = body
-    if (!name || !location || !duration) return NextResponse.json({ error: 'Missing required waterfall fields' }, { status: 400 })
-    if (status && !['draft', 'published'].includes(status)) return NextResponse.json({ error: 'Status must be draft or published' }, { status: 400 })
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    const { name, location, duration, status, short_line } = body as Record<string, unknown>
+    if ([name, location, duration].some((v) => typeof v !== 'string' || !v.trim())) return NextResponse.json({ error: 'Missing required waterfall fields' }, { status: 400 })
+    if (status !== undefined && (typeof status !== 'string' || !['draft', 'published'].includes(status))) return NextResponse.json({ error: 'Status must be draft or published' }, { status: 400 })
     const admin = createAdminClient()
     const { data, error } = await admin.from('waterfalls').update({ name, location, duration, status: status || 'published', short_line: short_line || '' }).eq('id', id).select()
     if (error) return NextResponse.json({ error: 'Failed to update waterfall' }, { status: 500 })
