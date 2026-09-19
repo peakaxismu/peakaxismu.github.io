@@ -22,7 +22,7 @@ export default function HikeMediaManager({ hikeId }: { hikeId: string }) {
     } finally { setLoading(false) }
   }
 
-  useEffect(() => { void load() }, [hikeId])
+  useEffect(() => { void load() }, [hikeId]) // eslint-disable-line react-hooks/set-state-in-effect
 
   const upload = async (files: FileList | null, isMain: boolean) => {
     if (!files?.length) return

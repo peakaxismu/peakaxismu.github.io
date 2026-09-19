@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isAdminUser } from '@/lib/supabase/admin-auth'
 
-async function authorized() { const { data: { user } } = await (await createClient()).auth.getUser(); return Boolean(user) }
+async function authorized() { const { data: { user } } = await (await createClient()).auth.getUser(); return isAdminUser(user) }
 
 function getPostUrl(embedCode: string, fallback: string) {
   const match = embedCode?.match(/data-instgrm-permalink=["']([^"']+)["']/i)
@@ -11,12 +12,26 @@ function getPostUrl(embedCode: string, fallback: string) {
 
 export async function POST(request: Request) {
   if (!(await authorized())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const b = await request.json()
-  const embed_code = String(b.embed_code || '').trim()
-  const post_url = getPostUrl(embed_code, String(b.post_url || '').trim())
+  const contentType = request.headers.get('content-type')?.split(';')[0].trim().toLowerCase()
+  if (contentType !== 'application/json') return NextResponse.json({ error: 'Content-Type must be application/json' }, { status: 415 })
+  const bodyText = await request.text()
+  if (new TextEncoder().encode(bodyText).byteLength > 12000) return NextResponse.json({ error: 'Request body is too large' }, { status: 413 })
+  let b: unknown
+  try { b = JSON.parse(bodyText) } catch { return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 }) }
+  if (!b || typeof b !== 'object' || Array.isArray(b)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  const body = b as Record<string, unknown>
+  const embed_code = typeof body.embed_code === 'string' ? body.embed_code.trim() : ''
+  const fallbackUrl = typeof body.post_url === 'string' ? body.post_url.trim() : ''
+  const post_url = getPostUrl(embed_code, fallbackUrl)
+  if (embed_code.length > 10000 || fallbackUrl.length > 2000) return NextResponse.json({ error: 'Instagram embed data is too long' }, { status: 400 })
+  if (post_url && !/^https?:\/\/(?:www\.)?instagram\.com\//i.test(post_url)) return NextResponse.json({ error: 'Invalid Instagram post URL' }, { status: 400 })
   if (!embed_code || !post_url) return NextResponse.json({ error: 'Paste the Instagram embed code. A post URL is extracted from it.' }, { status: 400 })
   if (!/<blockquote[^>]*class=["'][^"']*instagram-media/i.test(embed_code)) return NextResponse.json({ error: 'That does not look like an Instagram embed block.' }, { status: 400 })
-  const { data, error } = await createAdminClient().from('instagram_posts').insert({ image_url: String(b.image_url || ''), post_url, embed_code, caption: String(b.caption || ''), status: b.status === 'published' ? 'published' : 'draft', sort_order: Number(b.sort_order || 0) }).select().single()
+  const image_url = typeof body.image_url === 'string' ? body.image_url.trim() : ''
+  const caption = typeof body.caption === 'string' ? body.caption.trim() : ''
+  const sort_order = body.sort_order == null || body.sort_order === '' ? 0 : Number(body.sort_order)
+  if (image_url.length > 2000 || caption.length > 5000 || !Number.isInteger(sort_order) || sort_order < 0 || sort_order > 100000) return NextResponse.json({ error: 'Invalid Instagram post fields' }, { status: 400 })
+  const { data, error } = await createAdminClient().from('instagram_posts').insert({ image_url, post_url, embed_code, caption, status: body.status === 'published' ? 'published' : 'draft', sort_order }).select().single()
   if (error) return NextResponse.json({ error: 'Failed to create Instagram post' }, { status: 500 })
   return NextResponse.json({ success: true, data })
 }

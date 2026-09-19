@@ -32,16 +32,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { id } = await params
     const { user, authorized } = await authorize()
     if (!authorized) return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
-    const body = await request.json() as Record<string, unknown>
-    if (!isTrailStatus(body.trail_condition_status)) return NextResponse.json({ error: 'Invalid trail condition status' }, { status: 400 })
+    const rawBody = await request.json() as unknown
+    if (!rawBody || typeof rawBody !== 'object' || Array.isArray(rawBody)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    const input = rawBody as Record<string, unknown>
+    if (!isTrailStatus(input.trail_condition_status)) return NextResponse.json({ error: 'Invalid trail condition status' }, { status: 400 })
     const admin = createAdminClient()
     const { data: existing, error: existingError } = await admin.from('hikes').select('trail_condition_status, trail_condition_note').eq('id', id).single()
     if (existingError) return NextResponse.json({ error: 'Hike not found' }, { status: 404 })
-    const note = typeof body.trail_condition_note === 'string' ? body.trail_condition_note.trim() : ''
-    if (body.trail_condition_status !== 'open' && !note) return NextResponse.json({ error: 'Add a short operational note when a route is not open.' }, { status: 400 })
-    const changed = body.trail_condition_status !== existing.trail_condition_status || note !== (existing.trail_condition_note || '')
+    const note = typeof input.trail_condition_note === 'string' ? input.trail_condition_note.trim() : ''
+    if (input.trail_condition_status !== 'open' && !note) return NextResponse.json({ error: 'Add a short operational note when a route is not open.' }, { status: 400 })
+    const changed = input.trail_condition_status !== existing.trail_condition_status || note !== (existing.trail_condition_note || '')
     const { data, error } = await admin.from('hikes').update({
-      trail_condition_status: body.trail_condition_status,
+      trail_condition_status: input.trail_condition_status,
       trail_condition_note: note || null,
       ...(changed ? { trail_condition_updated_at: new Date().toISOString() } : {}),
     }).eq('id', id).select('id,name,status,trail_condition_status,trail_condition_note,trail_condition_updated_at').single()
@@ -57,29 +59,33 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const { id } = await params
     const { user, authorized } = await authorize()
     if (!authorized) return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
-    const body = await request.json() as Record<string, unknown>
-    const { name, difficulty, date, duration, location, price, spots_total, spots_remaining, description, status } = body
-    const bookingType = normaliseBookingType(body.booking_type)
-    if (!name || !difficulty || !duration || !location || !price || (bookingType === 'scheduled_group' && !date)) return NextResponse.json({ error: 'Missing required hike fields' }, { status: 400 })
+    const rawBody = await request.json() as unknown
+    if (!rawBody || typeof rawBody !== 'object' || Array.isArray(rawBody)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    const input = rawBody as Record<string, unknown>
+    const { name, difficulty, date, duration, location, price, spots_total, spots_remaining, description, status } = input
+    const bookingType = normaliseBookingType(input.booking_type)
+    if (typeof name !== 'string' || typeof difficulty !== 'string' || typeof duration !== 'string' || typeof location !== 'string' || typeof price !== 'string' || !name.trim() || !difficulty.trim() || !duration.trim() || !location.trim() || !price.trim() || (bookingType === 'scheduled_group' && typeof date !== 'string')) return NextResponse.json({ error: 'Missing required hike fields' }, { status: 400 })
+    const validParticipantCount = (value: unknown) => value == null || (typeof value === 'number' && Number.isFinite(value)) || (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value)))
+    if (!validParticipantCount(spots_total) || !validParticipantCount(spots_remaining)) return NextResponse.json({ error: 'Invalid participant counts' }, { status: 400 })
     const admin = createAdminClient()
     const { data: existing, error: existingError } = await admin.from('hikes').select('trail_condition_status, trail_condition_note').eq('id', id).single()
     if (existingError) return NextResponse.json({ error: 'Hike not found' }, { status: 404 })
-    const hasStatus = body.trail_condition_status !== undefined
-    if (hasStatus && !isTrailStatus(body.trail_condition_status)) return NextResponse.json({ error: 'Invalid trail condition status' }, { status: 400 })
-    const statusChanged = hasStatus && body.trail_condition_status !== existing.trail_condition_status
-    const noteChanged = body.trail_condition_note !== undefined && body.trail_condition_note !== existing.trail_condition_note
-    const trailConditionPayload = hasStatus || body.trail_condition_note !== undefined ? {
-      ...(hasStatus ? { trail_condition_status: body.trail_condition_status } : {}),
-      ...(body.trail_condition_note !== undefined ? { trail_condition_note: typeof body.trail_condition_note === 'string' ? body.trail_condition_note.trim() || null : null } : {}),
+    const hasStatus = input.trail_condition_status !== undefined
+    if (hasStatus && !isTrailStatus(input.trail_condition_status)) return NextResponse.json({ error: 'Invalid trail condition status' }, { status: 400 })
+    const statusChanged = hasStatus && input.trail_condition_status !== existing.trail_condition_status
+    const noteChanged = input.trail_condition_note !== undefined && input.trail_condition_note !== existing.trail_condition_note
+    const trailConditionPayload = hasStatus || input.trail_condition_note !== undefined ? {
+      ...(hasStatus ? { trail_condition_status: input.trail_condition_status } : {}),
+      ...(input.trail_condition_note !== undefined ? { trail_condition_note: typeof input.trail_condition_note === 'string' ? input.trail_condition_note.trim() || null : null } : {}),
       ...(statusChanged || noteChanged ? { trail_condition_updated_at: new Date().toISOString() } : {}),
     } : {}
-    if (hasStatus && body.trail_condition_status !== 'open' && body.trail_condition_note === undefined && existing.trail_condition_note == null) return NextResponse.json({ error: 'Add a short operational note when a route is not open.' }, { status: 400 })
+    if (hasStatus && input.trail_condition_status !== 'open' && input.trail_condition_note === undefined && existing.trail_condition_note == null) return NextResponse.json({ error: 'Add a short operational note when a route is not open.' }, { status: 400 })
     const { data, error } = await admin.from('hikes').update({
       name, difficulty, date: date || null, duration, location, price,
       spots_total: spots_total == null ? 10 : Number(spots_total),
       spots_remaining: spots_remaining == null ? (spots_total == null ? 10 : Number(spots_total)) : Number(spots_remaining),
       description: description || null, status,
-      ...practicalPayload({ ...body, booking_type: bookingType, rating_label: body.rating_label || 'Peak Axis rating' }),
+      ...practicalPayload({ ...input, booking_type: bookingType, rating_label: input.rating_label || 'Peak Axis rating' }),
       ...trailConditionPayload,
     }).eq('id', id).select()
     if (error) return NextResponse.json({ error: 'Failed to update hike' }, { status: 500 })

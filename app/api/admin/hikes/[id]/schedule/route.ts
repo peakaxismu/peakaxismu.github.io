@@ -19,10 +19,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (denied) return denied
   try {
     const { id } = await params
-    const body = await request.json() as { date?: string; price?: string; spots_total?: number; spots_remaining?: number; status?: 'draft' | 'published' }
-    const date = body.date?.trim()
+    const body = await request.json() as unknown
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    const input = body as Record<string, unknown>
+    const { date: inputDate, price, spots_total, spots_remaining, status } = input
+    if (status !== undefined && (typeof status !== 'string' || !['draft', 'published'].includes(status))) return NextResponse.json({ error: 'Invalid visibility status' }, { status: 400 })
+    const date = typeof inputDate === 'string' ? inputDate.trim() : ''
     if (!validDate(date)) return NextResponse.json({ error: 'Enter a valid scheduled date (YYYY-MM-DD)' }, { status: 400 })
-    if (!validPrice(body.price)) return NextResponse.json({ error: 'Enter a valid price in MUR' }, { status: 400 })
+    if (!validPrice(price)) return NextResponse.json({ error: 'Enter a valid price in MUR' }, { status: 400 })
 
     const admin = createAdminClient()
     const { data: source, error: sourceError } = await admin.from('hikes').select('*').eq('id', id).single()
@@ -30,8 +34,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (source.status !== 'published') return NextResponse.json({ error: 'Only published hikes can be scheduled' }, { status: 400 })
     if (source.booking_type === 'scheduled_group') return NextResponse.json({ error: 'A scheduled departure cannot be used as a route template' }, { status: 400 })
 
-    const total = body.spots_total == null ? (source.max_participants || source.spots_total || 10) : Number(body.spots_total)
-    const remaining = body.spots_remaining == null ? total : Number(body.spots_remaining)
+    const total = input.spots_total == null ? (source.max_participants || source.spots_total || 10) : Number(spots_total)
+    const remaining = input.spots_remaining == null ? total : Number(spots_remaining)
     if (!Number.isInteger(total) || total < 1 || !Number.isInteger(remaining) || remaining < 0 || remaining > total) return NextResponse.json({ error: 'Enter valid group capacity values' }, { status: 400 })
 
     const clone = { ...source }
@@ -42,10 +46,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     clone.source_hike_id = source.id
     clone.booking_type = 'scheduled_group'
     clone.date = date
-    clone.price = body.price.trim()
+    clone.price = typeof input.price === 'string' ? input.price.trim() : ''
     clone.spots_total = total
     clone.spots_remaining = remaining
-    clone.status = body.status || 'draft'
+    clone.status = status || 'draft'
     clone.trail_condition_updated_at = null
     clone.trail_condition_note = null
     clone.trail_condition_status = 'open'
@@ -67,9 +71,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (denied) return denied
   try {
     const { id } = await params
-    const body = await request.json() as Record<string, unknown>
+    const body = await request.json() as unknown
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    const input = body as Record<string, unknown>
     const allowed = ['date', 'price', 'spots_total', 'spots_remaining', 'status', 'trail_condition_status', 'trail_condition_note']
-    const patch = Object.fromEntries(Object.entries(body).filter(([key]) => allowed.includes(key))) as Record<string, unknown>
+    const patch = Object.fromEntries(Object.entries(input).filter(([key]) => allowed.includes(key))) as Record<string, unknown>
     if (!Object.keys(patch).length) return NextResponse.json({ error: 'No supported changes supplied' }, { status: 400 })
     if (patch.date !== undefined && !validDate(patch.date)) return NextResponse.json({ error: 'Enter a valid scheduled date (YYYY-MM-DD)' }, { status: 400 })
     if (patch.price !== undefined && !validPrice(patch.price)) return NextResponse.json({ error: 'Enter a valid price in MUR' }, { status: 400 })

@@ -2,11 +2,35 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
 const VALID_INTEREST_TYPES = ['hike', 'private_hike', 'expedition', 'team', 'activity'] as const
+const MAX_REQUEST_BYTES = 12_000
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 
 export async function POST(request: Request) {
   try {
+    const contentType = request.headers.get('content-type')?.split(';', 1)[0].trim().toLowerCase()
+    if (contentType !== 'application/json') {
+      return NextResponse.json({ error: 'Request must use JSON.' }, { status: 415 })
+    }
+
+    const contentLength = request.headers.get('content-length')
+    if (contentLength) {
+      const parsedContentLength = Number(contentLength)
+      if (!Number.isSafeInteger(parsedContentLength) || parsedContentLength < 0 || parsedContentLength > MAX_REQUEST_BYTES) {
+        return NextResponse.json({ error: 'Request body is too large.' }, { status: 413 })
+      }
+    }
+
     const body = await request.json()
-    const { name, email, phone, interest_type, reference_id, preferred_date, group_size, message } = body
+
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
+
+    const { name, email, phone, interest_type, reference_id, preferred_date, group_size, message, website } = body
+
+    if (typeof website === 'string' && website.trim()) {
+      return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
+    }
 
     if (typeof name !== 'string' || typeof email !== 'string' || typeof interest_type !== 'string') {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -31,8 +55,16 @@ export async function POST(request: Request) {
     const cleanPhone = typeof phone === 'string' ? phone.trim().slice(0, 30) : null
     const cleanRef = typeof reference_id === 'string' ? reference_id.trim().slice(0, 100) : null
     const cleanDate = typeof preferred_date === 'string' ? preferred_date.trim().slice(0, 50) : null
-    const cleanGroupSize = typeof group_size === 'string' ? group_size.trim().slice(0, 30) : null
+    const cleanGroupSize = typeof group_size === 'string' ? group_size.trim() : null
     const cleanMessage = typeof message === 'string' ? message.trim().slice(0, 2000) : null
+
+    if (cleanGroupSize !== null && !/^(?:[1-9]|10|11)$/.test(cleanGroupSize)) {
+      return NextResponse.json({ error: 'Please select a valid group size.' }, { status: 400 })
+    }
+
+    if (cleanDate !== null && !DATE_PATTERN.test(cleanDate)) {
+      return NextResponse.json({ error: 'Please select a valid preferred date.' }, { status: 400 })
+    }
 
     const supabase = await createClient()
 
@@ -59,7 +91,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('enquiries')
       .insert({
         name: cleanName,
@@ -72,13 +104,15 @@ export async function POST(request: Request) {
         message: cleanMessage,
         status: 'new',
       })
+      .select('id')
+      .single()
 
     if (error) {
       console.error('Supabase enquiry error:', error)
       return NextResponse.json({ error: 'Failed to submit enquiry. Please try again later.' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, data: { id: data.id } })
   } catch (err) {
     console.error('Enquiry request failed:', err)
     return NextResponse.json({ error: 'Invalid request. Please check your details and try again.' }, { status: 400 })

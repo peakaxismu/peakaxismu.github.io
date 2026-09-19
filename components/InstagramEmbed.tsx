@@ -2,18 +2,20 @@
 
 import { useEffect } from 'react'
 
+type InstagramWindow = Window & { instgrm?: { Embeds?: { process: () => void } } }
+
 export default function InstagramEmbed({ url }: { url: string }) {
   useEffect(() => {
     const script = document.querySelector('script[data-instgrm-loader]') as HTMLScriptElement | null
     if (script) {
-      ;(window as any).instgrm?.Embeds?.process()
+      ;(window as InstagramWindow).instgrm?.Embeds?.process()
       return
     }
     const s = document.createElement('script')
     s.src = 'https://www.instagram.com/embed.js'
     s.async = true
     s.dataset.instgrmLoader = 'true'
-    s.onload = () => (window as any).instgrm?.Embeds?.process()
+    s.onload = () => (window as InstagramWindow).instgrm?.Embeds?.process()
     document.body.appendChild(s)
   }, [url])
 

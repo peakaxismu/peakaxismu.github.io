@@ -27,15 +27,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   try {
     const { id } = await params
     const body = await request.json()
-    const type = typeof body.type === 'string' ? body.type as ActivityType : 'note'
-    const text = typeof body.body === 'string' ? body.body.trim() : ''
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    const input = body as Record<string, unknown>
+    const type = typeof input.type === 'string' ? input.type as ActivityType : 'note'
+    const text = typeof input.body === 'string' ? input.body.trim() : ''
     if (!text) return NextResponse.json({ error: 'Activity text is required' }, { status: 400 })
     if (!ACTIVITY_TYPES.includes(type)) return NextResponse.json({ error: 'Invalid activity type' }, { status: 400 })
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!isAdminUser(user)) return NextResponse.json({ error: 'Forbidden' }, { status: user ? 403 : 401 })
     const admin = createAdminClient()
-    const { data, error } = await admin.from('enquiry_activities').insert({ enquiry_id: id, type, body: text, metadata: body.metadata ?? {}, created_by: user?.id ?? null }).select().single()
+    const { data, error } = await admin.from('enquiry_activities').insert({ enquiry_id: id, type, body: text, metadata: input.metadata && typeof input.metadata === 'object' && !Array.isArray(input.metadata) ? input.metadata : {}, created_by: user?.id ?? null }).select().single()
     if (error) return NextResponse.json({ error: 'Failed to save activity' }, { status: 500 })
     return NextResponse.json({ data }, { status: 201 })
   } catch (err) {

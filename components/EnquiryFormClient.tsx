@@ -66,6 +66,7 @@ export default function EnquiryFormClient({ hikes, expeditions, teamPackages, in
   const [preferredDate, setPreferredDate] = useState('')
   const [groupSize, setGroupSize] = useState('2')
   const [message, setMessage] = useState('')
+  const [website, setWebsite] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
@@ -92,7 +93,7 @@ export default function EnquiryFormClient({ hikes, expeditions, teamPackages, in
     if (!name.trim() || !email.trim()) { setErrorMsg('Please fill in all required fields.'); return }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setErrorMsg('Please provide a valid email address.'); return }
     setSubmitting(true); setErrorMsg('')
-    const payload = { name: name.trim(), email: email.trim(), phone: phone.trim() || undefined, interest_type: interestType, reference_id: referenceId.trim() || undefined, preferred_date: preferredDate || undefined, group_size: groupSize, message: message.trim() || undefined }
+    const payload = { name: name.trim(), email: email.trim(), phone: phone.trim() || undefined, interest_type: interestType, reference_id: referenceId.trim() || undefined, preferred_date: preferredDate || undefined, group_size: groupSize, message: message.trim() || undefined, website }
     try {
       const res = await fetch('/api/enquiries', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       const json = await res.json()
@@ -123,6 +124,7 @@ export default function EnquiryFormClient({ hikes, expeditions, teamPackages, in
     </div>}
 
     <form id="enquiryForm" onSubmit={handleSubmit} noValidate>
+      <input name="website" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: '1px', height: '1px', opacity: 0 }} value={website} onChange={(e) => setWebsite(e.target.value)} />
       {errorMsg && <div role="alert" className="form-error-banner">⚠️ {errorMsg}</div>}
       <div className="field"><span id="interest-label" className="field-label-bold">1. What are you interested in? <span className="req-star">*</span></span><div className="interest-grid" role="group" aria-labelledby="interest-label">{INTEREST_OPTIONS.map(([value, title, sub]) => <button key={value} type="button" className={`interest-opt ${interestType === value ? 'active' : ''}`} onClick={() => { setInterestType(value); setReferenceId('') }}><div className="t">{title}</div><div className="s">{sub}</div></button>)}</div></div>
       {interestType === 'hike' && <div className="cond-section"><div className="field"><label htmlFor={hikeSelectId}>Select scheduled route</label><select id={hikeSelectId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)}><option value="">-- Choose a scheduled hike --</option>{hikes.map((h) => <option key={h.id} value={h.name}>{h.name}{h.date ? ` (${h.date})` : ''}{h.price ? ` — ${h.price}` : ''}</option>)}</select></div>{isDeuxMamelles && <div className="upsell-box">💡 <strong>Want to add a refreshing waterfall swim?</strong> Check out the <strong>Deux Mamelles + Waterfalls</strong> experience ($50/person for groups).</div>}</div>}

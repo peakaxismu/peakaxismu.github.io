@@ -10,8 +10,9 @@ export async function POST(request: Request) {
     if (!isAdminUser(user)) return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
 
     const body = await request.json()
-    const { name, type, description, status } = body
-    if (!name || !type || !description) return NextResponse.json({ error: 'Missing required package fields' }, { status: 400 })
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    const { name, type, description, status } = body as Record<string, unknown>
+    if ([name, type, description].some((v) => typeof v !== 'string' || !v.trim())) return NextResponse.json({ error: 'Missing required package fields' }, { status: 400 })
 
     const admin = createAdminClient()
     const { data, error } = await admin.from('team_building_packages').insert({ name, type, description, status: status || 'published' }).select()

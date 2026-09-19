@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { isAdminUser } from '@/lib/supabase/admin-auth'
 
 export async function PUT(
   request: Request,
@@ -10,12 +11,16 @@ export async function PUT(
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!user || !isAdminUser(user)) {
+      return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
     }
 
     const body = await request.json()
-    const { name, type, description, status } = body
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    const { name, type, description, status } = body as Record<string, unknown>
+    if ([name, type, description].some((v) => typeof v !== 'string' || !v.trim())) return NextResponse.json({ error: 'Name, type and description are required' }, { status: 400 })
+    if (status !== undefined && (typeof status !== 'string' || !['draft', 'published'].includes(status))) return NextResponse.json({ error: 'Status must be draft or published' }, { status: 400 })
+    if (typeof name !== 'string' || typeof type !== 'string' || typeof description !== 'string' || name.length > 200 || type.length > 100 || description.length > 10000) return NextResponse.json({ error: 'One or more fields are too long' }, { status: 400 })
 
     const { data, error } = await supabase
       .from('team_building_packages')
@@ -47,7 +52,7 @@ export async function DELETE(
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user) {
+    if (!user || !isAdminUser(user)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
