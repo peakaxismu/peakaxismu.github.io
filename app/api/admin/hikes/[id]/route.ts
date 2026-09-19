@@ -39,8 +39,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const admin = createAdminClient()
     const { data: existing, error: existingError } = await admin.from('hikes').select('trail_condition_status, trail_condition_note').eq('id', id).single()
     if (existingError) return NextResponse.json({ error: 'Hike not found' }, { status: 404 })
-    const note = typeof input.trail_condition_note === 'string' ? body.trail_condition_note.trim() : ''
-    if (body.trail_condition_status !== 'open' && !note) return NextResponse.json({ error: 'Add a short operational note when a route is not open.' }, { status: 400 })
+    const note = typeof input.trail_condition_note === 'string' ? input.trail_condition_note.trim() : ''
+    if (input.trail_condition_status !== 'open' && !note) return NextResponse.json({ error: 'Add a short operational note when a route is not open.' }, { status: 400 })
     const changed = body.trail_condition_status !== existing.trail_condition_status || note !== (existing.trail_condition_note || '')
     const { data, error } = await admin.from('hikes').update({
       trail_condition_status: body.trail_condition_status,
@@ -71,7 +71,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const hasStatus = body.trail_condition_status !== undefined
     if (hasStatus && !isTrailStatus(body.trail_condition_status)) return NextResponse.json({ error: 'Invalid trail condition status' }, { status: 400 })
     const statusChanged = hasStatus && body.trail_condition_status !== existing.trail_condition_status
-    const noteChanged = body.trail_condition_note !== undefined && body.trail_condition_note !== existing.trail_condition_note
+    const noteChanged = input.trail_condition_note !== undefined && body.trail_condition_note !== existing.trail_condition_note
     const trailConditionPayload = hasStatus || body.trail_condition_note !== undefined ? {
       ...(hasStatus ? { trail_condition_status: body.trail_condition_status } : {}),
       ...(body.trail_condition_note !== undefined ? { trail_condition_note: typeof body.trail_condition_note === 'string' ? body.trail_condition_note.trim() || null : null } : {}),
