@@ -23,6 +23,7 @@ export async function PUT(
     }
 
     const body = await request.json()
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
     const {
       slug,
       name,
@@ -43,10 +44,14 @@ export async function PUT(
       status,
     } = body
 
-    if (!name || !destination || !price_from) {
+    if ([name, destination, price_from].some((v) => typeof v !== 'string' || !v.trim())) {
       return NextResponse.json({ error: 'Missing required expedition fields' }, { status: 400 })
     }
 
+    if (name.length > 200 || destination.length > 300 || price_from.length > 100) return NextResponse.json({ error: 'One or more fields are too long' }, { status: 400 })
+    if (status !== undefined && (typeof status !== 'string' || !['draft', 'published'].includes(status))) return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+    const numericFields = [duration_days, group_size_min, group_size_max]
+    if (numericFields.some((v) => v !== undefined && v !== null && v !== '' && !Number.isFinite(Number(v)))) return NextResponse.json({ error: 'Invalid numeric expedition field' }, { status: 400 })
     const supabase = createAdminClient()
     const { data, error } = await supabase
       .from('expeditions')
