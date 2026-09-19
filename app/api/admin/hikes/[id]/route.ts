@@ -60,7 +60,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const body = await request.json() as Record<string, unknown>
     const { name, difficulty, date, duration, location, price, spots_total, spots_remaining, description, status } = body
     const bookingType = normaliseBookingType(body.booking_type)
-    if (!name || !difficulty || !duration || !location || !price || (bookingType === 'scheduled_group' && !date)) return NextResponse.json({ error: 'Missing required hike fields' }, { status: 400 })
+    if (typeof name !== 'string' || typeof difficulty !== 'string' || typeof duration !== 'string' || typeof location !== 'string' || typeof price !== 'string' || !name.trim() || !difficulty.trim() || !duration.trim() || !location.trim() || !price.trim() || (bookingType === 'scheduled_group' && typeof date !== 'string')) return NextResponse.json({ error: 'Missing required hike fields' }, { status: 400 })
+    const validParticipantCount = (value: unknown) => value == null || (typeof value === 'number' && Number.isFinite(value)) || (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value)))
+    if (!validParticipantCount(spots_total) || !validParticipantCount(spots_remaining)) return NextResponse.json({ error: 'Invalid participant counts' }, { status: 400 })
     const admin = createAdminClient()
     const { data: existing, error: existingError } = await admin.from('hikes').select('trail_condition_status, trail_condition_note').eq('id', id).single()
     if (existingError) return NextResponse.json({ error: 'Hike not found' }, { status: 404 })
