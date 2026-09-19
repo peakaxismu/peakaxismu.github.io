@@ -12,7 +12,7 @@ export async function PUT(
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user || !isAdminUser(user)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
     }
 
     const body = await request.json()
