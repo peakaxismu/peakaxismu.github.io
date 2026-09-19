@@ -46,7 +46,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     clone.source_hike_id = source.id
     clone.booking_type = 'scheduled_group'
     clone.date = date
-    clone.price = input.price.trim()
+    clone.price = typeof input.price === 'string' ? input.price.trim() : ''
     clone.spots_total = total
     clone.spots_remaining = remaining
     clone.status = status || 'draft'
