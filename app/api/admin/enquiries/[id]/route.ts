@@ -23,13 +23,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   try {
     const { id } = await params
     const body = await request.json()
-    const status = body.status as Status | undefined
-    const next_action = body.next_action as NextAction | null | undefined
-    const next_follow_up_at = body.next_follow_up_at as string | null | undefined
-    const priority = body.priority as Priority | undefined
-    const quote_amount = body.quote_amount as number | string | null | undefined
-    const lost_reason = typeof body.lost_reason === 'string' ? body.lost_reason.trim() : body.lost_reason
-    const note = typeof body.note === 'string' ? body.note.trim() : ''
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    const input = body as Record<string, unknown>
+    const status = typeof input.status === 'string' ? input.status as Status : undefined
+    const next_action = input.next_action === null || typeof input.next_action === 'string' ? input.next_action as NextAction | null | undefined : undefined
+    const next_follow_up_at = input.next_follow_up_at as string | null | undefined
+    const priority = typeof input.priority === 'string' ? input.priority as Priority : undefined
+    const quote_amount = input.quote_amount as number | string | null | undefined
+    const lost_reason = typeof input.lost_reason === 'string' ? input.lost_reason.trim() : input.lost_reason
+    const note = typeof input.note === 'string' ? input.note.trim() : ''
 
     if (status !== undefined && !STATUSES.includes(status)) return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     if (next_action !== undefined && next_action !== null && !NEXT_ACTIONS.includes(next_action)) return NextResponse.json({ error: 'Invalid next action' }, { status: 400 })
