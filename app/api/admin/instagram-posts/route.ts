@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isAdminUser } from '@/lib/supabase/admin-auth'
 
-async function authorized() { const { data: { user } } = await (await createClient()).auth.getUser(); return Boolean(user) }
+async function authorized() { const { data: { user } } = await (await createClient()).auth.getUser(); return isAdminUser(user) }
 
 function getPostUrl(embedCode: string, fallback: string) {
   const match = embedCode?.match(/data-instgrm-permalink=["']([^"']+)["']/i)
