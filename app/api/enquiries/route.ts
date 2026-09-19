@@ -6,6 +6,11 @@ const VALID_INTEREST_TYPES = ['hike', 'private_hike', 'expedition', 'team', 'act
 export async function POST(request: Request) {
   try {
     const body = await request.json()
+
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
+
     const { name, email, phone, interest_type, reference_id, preferred_date, group_size, message } = body
 
     if (typeof name !== 'string' || typeof email !== 'string' || typeof interest_type !== 'string') {
