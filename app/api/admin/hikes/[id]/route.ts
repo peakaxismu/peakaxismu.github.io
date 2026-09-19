@@ -32,9 +32,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { id } = await params
     const { user, authorized } = await authorize()
     if (!authorized) return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
-    const body = await request.json() as unknown
-    if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
-    const input = body
+    const rawBody = await request.json() as unknown
+    if (!rawBody || typeof rawBody !== 'object' || Array.isArray(rawBody)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    const input = rawBody as Record<string, unknown>
     if (!isTrailStatus(input.trail_condition_status)) return NextResponse.json({ error: 'Invalid trail condition status' }, { status: 400 })
     const admin = createAdminClient()
     const { data: existing, error: existingError } = await admin.from('hikes').select('trail_condition_status, trail_condition_note').eq('id', id).single()
@@ -62,8 +62,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     const rawBody = await request.json() as unknown
     if (!rawBody || typeof rawBody !== 'object' || Array.isArray(rawBody)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
     const input = rawBody as Record<string, unknown>
-    const { name, difficulty, date, duration, location, price, spots_total, spots_remaining, description, status } = body
-    const bookingType = normaliseBookingType(body.booking_type)
+    const { name, difficulty, date, duration, location, price, spots_total, spots_remaining, description, status } = input
+    const bookingType = normaliseBookingType(input.booking_type)
     if (typeof name !== 'string' || typeof difficulty !== 'string' || typeof duration !== 'string' || typeof location !== 'string' || typeof price !== 'string' || !name.trim() || !difficulty.trim() || !duration.trim() || !location.trim() || !price.trim() || (bookingType === 'scheduled_group' && typeof date !== 'string')) return NextResponse.json({ error: 'Missing required hike fields' }, { status: 400 })
     const validParticipantCount = (value: unknown) => value == null || (typeof value === 'number' && Number.isFinite(value)) || (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value)))
     if (!validParticipantCount(spots_total) || !validParticipantCount(spots_remaining)) return NextResponse.json({ error: 'Invalid participant counts' }, { status: 400 })
@@ -85,7 +85,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       spots_total: spots_total == null ? 10 : Number(spots_total),
       spots_remaining: spots_remaining == null ? (spots_total == null ? 10 : Number(spots_total)) : Number(spots_remaining),
       description: description || null, status,
-      ...practicalPayload({ ...body, booking_type: bookingType, rating_label: body.rating_label || 'Peak Axis rating' }),
+      ...practicalPayload({ ...input, booking_type: bookingType, rating_label: input.rating_label || 'Peak Axis rating' }),
       ...trailConditionPayload,
     }).eq('id', id).select()
     if (error) return NextResponse.json({ error: 'Failed to update hike' }, { status: 500 })
