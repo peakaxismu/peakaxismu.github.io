@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isAdminUser } from '@/lib/supabase/admin-auth'
 
 async function requireAdmin() {
   const supabase = await createClient()
   const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) return null
+  if (error || !isAdminUser(user)) return null
   return user
 }
 
