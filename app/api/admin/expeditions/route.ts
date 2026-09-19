@@ -10,8 +10,9 @@ export async function POST(request: Request) {
     if (!isAdminUser(user)) return NextResponse.json({ error: user ? 'Forbidden' : 'Unauthorized' }, { status: user ? 403 : 401 })
 
     const body = await request.json()
-    const { slug, name, destination, duration_days, difficulty, price_from, group_size_min, group_size_max, summit_elevation, next_departure, description, itinerary, included, not_included, packing_list, safety_notes, status } = body
-    if (!name || !destination || !price_from) return NextResponse.json({ error: 'Missing required expedition fields' }, { status: 400 })
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    const { slug, name, destination, duration_days, difficulty, price_from, group_size_min, group_size_max, summit_elevation, next_departure, description, itinerary, included, not_included, packing_list, safety_notes, status } = body as Record<string, unknown>
+    if ([name, destination, price_from].some((v) => typeof v !== 'string' || !v.trim())) return NextResponse.json({ error: 'Missing required expedition fields' }, { status: 400 })
     const generatedSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
     const admin = createAdminClient()
     const { data, error } = await admin.from('expeditions').insert({
