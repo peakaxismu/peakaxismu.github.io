@@ -27,7 +27,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const input = body as Record<string, unknown>
     const status = typeof input.status === 'string' ? input.status as Status : undefined
     const next_action = input.next_action === null || typeof input.next_action === 'string' ? input.next_action as NextAction | null | undefined : undefined
-    const next_follow_up_at = input.next_follow_up_at as string | null | undefined
+    const next_follow_up_at = input.next_follow_up_at
     const priority = typeof input.priority === 'string' ? input.priority as Priority : undefined
     const quote_amount = input.quote_amount as number | string | null | undefined
     const lost_reason = typeof input.lost_reason === 'string' ? input.lost_reason.trim() : input.lost_reason
@@ -36,7 +36,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (status !== undefined && !STATUSES.includes(status)) return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     if (next_action !== undefined && next_action !== null && !NEXT_ACTIONS.includes(next_action)) return NextResponse.json({ error: 'Invalid next action' }, { status: 400 })
     if (priority !== undefined && !PRIORITIES.includes(priority)) return NextResponse.json({ error: 'Invalid priority' }, { status: 400 })
-    if (quote_amount !== undefined && quote_amount !== null && (Number.isNaN(Number(quote_amount)) || Number(quote_amount) < 0)) return NextResponse.json({ error: 'Invalid quote amount' }, { status: 400 })
+    if (next_follow_up_at !== undefined && next_follow_up_at !== null && (typeof next_follow_up_at !== 'string' || next_follow_up_at.length > 100)) return NextResponse.json({ error: 'Invalid follow-up date' }, { status: 400 })
+    if (quote_amount !== undefined && quote_amount !== null && quote_amount !== '' && (typeof quote_amount !== 'number' && typeof quote_amount !== 'string' || !Number.isFinite(Number(quote_amount)) || Number(quote_amount) < 0)) return NextResponse.json({ error: 'Invalid quote amount' }, { status: 400 })
+    if (lost_reason !== undefined && lost_reason !== null && (typeof lost_reason !== 'string' || lost_reason.length > 2000)) return NextResponse.json({ error: 'Invalid lost reason' }, { status: 400 })
+    if (note.length > 5000) return NextResponse.json({ error: 'Note is too long' }, { status: 400 })
 
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
