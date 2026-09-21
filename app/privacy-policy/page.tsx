@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy — Peak Axis',
-  description: 'Learn how Peak Axis collects, uses, and protects personal data submitted through our enquiry form and website.',
+  description: 'How Peak Axis collects, uses, stores, and protects personal information.',
 }
 
 export default function PrivacyPolicyPage() {
@@ -12,98 +12,25 @@ export default function PrivacyPolicyPage() {
         <h1>Privacy Policy</h1>
         <p className="last-updated">Last updated: September 2026</p>
 
-        <section>
-          <h2>1. Who We Are</h2>
-          <p>
-            Peak Axis (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) is an adventure company based in Mauritius specializing in local guided hikes, volcano expeditions in La Réunion (Piton de la Fournaise), corporate team-building events, and outdoor activities.
-          </p>
-          <div className="legal-flag">
-            <strong>Owner Confirmation Needed:</strong> If Peak Axis operates under a registered legal entity name or business registration number (BRN/VAT in Mauritius), please specify here.
-          </div>
-        </section>
+        <section><h2>1. Operator and Scope</h2><p>Peak Axis is a Mauritius-based outdoor adventure business offering guided hikes, mountain experiences, expeditions, team-building activities, and related services. Peak Axis is the data controller for information collected through this website and its enquiry and booking processes. The operator’s formal legal name and registration details will be stated on booking documentation and invoices where applicable.</p></section>
 
-        <section>
-          <h2>2. Personal Information We Collect</h2>
-          <p>We only collect personal information that you voluntarily provide when submitting an enquiry or contacting us. This includes:</p>
-          <ul>
-            <li>Full Name</li>
-            <li>Email Address</li>
-            <li>Phone Number / WhatsApp contact (optional)</li>
-            <li>Adventure Interest (Hike, Private Hike, Expedition, Team Building, or Custom Activity)</li>
-            <li>Preferred Dates &amp; Estimated Group Size</li>
-            <li>Enquiry message and activity preferences</li>
-          </ul>
-        </section>
+        <section><h2>2. Information We Collect</h2><p>We may collect your name, email address, telephone or WhatsApp number, group size, preferred dates, activity preferences, emergency contact details, relevant medical or fitness information voluntarily disclosed for safety planning, payment or refund records when applicable, and messages sent to us.</p></section>
 
-        <section>
-          <h2>3. How We Use Your Information</h2>
-          <p>Your information is collected and processed solely to:</p>
-          <ul>
-            <li>Respond to your booking request or adventure enquiry</li>
-            <li>Assess fitness, safety requirements, and group logistics for your chosen activity</li>
-            <li>Communicate route updates, meeting points, gear guidelines, or schedule changes</li>
-            <li>Manage team-building or private hike customizations</li>
-          </ul>
-          <p>We do not sell, rent, or trade your personal information to marketers or third parties.</p>
-        </section>
+        <section><h2>3. Why We Use Information</h2><ul><li>To answer enquiries and communicate with clients.</li><li>To assess route suitability, group logistics, and safety requirements.</li><li>To confirm bookings and provide meeting points, packing lists, and schedule updates.</li><li>To administer cancellations, refunds, complaints, and incident records.</li><li>To protect the website, prevent misuse, and comply with legal obligations.</li></ul><p>We do not sell personal information or use it for third-party behavioural advertising.</p></section>
 
-        <section>
-          <h2>4. Storage &amp; Third-Party Processing</h2>
-          <p>
-            Enquiry data is processed and stored securely in our database hosted via <strong>Supabase</strong> (PostgreSQL with encrypted cloud storage). Access to submitted enquiries is restricted to authorized Peak Axis administrators via secure authentication.
-          </p>
-          <p>
-            Our website infrastructure is hosted on secure cloud hosting (Next.js server environment). Standard technical logs (such as IP address and browser user-agent) may be recorded transiently by our web host for security and diagnostics.
-          </p>
-        </section>
+        <section><h2>4. Legal Basis and Sensitive Information</h2><p>We process information where it is necessary to respond to your request, perform or prepare for a contract, comply with law, protect safety, or where you have given consent. Health and fitness information should be limited to what is relevant to the activity. It is not a medical diagnosis or substitute for professional medical advice.</p></section>
 
-        <section>
-          <h2>5. Cookies &amp; Tracking Technologies</h2>
-          <p>
-            We use essential session storage/cookies strictly required for administrative authentication and saving your cookie consent preferences. We do <strong>not</strong> use third-party advertising, social media tracking pixels, or cross-site behavioral tracking scripts.
-          </p>
-          <p>
-            For full details on cookie categories and consent management, please review our <a href="/cookie-policy" style={{ textDecoration: 'underline', color: 'var(--ink)' }}>Cookie Policy</a>.
-          </p>
-        </section>
+        <section><h2>5. Service Providers and Security</h2><p>Website and enquiry infrastructure may be provided by hosting, database, authentication, communications, payment, and email service providers. We share only information reasonably required for the relevant service. We use access controls and reasonable technical and organisational safeguards, but no internet transmission or storage system can be guaranteed completely secure.</p></section>
 
-        <section>
-          <h2>6. Data Retention</h2>
-          <p>
-            We retain enquiry records for as long as necessary to complete your booking request and maintain records of past guided activities.
-          </p>
-          <div className="legal-flag">
-            <strong>Owner Confirmation Needed:</strong> Confirm exact data retention period (e.g., 24 months after activity completion, or upon request).
-          </div>
-        </section>
+        <section><h2>6. Retention</h2><p>Enquiry records are normally retained for up to 24 months after the last meaningful communication. Booking, accounting, safety, insurance, and incident records may be retained for longer where required by law, contractual obligations, insurance requirements, or legitimate dispute-resolution needs. We securely delete or anonymise information when it is no longer required.</p></section>
 
-        <section>
-          <h2>7. Your Rights</h2>
-          <p>Depending on your jurisdiction, you have the right to:</p>
-          <ul>
-            <li>Access a copy of the personal data we hold about you</li>
-            <li>Request corrections to inaccurate or incomplete information</li>
-            <li>Request deletion of your personal data (&quot;Right to be Forgotten&quot;)</li>
-            <li>Withdraw consent for enquiry communications at any time</li>
-          </ul>
-        </section>
+        <section><h2>7. Cookies</h2><p>We use essential cookies or local storage for website operation, administrative authentication, and cookie-consent preferences. We do not intentionally use advertising pixels or cross-site behavioural tracking. See our <a href="/cookie-policy" style={{ textDecoration: 'underline', color: 'var(--ink)' }}>Cookie Policy</a>.</p></section>
 
-        <section>
-          <h2>8. How to Contact Us</h2>
-          <p>
-            To exercise your privacy rights or ask questions about how your data is handled, please submit an enquiry through our <a href="/enquire" style={{ textDecoration: 'underline', color: 'var(--ink)' }}>Contact Form</a> or reach out to our team directly.
-          </p>
-          <div className="legal-flag">
-            <strong>Owner Confirmation Needed:</strong> Provide designated privacy contact email (e.g. privacy@peakaxis.mu) if available.
-          </div>
-        </section>
+        <section><h2>8. Your Rights</h2><p>Subject to applicable law, you may request access, correction, deletion, restriction, or portability of your information, object to certain processing, or withdraw consent where processing relies on consent. We may need to verify your identity and may retain information where legally required.</p></section>
 
-        <section>
-          <h2>9. Updates to This Policy</h2>
-          <p>
-            We may update this Privacy Policy periodically to reflect operational, legal, or regulatory changes. The updated version will always be published on this page with an updated &quot;Last updated&quot; date.
-          </p>
-        </section>
+        <section><h2>9. Contact</h2><p>For privacy requests, contact Peak Axis through the <a href="/enquire" style={{ textDecoration: 'underline', color: 'var(--ink)' }}>enquiry form</a> and write “Privacy Request” in the message. We aim to acknowledge requests within 7 days and respond within the period required by applicable law.</p></section>
+
+        <section><h2>10. Governing Framework and Updates</h2><p>This policy is intended to operate under the applicable laws of Mauritius, including applicable data-protection requirements. We may update this policy and will publish the revised version with a new date. This policy should be reviewed by a Mauritius lawyer before substantial bookings begin.</p></section>
       </div>
     </div>
   )
