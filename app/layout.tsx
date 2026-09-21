@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import CookieConsent from '@/components/CookieConsent'
+import StructuredData from '@/components/StructuredData'
 import './globals.css'
 import './font-vars.css'
 import './home-overrides.css'
@@ -46,6 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className={inter.className}>
+        <StructuredData />
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
