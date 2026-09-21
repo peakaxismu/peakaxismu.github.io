@@ -1,4 +1,5 @@
 const siteUrl = 'https://peakaxis.mu'
+const tiktokUrl = 'https://www.tiktok.com/@peak.axis'
 
 export default function StructuredData() {
   const schema = {
@@ -8,9 +9,23 @@ export default function StructuredData() {
         '@type': 'Organization',
         '@id': `${siteUrl}/#organization`,
         name: 'Peak Axis',
+        legalName: 'Peak Axis',
         url: siteUrl,
         description:
-          'Peak Axis is a Mauritius adventure company running guided hikes, La Réunion volcano expeditions, team terrain days, and group activities.',
+          'Peak Axis is a Mauritius-based outdoor adventure company offering guided hikes, expeditions, team building, and group outdoor activities in Mauritius and selected destinations including La Réunion.',
+        areaServed: [
+          { '@type': 'Country', name: 'Mauritius' },
+          { '@type': 'Place', name: 'La Réunion' },
+        ],
+        knowsAbout: [
+          'Guided hiking',
+          'Outdoor expeditions',
+          'Volcano expeditions',
+          'Team building activities',
+          'Outdoor group activities',
+          'Outdoor safety',
+        ],
+        sameAs: [tiktokUrl],
       },
       {
         '@type': 'WebSite',
@@ -18,10 +33,11 @@ export default function StructuredData() {
         url: siteUrl,
         name: 'Peak Axis Mauritius',
         description:
-          'Guided hikes in Mauritius, volcano expeditions in La Réunion, and outdoor experiences built around real terrain.',
+          'Official website of Peak Axis, a Mauritius-based outdoor adventure company offering guided hikes, expeditions, team building, and group activities.',
         publisher: {
           '@id': `${siteUrl}/#organization`,
         },
+        inLanguage: 'en',
       },
     ],
   }
