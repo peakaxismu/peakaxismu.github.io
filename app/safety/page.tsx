@@ -1,0 +1,24 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Safety at Peak Axis',
+  description: 'Safety practices, participant preparation, weather decisions, and emergency procedures at Peak Axis.',
+}
+
+export default function SafetyPage() {
+  return (
+    <div className="legal-page"><div className="wrap">
+      <h1>Safety at Peak Axis</h1><p className="last-updated">Last updated: September 2026</p>
+      <section><h2>Safety Comes First</h2><p>Peak Axis treats safety as the first condition of every hike, mountain experience, expedition, and outdoor activity. No itinerary, summit, or schedule takes priority over a reasonable safety decision.</p></section>
+      <section><h2>Weather and Go/No-Go Decisions</h2><p>Before departure, we review available weather forecasts, official warnings, trail or park notices, visibility, rainfall, wind, heat, flooding risk, and route-specific hazards. Guides reassess conditions during the activity. We may delay, shorten, reroute, postpone, or cancel an activity whenever conditions are unsuitable.</p><p>Extreme weather, cyclone warnings, lightning, heavy rain, flooding, unsafe visibility, volcanic alerts, or official closures may result in cancellation without waiting for conditions to deteriorate.</p></section>
+      <section><h2>Participant Equipment</h2><p>Participants must bring the activity-specific items communicated before departure, which may include suitable hiking footwear, weather-appropriate layers, rain protection, sufficient water, food, sun protection, personal medication, identification, and a charged phone. Equipment requirements vary by route and season.</p><p>Any equipment supplied by Peak Axis will be identified in the booking information. Participants must not rely on supplied equipment unless its provision has been confirmed.</p></section>
+      <section><h2>Guides, Ratios, and First Aid</h2><p>Guide-to-client ratios are determined by terrain, difficulty, weather, group experience, participant needs, and applicable operational requirements. The confirmed ratio will be communicated for the activity. Guides may carry first-aid equipment and provide assistance within their training and available resources; this does not replace professional medical care.</p></section>
+      <section><h2>If Someone Cannot Continue</h2><p>A guide may stop, separate, turn back, or evacuate a participant when continuing is unsafe. The group may need to alter or end the activity. Depending on location and severity, Peak Axis may arrange first aid, contact emergency services, coordinate evacuation, and notify the emergency contact. Rescue, medical, transport, accommodation, and repatriation costs should be covered by suitable insurance where possible.</p></section>
+      <section><h2>Trail and Park Closures</h2><p>We respect official trail, park, volcanic, and access restrictions. If a route is closed, we may offer an alternative route or date, or cancel under the Refund &amp; Cancellation Policy. Participants must never bypass a closure or safety barrier.</p></section>
+      <section><h2>Emergency Procedures</h2><p>In an emergency, guides will prioritise immediate safety, account for participants, provide first aid within their training, contact local emergency services, communicate the location and circumstances, and coordinate evacuation or onward medical assistance. Participants must follow instructions, remain reachable, and provide accurate emergency-contact and medical information.</p><p>General emergency contacts: Mauritius Police / emergency services: <strong>112 or 999</strong>; ambulance and fire assistance: <strong>114</strong>. Participants should also save local emergency numbers relevant to the activity location, including La Réunion when applicable.</p></section>
+      <section><h2>Insurance</h2><p>Participants are strongly advised to obtain travel, medical, rescue, evacuation, and personal-accident insurance that covers the specific activity, location, and level of risk. Standard travel insurance may exclude adventure activities, so check the policy wording carefully.</p></section>
+      <section><h2>Participant Health and Responsibility</h2><p>Tell Peak Axis about relevant medical conditions, injuries, allergies, medication, pregnancy, mobility limitations, or fitness concerns before the activity. Participants must arrive rested, hydrated, appropriately equipped, and able to follow instructions. The guide may refuse participation where safety is reasonably in doubt.</p></section>
+      <section><h2>Contact and Legal Review</h2><p>For route-specific safety questions, contact Peak Axis through the <a href="/enquire" style={{ textDecoration: 'underline', color: 'var(--ink)' }}>enquiry form</a> before booking. This page describes general procedures and should be reviewed by a Mauritius lawyer and qualified safety professional before substantial bookings begin.</p></section>
+    </div></div>
+  )
+}
