@@ -34,6 +34,7 @@ export default function SiteContentAdminPage() {
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const photoDragRef = useRef<{ x: number; y: number } | null>(null)
+  const photoCropRef = useRef({ x: 50, y: 30, zoom: 1 })
 
   const load = async () => {
     setLoading(true); setError('')
@@ -60,6 +61,11 @@ export default function SiteContentAdminPage() {
     if (!editingTestimonial?.photo_url && !photoPreview) return
     e.preventDefault()
     e.currentTarget.setPointerCapture(e.pointerId)
+    photoCropRef.current = {
+      x: editingTestimonial?.photo_position_x ?? 50,
+      y: editingTestimonial?.photo_position_y ?? 30,
+      zoom: editingTestimonial?.photo_zoom ?? 1,
+    }
     photoDragRef.current = { x: e.clientX, y: e.clientY }
   }
   const movePhotoDrag = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -70,8 +76,8 @@ export default function SiteContentAdminPage() {
     photoDragRef.current = { x: e.clientX, y: e.clientY }
     setEditingTestimonial(prev => {
       if (!prev) return prev
-      const x = Math.max(0, Math.min(100, (prev.photo_position_x ?? 50) - dx * 0.8))
-      const y = Math.max(0, Math.min(100, (prev.photo_position_y ?? 30) - dy * 0.8))
+      const x = Math.max(0, Math.min(100, photoCropRef.current.x - dx * 0.35))
+      const y = Math.max(0, Math.min(100, photoCropRef.current.y - dy * 0.35))
       return { ...prev, photo_position_x: Math.round(x), photo_position_y: Math.round(y) }
     })
   }
