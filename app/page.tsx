@@ -11,7 +11,7 @@ export default async function HomePage(){
   supabase.from('team_building_packages').select('id,name,type,description').eq('status','published'),
   supabase.from('homepage_content').select('*').eq('id',true).maybeSingle(),
   supabase.from('site_settings').select('instagram_handle,instagram_url').eq('id',true).maybeSingle(),
-  supabase.from('testimonials').select('id,quote,name,activity,photo_url,photo_position_x,photo_position_y').eq('status','published').order('sort_order',{ascending:true}).order('created_at',{ascending:true}).limit(6),
+  supabase.from('testimonials').select('id,quote,name,activity,photo_url,photo_position_x,photo_position_y,photo_zoom').eq('status','published').order('sort_order',{ascending:true}).order('created_at',{ascending:true}).limit(6),
   supabase.from('instagram_posts').select('id,image_url,post_url,embed_code,caption').eq('status','published').order('sort_order',{ascending:true}).order('created_at',{ascending:true}).limit(6),
  ])
  const c=content || {}; const s=settings || {instagram_handle:'peak.axis',instagram_url:'https://www.instagram.com/peak.axis'}; const reviews=testimonials||[]; const posts=instagramPosts||[]
