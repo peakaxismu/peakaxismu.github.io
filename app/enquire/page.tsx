@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import EnquiryFormClient from '@/components/EnquiryFormClient'
@@ -60,9 +59,7 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
             </div>
             <p>Choose what sounds right. You can add dates, group size and other details only if you already know them.</p>
           </div>
-          <Suspense fallback={<div className="contact-loading"><p>Just a moment…</p></div>}>
-            <EnquiryFormClient hikes={hikes || []} expeditions={expeditions || []} teamPackages={teamPackages || []} initialInterest={initialInterest} initialRef={initialRef} />
-          </Suspense>
+          <EnquiryFormClient hikes={hikes || []} expeditions={expeditions || []} teamPackages={teamPackages || []} initialInterest={initialInterest} initialRef={initialRef} />
         </div>
       </section>
 
