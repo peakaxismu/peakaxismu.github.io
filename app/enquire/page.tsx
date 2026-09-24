@@ -171,3 +171,6 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
           #view-enquire .recap-list > div { grid-template-columns:1fr; gap:3px; }
         }
       `}</style>
+    </div>
+  )
+}
