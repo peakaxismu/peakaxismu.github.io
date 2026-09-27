@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       const { data: hike, error: hikeLookupError } = await supabase
         .from('hikes')
         .select('id')
-        .eq('name', cleanRef)
+        .eq('id', cleanRef)
         .eq('status', 'published')
         .eq('booking_type', 'scheduled_group')
         .maybeSingle()
