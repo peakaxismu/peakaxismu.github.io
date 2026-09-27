@@ -7,12 +7,9 @@ interface Hike {
   id: string
   name: string
   difficulty: 'easy' | 'moderate' | 'challenging'
-  date: string
   duration: string
   location: string
   price: string
-  spots_total: number
-  spots_remaining: number
   description: string | null
   status: 'draft' | 'published'
   region?: string | null
@@ -58,7 +55,7 @@ export default function HikesAdminClient({ initialHikes }: { initialHikes: Hike[
   }, [hikes, search, statusFilter, difficultyFilter])
 
   const openEditor = (hike?: Hike) => {
-    setEditing(hike ? { ...hike } : { name: '', difficulty: 'moderate', location: '', duration: '', price: '', status: 'draft', booking_type: 'on_demand', spots_total: 10, spots_remaining: 10, description: '' })
+    setEditing(hike ? { ...hike } : { name: '', difficulty: 'moderate', location: '', duration: '', price: '', status: 'draft', booking_type: 'on_demand', description: '' })
     setTab('details')
     setError('')
   }
