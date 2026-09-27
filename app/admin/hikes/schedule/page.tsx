@@ -9,7 +9,7 @@ export default async function AdminScheduleHikePage() {
     .from('hikes')
     .select('id,name,difficulty,duration,location,price,max_participants,spots_total,booking_type')
     .eq('status', 'published')
-    .neq('booking_type', 'scheduled_group')
+    
     .order('name', { ascending: true })
 
   return <ScheduleHikeClient hikes={hikes || []} />
