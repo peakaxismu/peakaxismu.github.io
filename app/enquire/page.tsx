@@ -11,7 +11,7 @@ type EnquiryPageProps = {
 export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
   const params = await searchParams
   const supabase = await createClient()
-  const { data: hikes } = await supabase.from('hikes').select('id, name, date, price, price_solo_usd, price_group_usd, hike_type, main_attraction, difficulty, difficulty_numeric, duration, location, spots_remaining, spots_total, description, booking_type').eq('status', 'published').eq('booking_type', 'scheduled_group')
+  const { data: hikes } = await supabase.from('hikes').select('id, name, date, price, price_solo_usd, price_group_usd, hike_type, main_attraction, difficulty, difficulty_numeric, duration, location, spots_remaining, spots_total, description, booking_type').eq('status', 'published').eq('booking_type', 'scheduled_group').gte('date', new Date().toISOString().slice(0, 10)).gt('spots_remaining', 0)
   const { data: expeditions } = await supabase.from('expeditions').select('id, name, destination, price_from, duration, difficulty, description').eq('status', 'published')
   const { data: teamPackages } = await supabase.from('team_building_packages').select('id, name, type, duration, price_note, description').eq('status', 'published')
   const allowedInterests = new Set(['hike', 'private_hike', 'expedition', 'piton_des_neiges', 'team', 'activity'])
