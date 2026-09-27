@@ -20,9 +20,6 @@ export interface Hike {
   price: string
   description: string | null
   status: HikeStatus
-  date?: string
-  spots_total?: number
-  spots_remaining?: number
   distance_km?: number | null
   elevation_gain_m?: number | null
   starting_point?: string | null
