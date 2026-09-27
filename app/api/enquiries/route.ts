@@ -91,6 +91,7 @@ export async function POST(request: Request) {
     }
 
     const enquiryId = crypto.randomUUID()
+    const scheduledHikeId = interest_type === 'hike' ? cleanRef : null
 
     const { error } = await supabase
       .from('enquiries')
@@ -101,6 +102,7 @@ export async function POST(request: Request) {
         phone: cleanPhone,
         interest_type,
         reference_id: cleanRef,
+        scheduled_hike_id: scheduledHikeId,
         preferred_date: cleanDate,
         group_size: cleanGroupSize,
         message: cleanMessage,
