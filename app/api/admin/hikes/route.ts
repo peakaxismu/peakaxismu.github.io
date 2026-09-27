@@ -18,7 +18,7 @@ function practicalPayload(body: Record<string, unknown>) {
 }
 
 function normaliseBookingType(value: unknown) {
-  return value === 'scheduled_group' || value === 'private' || value === 'on_demand' ? value : 'on_demand'
+  return value === 'private' || value === 'on_demand' ? value : 'on_demand'
 }
 
 function validFiniteNumber(value: unknown) { return value == null || (typeof value === 'number' && Number.isFinite(value)) || (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value))) }
