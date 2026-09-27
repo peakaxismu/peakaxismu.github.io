@@ -19,7 +19,7 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
   const { data: expeditions } = await supabase.from('expeditions').select('id, name, destination, price_from, duration, difficulty, description').eq('status', 'published')
   const { data: teamPackages } = await supabase.from('team_building_packages').select('id, name, type, duration, price_note, description').eq('status', 'published')
   const allowedInterests = new Set(['hike', 'private_hike', 'expedition', 'piton_des_neiges', 'team', 'activity'])
-  let initialInterest = params.interest && allowedInterests.has(params.interest) ? params.interest : 'hike'
+  let initialInterest = params.interest && allowedInterests.has(params.interest) ? params.interest : ''
   const rawRef = params.ref ?? ''
   let initialRef = ''
   try { initialRef = decodeURIComponent(rawRef) } catch { initialRef = rawRef }
@@ -105,6 +105,11 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
         #view-enquire .interest-opt { width:100%; min-height:82px; display:flex; align-items:flex-start; gap:12px; padding:14px; text-align:left; border:1px solid #d2cbbf; border-radius:12px; background:#f5f1e8; color:#211f1d; cursor:pointer; transition:.18s ease; }
         #view-enquire .interest-opt:hover { border-color:#c1440e; transform:translateY(-1px); }
         #view-enquire .interest-opt.active { border-color:#c1440e; background:#211f1d; color:#faf8f3; box-shadow:inset 0 0 0 1px #c1440e; }
+        #view-enquire .interest-opt.inactive { opacity:.32; }
+        #view-enquire .interest-opt.inactive:hover { opacity:.58; }
+        #view-enquire .experience-context-panel { margin-top:14px; padding:18px; border:1px solid #ded7ca; border-radius:10px; background:#fffaf2; animation:enquiry-context-in .2s ease-out; }
+        #view-enquire .experience-context-panel .field + .field { margin-top:14px; }
+        @keyframes enquiry-context-in { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
         #view-enquire .interest-icon { width:30px; height:30px; flex:0 0 30px; display:grid; place-items:center; border-radius:50%; background:#e8e0d3; color:#c1440e; font-weight:800; }
         #view-enquire .interest-opt.active .interest-icon { background:#c1440e; color:#faf8f3; }
         #view-enquire .interest-copy { display:flex; flex-direction:column; gap:4px; }

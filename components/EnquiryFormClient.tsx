@@ -68,7 +68,7 @@ export default function EnquiryFormClient({
   hikes,
   expeditions,
   teamPackages,
-  initialInterest = 'hike',
+  initialInterest = '',
   initialRef = '',
 }: EnquiryFormClientProps) {
   const [interestType, setInterestType] = useState(initialInterest)
@@ -149,6 +149,11 @@ export default function EnquiryFormClient({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setTouched({ name: true, email: true })
+
+    if (!interestType) {
+      setErrorMsg('Please choose the experience you are enquiring about.')
+      return
+    }
 
     if (!name.trim() || !email.trim()) {
       setErrorMsg('Please add your name and email so we can get back to you.')
@@ -251,14 +256,14 @@ export default function EnquiryFormClient({
 
           <fieldset className="experience-fieldset">
             <legend>What are you dreaming of?</legend>
-            <div className="interest-grid" role="radiogroup" aria-label="Choose an experience">
+            <div className={'interest-grid ' + (interestType ? 'has-selection' : '')} role="radiogroup" aria-label="Choose an experience">
               {EXPERIENCE_OPTIONS.map(([value, title, sub]) => {
                 const active = cardValueForInterest(interestType) === value
                 return (
                   <button
                     key={value}
                     type="button"
-                    className={'interest-opt ' + (active ? 'active' : '')}
+                    className={'interest-opt ' + (active ? 'active' : interestType ? 'inactive' : '')}
                     onClick={() => handleExperienceChange(value)}
                     aria-pressed={active}
                   >
@@ -291,59 +296,8 @@ export default function EnquiryFormClient({
             </div>
           )}
 
-          <div className="field-group-heading">A little about you</div>
-
-          <div className="row2">
-            <div className="field">
-              <label htmlFor={nameId}>Your name <span className="req-star">*</span></label>
-              <input
-                id={nameId}
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onBlur={() => handleBlur('name')}
-                autoComplete="name"
-                placeholder="Your name"
-                className={touched.name && !name.trim() ? 'input-error' : ''}
-              />
-              {touched.name && !name.trim() && <span className="field-error-text">Please add your name.</span>}
-            </div>
-            <div className="field">
-              <label htmlFor={emailId}>Email <span className="req-star">*</span></label>
-              <input
-                type="email"
-                id={emailId}
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onBlur={() => handleBlur('email')}
-                autoComplete="email"
-                placeholder="you@example.com"
-                className={touched.email && (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) ? 'input-error' : ''}
-              />
-              {touched.email && !email.trim() && <span className="field-error-text">Please add your email.</span>}
-            </div>
-          </div>
-
-          <div className="field">
-            <label htmlFor={phoneId}>WhatsApp / phone <span className="optional-label">optional</span></label>
-            <input
-              type="tel"
-              id={phoneId}
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              autoComplete="tel"
-              placeholder="+230 5xxx xxxx"
-            />
-          </div>
-
-          <button type="button" className="details-toggle" onClick={() => setShowMoreDetails((open) => !open)} aria-expanded={showMoreDetails}>
-            <span>{showMoreDetails ? 'Hide extra details' : 'Add more details'}</span>
-            <span aria-hidden="true">{showMoreDetails ? '−' : '+'}</span>
-          </button>
-
-          {showMoreDetails && (
-            <div className="details-panel">
+          {interestType && (
+            <div className="experience-context-panel" aria-live="polite">
               {interestType === 'hike' && (
                 <div className="field">
                   <label htmlFor={hikeSelectId}>Choose a scheduled hike</label>
@@ -406,8 +360,63 @@ export default function EnquiryFormClient({
                   <input id={actTypeId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)} placeholder="A group event, workshop, celebration, or something else" />
                 </div>
               )}
+            </div>
+          )}
 
-              <div className="row2">
+          <div className="field-group-heading">A little about you</div>
+
+          <div className="row2">
+            <div className="field">
+              <label htmlFor={nameId}>Your name <span className="req-star">*</span></label>
+              <input
+                id={nameId}
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onBlur={() => handleBlur('name')}
+                autoComplete="name"
+                placeholder="Your name"
+                className={touched.name && !name.trim() ? 'input-error' : ''}
+              />
+              {touched.name && !name.trim() && <span className="field-error-text">Please add your name.</span>}
+            </div>
+            <div className="field">
+              <label htmlFor={emailId}>Email <span className="req-star">*</span></label>
+              <input
+                type="email"
+                id={emailId}
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={() => handleBlur('email')}
+                autoComplete="email"
+                placeholder="you@example.com"
+                className={touched.email && (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) ? 'input-error' : ''}
+              />
+              {touched.email && !email.trim() && <span className="field-error-text">Please add your email.</span>}
+            </div>
+          </div>
+
+          <div className="field">
+            <label htmlFor={phoneId}>WhatsApp / phone <span className="optional-label">optional</span></label>
+            <input
+              type="tel"
+              id={phoneId}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              autoComplete="tel"
+              placeholder="+230 5xxx xxxx"
+            />
+          </div>
+
+          <button type="button" className="details-toggle" onClick={() => setShowMoreDetails((open) => !open)} aria-expanded={showMoreDetails}>
+            <span>{showMoreDetails ? 'Hide extra details' : 'Add more details'}</span>
+            <span aria-hidden="true">{showMoreDetails ? '−' : '+'}</span>
+          </button>
+
+          {showMoreDetails && (
+            <div className="details-panel">
+            <div className="row2">
                 <div className="field">
                   <label htmlFor={groupSizeId}>How many people?</label>
                   <select id={groupSizeId} value={groupSize} onChange={(e) => setGroupSize(e.target.value)}>
