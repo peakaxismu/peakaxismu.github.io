@@ -18,7 +18,7 @@ function practicalPayload(body: Record<string, unknown>) {
   for (const field of practicalFields) if (body[field] !== undefined) payload[field] = body[field]
   return payload
 }
-function normaliseBookingType(value: unknown) { return value === 'scheduled_group' || value === 'private' || value === 'on_demand' ? value : 'on_demand' }
+function normaliseBookingType(value: unknown) { return value === 'private' || value === 'on_demand' ? value : 'on_demand' }
 function isTrailStatus(value: unknown): value is TrailStatus { return typeof value === 'string' && trailStatuses.includes(value as TrailStatus) }
 
 async function authorize() {
