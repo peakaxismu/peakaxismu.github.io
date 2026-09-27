@@ -19,7 +19,7 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
   const { data: expeditions } = await supabase.from('expeditions').select('id, name, destination, price_from, duration, difficulty, description').eq('status', 'published')
   const { data: teamPackages } = await supabase.from('team_building_packages').select('id, name, type, duration, price_note, description').eq('status', 'published')
   const allowedInterests = new Set(['hike', 'private_hike', 'expedition', 'piton_des_neiges', 'team', 'activity'])
-  let initialInterest = params.interest && allowedInterests.has(params.interest) ? params.interest : 'hike'
+  let initialInterest = params.interest && allowedInterests.has(params.interest) ? params.interest : ''
   const rawRef = params.ref ?? ''
   let initialRef = ''
   try { initialRef = decodeURIComponent(rawRef) } catch { initialRef = rawRef }
