@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 type Hike = {
   id: string
-  name: string
+  hike_id: string
   date: string | null
   status: 'draft' | 'published' | 'retired'
   spots_total: number | null
@@ -14,7 +14,7 @@ type Hike = {
   difficulty: string
   location: string
   price: string
-  source_hike_id: string | null
+  hikes: { name: string; difficulty: string; location: string }
 }
 
 export default function ScheduledHikesAdminClient({ initialHikes }: { initialHikes: Hike[] }) {
@@ -65,8 +65,8 @@ export default function ScheduledHikesAdminClient({ initialHikes }: { initialHik
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/40">Scheduled group</p>
-              <h2 className="mt-1 text-lg font-semibold text-white">{hike.name}</h2>
-              <p className="mt-1 text-sm text-white/55">{hike.location} · {hike.difficulty} · {hike.price}</p>
+              <h2 className="mt-1 text-lg font-semibold text-white">{hike.hikes.name}</h2>
+              <p className="mt-1 text-sm text-white/55">{hike.hikes.location} · {hike.hikes.difficulty} · {hike.price}</p>
             </div>
             <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/70">{hike.status}</span>
           </div>
