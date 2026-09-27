@@ -10,7 +10,6 @@ type Hike = {
   location: string
   price: string
   max_participants?: number | null
-  spots_total?: number | null
 }
 
 const inputStyle: React.CSSProperties = {
@@ -33,7 +32,7 @@ export default function ScheduleHikeClient({ hikes }: { hikes: Hike[] }) {
   const [sourceId, setSourceId] = useState(hikes[0]?.id || '')
   const [date, setDate] = useState('')
   const [price, setPrice] = useState(hikes[0]?.price || '')
-  const [spots, setSpots] = useState(String(hikes[0]?.max_participants || hikes[0]?.spots_total || 10))
+  const [spots, setSpots] = useState(String(hikes[0]?.max_participants || 10))
   const [status, setStatus] = useState<'draft' | 'published'>('draft')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -44,7 +43,7 @@ export default function ScheduleHikeClient({ hikes }: { hikes: Hike[] }) {
     setSourceId(id)
     const next = hikes.find((h) => h.id === id)
     setPrice(next?.price || '')
-    setSpots(String(next?.max_participants || next?.spots_total || 10))
+    setSpots(String(next?.max_participants || 10))
   }
 
   const schedule = async (event: React.FormEvent) => {
@@ -104,7 +103,7 @@ export default function ScheduleHikeClient({ hikes }: { hikes: Hike[] }) {
         </label>
 
         <div style={{ borderLeft: '3px solid var(--ember)', background: '#f5f1e8', padding: '12px 14px', fontSize: 12, lineHeight: 1.55 }}>
-          The scheduled hike is a separate snapshot. Changing its MUR price later will not change the original route template.
+          The departure is its own record linked to the route. Its date, capacity, price, visibility, and trail conditions can change without changing the route details.
         </div>
 
         {error && <div role="alert" style={{ color: '#8f3215', background: '#f7e7df', padding: 11 }}>{error}</div>}

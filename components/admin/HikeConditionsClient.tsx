@@ -7,7 +7,7 @@ type TrailStatus = 'open' | 'conditions_to_confirm' | 'temporarily_unsuitable' |
 type Hike = {
   id: string
   name: string
-  status: 'draft' | 'published'
+  status: 'draft' | 'published' | 'retired'
   difficulty: string
   location: string
   trail_condition_status: TrailStatus
