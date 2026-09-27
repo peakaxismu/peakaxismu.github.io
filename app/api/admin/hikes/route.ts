@@ -36,16 +36,14 @@ export async function POST(request: Request) {
     const rawBody = await request.json() as unknown
     if (!rawBody || typeof rawBody !== 'object' || Array.isArray(rawBody)) return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
     const body = rawBody as Record<string, unknown>
-    const { name, difficulty, date, duration, location, price, spots_total, spots_remaining, description, status } = body
+    const { name, difficulty, duration, location, price, description, status } = body
     const bookingType = normaliseBookingType(body.booking_type)
     const trailConditionStatus = normaliseTrailCondition(body.trail_condition_status)
-    if (typeof name !== 'string' || typeof difficulty !== 'string' || typeof duration !== 'string' || typeof location !== 'string' || typeof price !== 'string' || !name.trim() || !difficulty.trim() || !duration.trim() || !location.trim() || !price.trim() || (bookingType === 'scheduled_group' && typeof date !== 'string')) {
+    if (typeof name !== 'string' || typeof difficulty !== 'string' || typeof duration !== 'string' || typeof location !== 'string' || typeof price !== 'string' || !name.trim() || !difficulty.trim() || !duration.trim() || !location.trim() || !price.trim()) {
       return NextResponse.json({ error: 'Missing required hike fields' }, { status: 400 })
     }
 
     if (name.length > 200 || difficulty.length > 100 || duration.length > 100 || location.length > 300 || price.length > 100 || (typeof description === 'string' && description.length > 10000)) return NextResponse.json({ error: 'One or more fields are too long' }, { status: 400 })
-
-    if (!validFiniteNumber(spots_total) || !validFiniteNumber(spots_remaining)) return NextResponse.json({ error: 'Invalid participant counts' }, { status: 400 })
 
     const admin = createAdminClient()
     const { data, error } = await admin.from('hikes').insert({
