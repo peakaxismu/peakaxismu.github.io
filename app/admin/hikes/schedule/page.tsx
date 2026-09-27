@@ -7,7 +7,7 @@ export default async function AdminScheduleHikePage() {
   const supabase = await createClient()
   const { data: hikes } = await supabase
     .from('hikes')
-    .select('id,name,difficulty,duration,location,price,max_participants,spots_total,booking_type')
+    .select('id,name,difficulty,duration,location,price,max_participants,booking_type')
     .eq('status', 'published')
     
     .order('name', { ascending: true })
