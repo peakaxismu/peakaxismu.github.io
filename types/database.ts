@@ -1,5 +1,5 @@
 export type HikeDifficulty = 'easy' | 'moderate' | 'challenging'
-export type HikeStatus = 'draft' | 'published'
+export type HikeStatus = 'draft' | 'published' | 'retired'
 export type HikeBookingType = 'on_demand' | 'private'
 export type HikeTrailConditionStatus = 'open' | 'conditions_to_confirm' | 'temporarily_unsuitable' | 'closed'
 export type EnquiryStatus = 'new' | 'contacted' | 'quoted' | 'confirmed' | 'completed' | 'closed'
