@@ -74,11 +74,10 @@ export async function POST(request: Request) {
       }
 
       const { data: hike, error: hikeLookupError } = await supabase
-        .from('hikes')
-        .select('id')
+        .from('scheduled_hikes')
+        .select('id,date,spots_remaining,status')
         .eq('id', cleanRef)
         .eq('status', 'published')
-        .eq('booking_type', 'scheduled_group')
         .maybeSingle()
 
       if (hikeLookupError) {
@@ -86,7 +85,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Unable to validate the selected hike. Please try again.' }, { status: 500 })
       }
 
-      if (!hike) {
+      if (!hike || new Date(`${hike.date}T23:59:59Z`) < new Date() || hike.spots_remaining <= 0) {
         return NextResponse.json({ error: 'The selected scheduled hike is no longer available. Please choose another option.' }, { status: 400 })
       }
     }
