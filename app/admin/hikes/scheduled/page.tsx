@@ -1,12 +1,14 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import ScheduledHikesAdminClient from '@/components/admin/ScheduledHikesAdminClient'
 
 export const revalidate = 0
 
 export default async function AdminScheduledHikesPage() {
-  const supabase = await createClient()
-  const { data: hikes } = await supabase
+  await createClient()
+  const admin = createAdminClient()
+  const { data: hikes } = await admin
     .from('scheduled_hikes')
     .select('*,hikes(*)')
     .order('date', { ascending: true })
