@@ -1,6 +1,6 @@
 export type HikeDifficulty = 'easy' | 'moderate' | 'challenging'
 export type HikeStatus = 'draft' | 'published'
-export type HikeBookingType = 'scheduled_group' | 'on_demand' | 'private'
+export type HikeBookingType = 'on_demand' | 'private'
 export type HikeTrailConditionStatus = 'open' | 'conditions_to_confirm' | 'temporarily_unsuitable' | 'closed'
 export type EnquiryStatus = 'new' | 'contacted' | 'quoted' | 'confirmed' | 'completed' | 'closed'
 
@@ -23,7 +23,6 @@ export interface Hike {
   date?: string
   spots_total?: number
   spots_remaining?: number
-  source_hike_id?: string | null
   distance_km?: number | null
   elevation_gain_m?: number | null
   starting_point?: string | null
