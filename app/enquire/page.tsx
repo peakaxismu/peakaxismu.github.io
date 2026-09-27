@@ -15,7 +15,7 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
   const hikes = (scheduled || []).flatMap((departure) => {
     const route = Array.isArray(departure.hikes) ? departure.hikes[0] : departure.hikes
     return route ? [{ ...route, id: departure.id, date: departure.date, price: departure.price, spots_remaining: departure.spots_remaining, spots_total: departure.spots_total, booking_type: 'scheduled_group' }] : []
-  }
+  })
   const { data: expeditions } = await supabase.from('expeditions').select('id, name, destination, price_from, duration, difficulty, description').eq('status', 'published')
   const { data: teamPackages } = await supabase.from('team_building_packages').select('id, name, type, duration, price_note, description').eq('status', 'published')
   const allowedInterests = new Set(['hike', 'private_hike', 'expedition', 'piton_des_neiges', 'team', 'activity'])
