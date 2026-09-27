@@ -19,7 +19,7 @@ export async function generateMetadata({params}:Props):Promise<Metadata>{const {
 export default async function HikeDetailPage({params}:Props){
  const {slug}=await params; const {hike,media}=await getData(slug); if(!hike)notFound()
  const hikeMedia=media.filter(m=>m.hike_id===hike.id),main=hikeMedia.find(m=>m.is_main)||hikeMedia[0],gallery=hikeMedia.filter(m=>m.id!==main?.id)
- const trailStatus=hike.trail_condition_status||'open',routeUnavailable=trailStatus==='temporarily_unsuitable'||trailStatus==='closed'
+ const trailStatus=hike.trail_condition_status||'open'
  const bookingType=hike.booking_type==='private'?'private':'on_demand',bookingLabel=bookingType==='private'?'Private / on-demand':'On-demand hike'
  const enquiry=`/enquire?interest=private_hike&ref=${encodeURIComponent(hike.name)}`
  const bring=list(hike.what_to_bring),included=list(hike.included),excluded=list(hike.excluded),experience=list(hike.experience_types)
