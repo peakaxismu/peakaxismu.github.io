@@ -47,9 +47,7 @@ export async function POST(request: Request) {
 
     const admin = createAdminClient()
     const { data, error } = await admin.from('hikes').insert({
-      name, difficulty, date: date || null, duration, location, price,
-      spots_total: spots_total == null ? 10 : Number(spots_total),
-      spots_remaining: spots_remaining == null ? (spots_total == null ? 10 : Number(spots_total)) : Number(spots_remaining),
+      name, difficulty, duration, location, price,
       description: typeof description === 'string' ? description.trim() || null : null,
       status: status === 'draft' ? 'draft' : 'published',
       ...practicalPayload({ ...body, booking_type: bookingType, rating_label: body.rating_label || 'Peak Axis rating', trail_condition_status: trailConditionStatus }),
