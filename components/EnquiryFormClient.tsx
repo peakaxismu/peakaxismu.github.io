@@ -183,7 +183,7 @@ export default function EnquiryFormClient({
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'We could not send your enquiry. Please try again.')
-      setSubmittedData({ id: json.data?.id, ...payload })
+      setSubmittedData({ id: json.data?.id, ...payload, reference_id: interestType === 'hike' ? (selectedHike?.name || payload.reference_id) : payload.reference_id })
       setSubmitted(true)
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : 'We could not send your enquiry. Please try again.')
