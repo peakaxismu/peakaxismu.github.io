@@ -20,6 +20,7 @@ export interface HikeItem {
   spots_remaining?: number
   spots_total?: number
   description?: string | null
+  booking_type?: string
 }
 
 export interface ExpeditionItem {
@@ -96,6 +97,8 @@ export default function EnquiryFormClient({
   } | null>(null)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
 
+  const scheduledHikes = hikes.filter((h) => h.date && h.spots_remaining !== undefined && h.spots_remaining > 0)
+
   const nameId = useId()
   const emailId = useId()
   const phoneId = useId()
@@ -111,7 +114,7 @@ export default function EnquiryFormClient({
   const messageId = useId()
 
   const parsedGroupSize = Number.parseInt(groupSize, 10) || 1
-  const selectedHike = interestType === 'hike' ? hikes.find((h) => h.name === referenceId) : null
+  const selectedHike = interestType === 'hike' ? hikes.find((h) => h.id === referenceId) : null
   const selectedExpedition = interestType === 'expedition' ? expeditions.find((ex) => ex.name === referenceId) : null
   const selectedTeamPkg = interestType === 'team' ? teamPackages.find((tp) => tp.name === referenceId) : null
   const isDeuxMamelles = selectedHike?.name.toLowerCase().includes('deux mamelles')
@@ -343,12 +346,12 @@ export default function EnquiryFormClient({
             <div className="details-panel">
               {interestType === 'hike' && (
                 <div className="field">
-                  <label htmlFor={hikeSelectId}>Which group hike?</label>
+                  <label htmlFor={hikeSelectId}>Choose a scheduled hike</label>
                   <select id={hikeSelectId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)}>
-                    <option value="">Any scheduled hike is fine</option>
-                    {hikes.map((h) => (
-                      <option key={h.id} value={h.name}>
-                        {h.name}{h.date ? ' · ' + h.date : ''}
+                    <option value="">{scheduledHikes.length ? 'Select a departure' : 'No hike planned'}</option>
+                    {scheduledHikes.map((h) => (
+                      <option key={h.id} value={h.id}>
+                        {h.name} · {h.date} · {h.spots_remaining} {h.spots_remaining === 1 ? 'spot' : 'spots'} left
                       </option>
                     ))}
                   </select>
