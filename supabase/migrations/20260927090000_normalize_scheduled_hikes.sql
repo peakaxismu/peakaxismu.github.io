@@ -20,6 +20,8 @@ create index if not exists scheduled_hikes_status_date_idx on public.scheduled_h
 alter table public.scheduled_hikes enable row level security;
 
 drop policy if exists "Public can read published scheduled hikes" on public.scheduled_hikes;
+grant select on public.scheduled_hikes to anon, authenticated;
+
 create policy "Public can read published scheduled hikes"
   on public.scheduled_hikes for select
   using (status = 'published');
