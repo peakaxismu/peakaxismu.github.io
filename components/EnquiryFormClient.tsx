@@ -68,7 +68,7 @@ export default function EnquiryFormClient({
   hikes,
   expeditions,
   teamPackages,
-  initialInterest = 'hike',
+  initialInterest = '',
   initialRef = '',
 }: EnquiryFormClientProps) {
   const [interestType, setInterestType] = useState(initialInterest)
@@ -150,7 +150,7 @@ export default function EnquiryFormClient({
     e.preventDefault()
     setTouched({ name: true, email: true })
 
-    if (!name.trim() || !email.trim()) {
+    if (!interestType) {\n      setErrorMsg('Please choose the experience you are enquiring about.')\n      return\n    }\n\n    if (!name.trim() || !email.trim()) {
       setErrorMsg('Please add your name and email so we can get back to you.')
       return
     }
@@ -251,14 +251,14 @@ export default function EnquiryFormClient({
 
           <fieldset className="experience-fieldset">
             <legend>What are you dreaming of?</legend>
-            <div className="interest-grid" role="radiogroup" aria-label="Choose an experience">
+            <div className={'interest-grid ' + (interestType ? 'has-selection' : '')} role="radiogroup" aria-label="Choose an experience">
               {EXPERIENCE_OPTIONS.map(([value, title, sub]) => {
                 const active = cardValueForInterest(interestType) === value
                 return (
                   <button
                     key={value}
                     type="button"
-                    className={'interest-opt ' + (active ? 'active' : '')}
+                    className={'interest-opt ' + (active ? 'active' : interestType ? 'inactive' : '')}
                     onClick={() => handleExperienceChange(value)}
                     aria-pressed={active}
                   >
@@ -291,7 +291,7 @@ export default function EnquiryFormClient({
             </div>
           )}
 
-          <div className="field-group-heading">A little about you</div>
+          {interestType && (\n            <div className="experience-context-panel" aria-live="polite">\n              {interestType === 'hike' && (\n                <div className="field">\n                  <label htmlFor={hikeSelectId}>Choose a scheduled hike</label>\n                  <select id={hikeSelectId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)}>\n                    <option value="">{scheduledHikes.length ? 'Select a departure' : 'No hike planned'}</option>\n                    {scheduledHikes.map((h) => (\n                      <option key={h.id} value={h.id}>\n                        {h.name} · {h.date} · {h.spots_remaining} {h.spots_remaining === 1 ? 'spot' : 'spots'} left\n                      </option>\n                    ))}\n                  </select>\n                  {isDeuxMamelles && <div className="upsell-box">Want to add a refreshing waterfall swim? Ask us about the Deux Mamelles + Waterfalls experience.</div>}\n                </div>\n              )}\n\n              {interestType === 'private_hike' && (\n                <>\n                  <div className="field">\n                    <label htmlFor={trailPrefId}>Route or area</label>\n                    <input id={trailPrefId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)} placeholder="e.g. Le Morne, Black River Gorges, or surprise me" />\n                  </div>\n                  <div className="field">\n                    <label htmlFor={prefDatePrivateId}>Preferred date</label>\n                    <input type="date" id={prefDatePrivateId} value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} />\n                  </div>\n                  {initialInterest === 'expedition' && expeditions.length > 0 && (\n                    <div className="field">\n                      <label htmlFor={expSelectId}>Or choose an expedition</label>\n                      <select id={expSelectId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)}>\n                        <option value="">I&apos;m open to options</option>\n                        {expeditions.map((ex) => (\n                          <option key={ex.id} value={ex.name}>{ex.name} · {ex.destination}</option>\n                        ))}\n                      </select>\n                    </div>\n                  )}\n                </>\n              )}\n\n              {interestType === 'team' && (\n                <div className="row2">\n                  <div className="field">\n                    <label htmlFor={teamPkgId}>Team experience</label>\n                    <select id={teamPkgId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)}>\n                      <option value="">Help me choose</option>\n                      {teamPackages.map((tp) => <option key={tp.id} value={tp.name}>{tp.name}</option>)}\n                      <option value="Custom Team Package">Something custom</option>\n                    </select>\n                  </div>\n                  <div className="field">\n                    <label htmlFor={teamDateId}>Preferred date</label>\n                    <input type="date" id={teamDateId} value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} />\n                  </div>\n                </div>\n              )}\n\n              {interestType === 'activity' && (\n                <div className="field">\n                  <label htmlFor={actTypeId}>What are you planning?</label>\n                  <input id={actTypeId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)} placeholder="A group event, workshop, celebration, or something else" />\n                </div>\n              )}\n            </div>\n          )}\n\n          <div className="field-group-heading">A little about you</div>
 
           <div className="row2">
             <div className="field">
@@ -344,70 +344,7 @@ export default function EnquiryFormClient({
 
           {showMoreDetails && (
             <div className="details-panel">
-              {interestType === 'hike' && (
-                <div className="field">
-                  <label htmlFor={hikeSelectId}>Choose a scheduled hike</label>
-                  <select id={hikeSelectId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)}>
-                    <option value="">{scheduledHikes.length ? 'Select a departure' : 'No hike planned'}</option>
-                    {scheduledHikes.map((h) => (
-                      <option key={h.id} value={h.id}>
-                        {h.name} · {h.date} · {h.spots_remaining} {h.spots_remaining === 1 ? 'spot' : 'spots'} left
-                      </option>
-                    ))}
-                  </select>
-                  {isDeuxMamelles && <div className="upsell-box">Want to add a refreshing waterfall swim? Ask us about the Deux Mamelles + Waterfalls experience.</div>}
-                </div>
-              )}
-
-              {interestType === 'private_hike' && (
-                <>
-                  <div className="field">
-                    <label htmlFor={trailPrefId}>Route or area</label>
-                    <input id={trailPrefId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)} placeholder="e.g. Le Morne, Black River Gorges, or surprise me" />
-                  </div>
-                  <div className="field">
-                    <label htmlFor={prefDatePrivateId}>Preferred date</label>
-                    <input type="date" id={prefDatePrivateId} value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} />
-                  </div>
-                  {initialInterest === 'expedition' && expeditions.length > 0 && (
-                    <div className="field">
-                      <label htmlFor={expSelectId}>Or choose an expedition</label>
-                      <select id={expSelectId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)}>
-                        <option value="">I&apos;m open to options</option>
-                        {expeditions.map((ex) => (
-                          <option key={ex.id} value={ex.name}>{ex.name} · {ex.destination}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {interestType === 'team' && (
-                <div className="row2">
-                  <div className="field">
-                    <label htmlFor={teamPkgId}>Team experience</label>
-                    <select id={teamPkgId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)}>
-                      <option value="">Help me choose</option>
-                      {teamPackages.map((tp) => <option key={tp.id} value={tp.name}>{tp.name}</option>)}
-                      <option value="Custom Team Package">Something custom</option>
-                    </select>
-                  </div>
-                  <div className="field">
-                    <label htmlFor={teamDateId}>Preferred date</label>
-                    <input type="date" id={teamDateId} value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} />
-                  </div>
-                </div>
-              )}
-
-              {interestType === 'activity' && (
-                <div className="field">
-                  <label htmlFor={actTypeId}>What are you planning?</label>
-                  <input id={actTypeId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)} placeholder="A group event, workshop, celebration, or something else" />
-                </div>
-              )}
-
-              <div className="row2">
+            <div className="row2">
                 <div className="field">
                   <label htmlFor={groupSizeId}>How many people?</label>
                   <select id={groupSizeId} value={groupSize} onChange={(e) => setGroupSize(e.target.value)}>
