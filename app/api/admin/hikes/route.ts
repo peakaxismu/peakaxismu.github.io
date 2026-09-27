@@ -21,8 +21,6 @@ function normaliseBookingType(value: unknown) {
   return value === 'private' || value === 'on_demand' ? value : 'on_demand'
 }
 
-function validFiniteNumber(value: unknown) { return value == null || (typeof value === 'number' && Number.isFinite(value)) || (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value))) }
-
 function normaliseTrailCondition(value: unknown) {
   return value === 'conditions_to_confirm' || value === 'temporarily_unsuitable' || value === 'closed' ? value : 'open'
 }
