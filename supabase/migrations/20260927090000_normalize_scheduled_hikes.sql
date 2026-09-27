@@ -71,16 +71,6 @@ where e.interest_type = 'hike'
     or e.reference_id = concat((select h.name from public.hikes h where h.id = sh.hike_id), ' - ', sh.date::text)
   );
 
-do $
-begin
-  if to_regclass('public.hike_media') is not null then
-    update public.hike_media m
-    set hike_id = sh.hike_id
-    from public.scheduled_hikes sh
-    where m.hike_id = sh.id;
-  end if;
-end $;
-
 delete from public.hikes
 where booking_type = 'scheduled_group'
   and source_hike_id is not null;
