@@ -150,7 +150,10 @@ export default function EnquiryFormClient({
     e.preventDefault()
     setTouched({ name: true, email: true })
 
-    if (!interestType) {\n      setErrorMsg('Please choose the experience you are enquiring about.')\n      return\n    }\n\n    if (!name.trim() || !email.trim()) {
+    if (!interestType) {
+      setErrorMsg('Please choose the experience you are enquiring about.')
+      return
+    }\n\n    if (!name.trim() || !email.trim()) {
       setErrorMsg('Please add your name and email so we can get back to you.')
       return
     }
