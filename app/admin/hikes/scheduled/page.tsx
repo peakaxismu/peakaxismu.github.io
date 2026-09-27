@@ -7,9 +7,8 @@ export const revalidate = 0
 export default async function AdminScheduledHikesPage() {
   const supabase = await createClient()
   const { data: hikes } = await supabase
-    .from('hikes')
-    .select('*')
-    .eq('booking_type', 'scheduled_group')
+    .from('scheduled_hikes')
+    .select('*,hikes(*)')
     .order('date', { ascending: true })
 
   return (
