@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getOnDemandHikeHref } from '@/lib/hike-routes'
 
 export const revalidate = 0
 
@@ -91,7 +92,7 @@ export default async function ScheduledHikePage({ params }: Props) {
                 ) : (
                   <span className="sold-out">Fully booked</span>
                 )}
-                <Link href={`/hikes/${hike.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`} className="secondary-btn">View hike details</Link>
+                <Link href={getOnDemandHikeHref(hike.name)} className="secondary-btn">View hike details</Link>
               </div>
             </div>
 
