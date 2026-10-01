@@ -4,7 +4,6 @@ import type { Hike } from '@/types/database'
 type Media = { id:string; hike_id:string; image_url:string; is_main:boolean; sort_order:number }
 export type ScheduledOverlay = { id:string; date:string; price:string|null; spots_total:number|null; spots_remaining:number|null; trail_condition_status?:string|null; trail_condition_note?:string|null }
 
-=(v:string)=>v.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'-')
 const valueOr=(v:string|number|null|undefined,f='To be confirmed')=>v===null||v===undefined||v===''?f:String(v)
 const list=(v?:string[])=>v?.filter(Boolean)||[]
 
