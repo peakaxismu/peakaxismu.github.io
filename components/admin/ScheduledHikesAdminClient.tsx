@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { getScheduledHikeHref } from '@/lib/hike-routes'
 
 type Hike = {
@@ -19,14 +19,33 @@ type Hike = {
   hikes: { name: string; difficulty: string; location: string }
 }
 
+type Toast = { type: 'success' | 'error'; message: string } | null
+
+const inputClass = 'w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none transition placeholder:text-white/25 focus:border-emerald-300/60 focus:ring-2 focus:ring-emerald-300/10 disabled:cursor-wait disabled:opacity-60'
+
 export default function ScheduledHikesAdminClient({ initialHikes }: { initialHikes: Hike[] }) {
   const [hikes, setHikes] = useState(initialHikes)
   const [saving, setSaving] = useState<string | null>(null)
-  const [message, setMessage] = useState('')
+  const [toast, setToast] = useState<Toast>(null)
+  const [query, setQuery] = useState('')
+  const [status, setStatus] = useState<'all' | Hike['status']>('all')
 
-  async function save(hike: Hike, patch: Record<string, unknown>) {
+  const visibleHikes = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return hikes.filter((hike) => {
+      const matchesStatus = status === 'all' || hike.status === status
+      const matchesQuery = !q || [hike.hikes.name, hike.hikes.location, hike.hikes.difficulty].some((value) => value.toLowerCase().includes(q))
+      return matchesStatus && matchesQuery
+    })
+  }, [hikes, query, status])
+
+  function notify(next: Toast) {
+    setToast(next)
+    if (next) window.setTimeout(() => setToast(null), 3200)
+  }
+
+  async function save(hike: Hike, patch: Record<string, unknown>, message: string) {
     setSaving(hike.id)
-    setMessage('')
     try {
       const response = await fetch(`/api/admin/hikes/${hike.id}/schedule`, {
         method: 'PATCH',
@@ -36,12 +55,16 @@ export default function ScheduledHikesAdminClient({ initialHikes }: { initialHik
       const result = await response.json()
       if (!response.ok) throw new Error(result.error || 'Unable to save departure')
       setHikes((current) => current.map((item) => item.id === hike.id ? result.data : item))
-      setMessage('Departure updated.')
+      notify({ type: 'success', message })
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to save departure')
+      notify({ type: 'error', message: error instanceof Error ? error.message : 'Unable to save departure' })
     } finally {
       setSaving(null)
     }
+  }
+
+  function update(id: string, patch: Partial<Hike>) {
+    setHikes((current) => current.map((item) => item.id === id ? { ...item, ...patch } : item))
   }
 
   function formatMurPrice(value: string) {
@@ -49,8 +72,7 @@ export default function ScheduledHikesAdminClient({ initialHikes }: { initialHik
     if (!trimmed) return ''
     const numeric = trimmed.replace(/^(mur|rs|rs\.)\s*/i, '').replace(/,/g, '').trim()
     if (/^\d+(?:\.\d{1,2})?$/.test(numeric)) {
-      const amount = Number(numeric)
-      return `MUR ${amount.toLocaleString('en-MU', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
+      return `MUR ${Number(numeric).toLocaleString('en-MU', { maximumFractionDigits: 2 })}`
     }
     return /^mur\s/i.test(trimmed) ? trimmed : `MUR ${trimmed}`
   }
@@ -59,41 +81,75 @@ export default function ScheduledHikesAdminClient({ initialHikes }: { initialHik
     return <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-sm text-white/60">No scheduled departures yet. Create one from the schedule flow.</div>
   }
 
+  const published = hikes.filter((hike) => hike.status === 'published').length
+  const drafts = hikes.filter((hike) => hike.status === 'draft').length
+
   return (
-    <div className="space-y-4">
-      {message && <p className="text-sm text-emerald-300">{message}</p>}
-      {hikes.map((hike) => (
-        <article key={hike.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/40">Scheduled group</p>
-              <h2 className="mt-1 text-lg font-semibold text-white">{hike.hikes.name}</h2>
-              <p className="mt-1 text-sm text-white/55">{hike.hikes.location} · {hike.hikes.difficulty} · {hike.price}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/70">{hike.status}</span>
-              <Link href={getScheduledHikeHref(hike.id)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-emerald-400 px-3.5 py-2 text-xs font-bold text-slate-950 transition hover:bg-emerald-300">
-                View live <span aria-hidden="true">↗</span>
-              </Link>
-            </div>
-          </div>
+    <div className="space-y-5">
+      {toast && (
+        <div role="status" aria-live="polite" className={`fixed bottom-5 right-5 z-[80] flex max-w-sm items-start gap-3 rounded-2xl border px-4 py-3 shadow-2xl backdrop-blur-md ${toast.type === 'success' ? 'border-emerald-300/20 bg-emerald-950/95 text-emerald-100' : 'border-red-300/20 bg-red-950/95 text-red-100'}`}>
+          <span aria-hidden="true" className="font-bold">{toast.type === 'success' ? '✓' : '!'}</span>
+          <p className="text-sm font-medium">{toast.message}</p>
+          <button type="button" onClick={() => setToast(null)} className="ml-2 text-white/50 hover:text-white" aria-label="Dismiss notification">×</button>
+        </div>
+      )}
 
-          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-            <label className="space-y-1 text-sm text-white/65">Date<input type="date" defaultValue={hike.date || ''} onBlur={(event) => event.currentTarget.value !== (hike.date || '') && save(hike, { date: event.currentTarget.value })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white" /></label>
-            <label className="space-y-1 text-sm text-white/65">Price (MUR)<input type="text" defaultValue={hike.price || ''} onBlur={(event) => { const value = formatMurPrice(event.currentTarget.value); event.currentTarget.value = value; if (value !== hike.price) save(hike, { price: value }) }} placeholder="MUR 2,500" inputMode="decimal" className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white" /></label>
-            <label className="space-y-1 text-sm text-white/65">Total capacity<input type="number" min="1" defaultValue={hike.spots_total ?? 1} onBlur={(event) => save(hike, { spots_total: Number(event.currentTarget.value) })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white" /></label>
-            <label className="space-y-1 text-sm text-white/65">Remaining spots<input type="number" min="0" max={hike.spots_total ?? undefined} defaultValue={hike.spots_remaining ?? 0} onBlur={(event) => save(hike, { spots_remaining: Number(event.currentTarget.value) })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white" /></label>
-            <label className="space-y-1 text-sm text-white/65">Visibility<select defaultValue={hike.status} onChange={(event) => save(hike, { status: event.target.value })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white"><option value="draft">Draft / hidden</option><option value="published">Published</option><option value="retired">Retired</option></select></label>
-          </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/40">Total departures</p><p className="mt-1 text-2xl font-semibold text-white">{hikes.length}</p></div>
+        <div className="rounded-2xl border border-emerald-300/15 bg-emerald-300/[0.05] p-4"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200/60">Published</p><p className="mt-1 text-2xl font-semibold text-emerald-200">{published}</p></div>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/40">Drafts</p><p className="mt-1 text-2xl font-semibold text-white">{drafts}</p></div>
+      </div>
 
-          <div className="mt-5 grid gap-4 lg:grid-cols-[220px_1fr]">
-            <label className="space-y-1 text-sm text-white/65">Trail condition<select defaultValue={hike.trail_condition_status || 'open'} onChange={(event) => save(hike, { trail_condition_status: event.target.value })} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white"><option value="open">Open</option><option value="conditions_to_confirm">Conditions to confirm</option><option value="temporarily_unsuitable">Temporarily unsuitable</option><option value="closed">Closed</option></select></label>
-            <label className="space-y-1 text-sm text-white/65">Operational note<textarea defaultValue={hike.trail_condition_note || ''} onBlur={(event) => save(hike, { trail_condition_note: event.currentTarget.value })} rows={2} className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white" placeholder="Add a note for weather, access, footing, or other departure-specific conditions." /></label>
-          </div>
+      <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:flex-row sm:items-center">
+        <input aria-label="Search scheduled hikes" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by hike, location, or difficulty…" className={`${inputClass} flex-1`} />
+        <select aria-label="Filter by visibility" value={status} onChange={(event) => setStatus(event.target.value as typeof status)} className={`${inputClass} sm:w-44`}>
+          <option value="all">All visibility</option><option value="published">Published</option><option value="draft">Draft</option><option value="retired">Retired</option>
+        </select>
+        {(query || status !== 'all') && <button type="button" onClick={() => { setQuery(''); setStatus('all') }} className="rounded-xl px-3 py-2 text-sm font-semibold text-white/60 hover:bg-white/5 hover:text-white">Clear</button>}
+      </div>
 
-          {saving === hike.id && <p className="mt-3 text-xs text-white/40">Saving…</p>}
-        </article>
-      ))}
+      {!visibleHikes.length ? (
+        <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center"><p className="font-medium text-white">No departures match these filters.</p><p className="mt-1 text-sm text-white/45">Try a different search or clear the filters.</p></div>
+      ) : (
+        <div className="space-y-4">
+          {visibleHikes.map((hike) => {
+            const isSaving = saving === hike.id
+            return (
+              <article key={hike.id} className={`rounded-2xl border bg-white/[0.03] p-5 transition ${isSaving ? 'border-emerald-300/25' : 'border-white/10'}`}>
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/40">Scheduled departure</p>
+                      <span className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white/65">{hike.status}</span>
+                    </div>
+                    <h2 className="mt-2 text-lg font-semibold text-white">{hike.hikes.name}</h2>
+                    <p className="mt-1 text-sm text-white/50">{hike.hikes.location} · {hike.hikes.difficulty} · {hike.price || 'Price not set'}</p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {isSaving && <span className="text-xs font-medium text-emerald-200/70" role="status">Saving…</span>}
+                    <Link href={getScheduledHikeHref(hike.id)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-emerald-400 px-3.5 py-2 text-xs font-bold text-slate-950 transition hover:bg-emerald-300">View live <span aria-hidden="true">↗</span></Link>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+                  <label className="space-y-1 text-sm text-white/65">Date<input type="date" disabled={isSaving} value={hike.date || ''} onChange={(event) => update(hike.id, { date: event.target.value })} onBlur={() => save(hike, { date: hike.date || null }, 'Departure date updated.')} className={inputClass} /></label>
+                  <label className="space-y-1 text-sm text-white/65">Price (MUR)<input type="text" disabled={isSaving} value={hike.price || ''} onChange={(event) => update(hike.id, { price: event.target.value })} onBlur={(event) => { const value = formatMurPrice(event.currentTarget.value); update(hike.id, { price: value }); save(hike, { price: value }, 'Price updated.') }} placeholder="MUR 2,500" inputMode="decimal" className={inputClass} /></label>
+                  <label className="space-y-1 text-sm text-white/65">Total capacity<input type="number" min="1" disabled={isSaving} value={hike.spots_total ?? 1} onChange={(event) => update(hike.id, { spots_total: Number(event.target.value) })} onBlur={() => save(hike, { spots_total: hike.spots_total }, 'Total capacity updated.')} className={inputClass} /></label>
+                  <label className="space-y-1 text-sm text-white/65">Remaining spots<input type="number" min="0" max={hike.spots_total ?? undefined} disabled={isSaving} value={hike.spots_remaining ?? 0} onChange={(event) => update(hike.id, { spots_remaining: Number(event.target.value) })} onBlur={() => save(hike, { spots_remaining: hike.spots_remaining }, 'Remaining spots updated.')} className={inputClass} /></label>
+                  <label className="space-y-1 text-sm text-white/65">Visibility<select disabled={isSaving} value={hike.status} onChange={(event) => { const value = event.target.value as Hike['status']; update(hike.id, { status: value }); save(hike, { status: value }, value === 'published' ? 'Departure published.' : value === 'retired' ? 'Departure retired.' : 'Departure moved to draft.') }} className={inputClass}><option value="draft">Draft / hidden</option><option value="published">Published</option><option value="retired">Retired</option></select></label>
+                </div>
+
+                <div className="mt-5 grid gap-4 lg:grid-cols-[220px_1fr]">
+                  <label className="space-y-1 text-sm text-white/65">Trail condition<select disabled={isSaving} value={hike.trail_condition_status || 'open'} onChange={(event) => { const value = event.target.value as Hike['trail_condition_status']; update(hike.id, { trail_condition_status: value }); save(hike, { trail_condition_status: value }, 'Trail condition updated.') }} className={inputClass}><option value="open">Open</option><option value="conditions_to_confirm">Conditions to confirm</option><option value="temporarily_unsuitable">Temporarily unsuitable</option><option value="closed">Closed</option></select></label>
+                  <label className="space-y-1 text-sm text-white/65">Operational note<textarea disabled={isSaving} value={hike.trail_condition_note || ''} onChange={(event) => update(hike.id, { trail_condition_note: event.target.value })} onBlur={() => save(hike, { trail_condition_note: hike.trail_condition_note || '' }, 'Operational note saved.')} rows={2} className={inputClass} placeholder="Add weather, access, footing, or other departure-specific conditions." /></label>
+                </div>
+
+                <p className="mt-4 text-xs text-white/35">Changes save automatically when you leave a field. Visibility and trail condition save immediately.</p>
+              </article>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
