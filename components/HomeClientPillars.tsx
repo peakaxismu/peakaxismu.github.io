@@ -7,6 +7,7 @@ import { getOnDemandHikeHref, getScheduledHikeHref } from '@/lib/hike-routes'
 
 interface Hike { id:string; name:string; difficulty:string; duration:string; location:string; price:string; booking_type?:'on_demand'|'private'; date?:string; spots_remaining?:number; spots_total?:number }
 interface ScheduledHike { id:string; hike_id:string; date:string; price:string; spots_remaining:number; spots_total:number }
+type DisplayedHike = Hike & { scheduledHikeId?:string; hikeId?:string; booking_type?:'on_demand'|'private'|'scheduled_group'; date?:string; spots_remaining?:number; spots_total?:number }
 interface Expedition { id:string; slug:string; name:string; destination:string; duration_days:number; price_from:string; next_departure:string; description:string }
 interface TeamBuilding { id:string; name:string; type:string; description:string }
 interface Copy { hikes_title:string; hikes_body:string; hikes_primary_cta:string; hikes_primary_url:string; hikes_secondary_cta:string; hikes_secondary_url:string; expeditions_title:string; expeditions_body:string; expeditions_cta:string; expeditions_url:string; team_title:string; team_body:string; team_cta:string; team_url:string; activities_title:string; activities_body:string; activities_cta:string; activities_url:string }
@@ -14,8 +15,8 @@ interface Copy { hikes_title:string; hikes_body:string; hikes_primary_cta:string
 export default function HomeClientPillars({hikes,scheduledHikes=[],expedition,teamBuilding,copy}:{hikes:Hike[];scheduledHikes?:ScheduledHike[];expedition:Expedition|null;teamBuilding:TeamBuilding[];copy:Copy}) {
   const [activeTab,setActiveTab]=useState<'hikes'|'expeditions'|'team'|'activities'>('hikes')
   const routeById=new Map(hikes.map(h=>[h.id,h]))
-  const displayedHikes=scheduledHikes.length>0
-    ? scheduledHikes.map(s=>{const parent=routeById.get(s.hike_id); if(!parent)return null; return { ...parent, scheduledHikeId:s.id, hikeId:s.hike_id, date:s.date, price:s.price, booking_type:'scheduled_group' as const, spots_remaining:s.spots_remaining, spots_total:s.spots_total }}).filter(Boolean)
+  const displayedHikes:DisplayedHike[]=scheduledHikes.length>0
+    ? scheduledHikes.flatMap(s=>{const parent=routeById.get(s.hike_id); if(!parent)return []; return [{ ...parent, scheduledHikeId:s.id, hikeId:s.hike_id, date:s.date, price:s.price, booking_type:'scheduled_group' as const, spots_remaining:s.spots_remaining, spots_total:s.spots_total }]})
     : hikes
   const outdoorTeam=teamBuilding.filter(t=>t.type==='outdoor')
   const indoorActivities=teamBuilding.filter(t=>t.type==='indoor')
