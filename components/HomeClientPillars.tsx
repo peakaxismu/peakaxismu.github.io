@@ -5,7 +5,7 @@ import Link from 'next/link'
 import HomeStoryKilimanjaro from '@/components/HomeStoryKilimanjaro'
 import { getOnDemandHikeHref, getScheduledHikeHref } from '@/lib/hike-routes'
 
-interface Hike { id:string; name:string; difficulty:string; duration:string; location:string; price:string; booking_type?:'on_demand'|'private'; date?:string; spots_remaining?:number; spots_total?:number }
+interface Hike { id:string; name:string; difficulty:string; duration:string; location:string; price:string; booking_type?:'on_demand'|'private'|'scheduled_group'; date?:string; spots_remaining?:number; spots_total?:number }
 interface ScheduledHike { id:string; hike_id:string; date:string; price:string; spots_remaining:number; spots_total:number }
 type DisplayedHike = Hike & { scheduledHikeId?:string; hikeId?:string; booking_type?:'on_demand'|'private'|'scheduled_group'; date?:string; spots_remaining?:number; spots_total?:number }
 interface Expedition { id:string; slug:string; name:string; destination:string; duration_days:number; price_from:string; next_departure:string; description:string }
