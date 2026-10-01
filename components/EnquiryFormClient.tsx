@@ -48,6 +48,7 @@ interface EnquiryFormClientProps {
   teamPackages: TeamPackageItem[]
   initialInterest?: string
   initialRef?: string
+  initialScheduledId?: string
 }
 
 const EXPERIENCE_OPTIONS = [
@@ -70,6 +71,7 @@ export default function EnquiryFormClient({
   teamPackages,
   initialInterest = '',
   initialRef = '',
+  initialScheduledId = '',
 }: EnquiryFormClientProps) {
   const [interestType, setInterestType] = useState(initialInterest)
   const [referenceId, setReferenceId] = useState(initialRef)
@@ -82,7 +84,8 @@ export default function EnquiryFormClient({
   const [website, setWebsite] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
-  const [showMoreDetails, setShowMoreDetails] = useState(Boolean(initialRef))
+  const isScheduledDeparture = Boolean(initialScheduledId)
+  const [showMoreDetails, setShowMoreDetails] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
   const [submittedData, setSubmittedData] = useState<{
     id?: string
@@ -234,6 +237,28 @@ export default function EnquiryFormClient({
           <Link href="/hikes" className="btn-primary">Explore hikes</Link>
           <Link href="/" className="btn-secondary">Back home</Link>
         </div>
+      </div>
+    )
+  }
+
+  if (isScheduledDeparture && selectedHike) {
+    return (
+      <div className="enquiry-layout">
+        <div className="enquiry-main-col">
+          <form id="enquiryForm" onSubmit={handleSubmit} noValidate>
+            <input name="website" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: '1px', height: '1px', opacity: 0 }} value={website} onChange={(e) => setWebsite(e.target.value)} />
+            {errorMsg && <div role="alert" className="form-error-banner">{errorMsg}</div>}
+            <div className="referenced-item-card" aria-label="Selected scheduled departure"><div><span className="ref-card-kicker">You&apos;re enquiring about</span><h3>{selectedHike.name}</h3></div><div className="ref-card-meta">{selectedHike.date && <span>{selectedHike.date}</span>}{selectedHike.spots_remaining !== undefined && <span>{selectedHike.spots_remaining} {selectedHike.spots_remaining === 1 ? 'spot' : 'spots'} left</span>}</div></div>
+            <div className="field-group-heading">A little about you</div>
+            <div className="row2"><div className="field"><label htmlFor={nameId}>Your name <span className="req-star">*</span></label><input id={nameId} required value={name} onChange={(e) => setName(e.target.value)} onBlur={() => handleBlur('name')} autoComplete="name" placeholder="Your name" /></div><div className="field"><label htmlFor={emailId}>Email <span className="req-star">*</span></label><input type="email" id={emailId} required value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => handleBlur('email')} autoComplete="email" placeholder="you@example.com" /></div></div>
+            <div className="field"><label htmlFor={phoneId}>WhatsApp / phone <span className="optional-label">optional</span></label><input type="tel" id={phoneId} value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" placeholder="+230 5xxx xxxx" /></div>
+            <button type="button" className="details-toggle" onClick={() => setShowMoreDetails((open) => !open)} aria-expanded={showMoreDetails}><span>{showMoreDetails ? 'Hide extra details' : 'Add more details'}</span><span aria-hidden="true">{showMoreDetails ? '−' : '+'}</span></button>
+            {showMoreDetails && <div className="details-panel"><div className="row2"><div className="field"><label htmlFor={groupSizeId}>How many people?</label><select id={groupSizeId} value={groupSize} onChange={(e) => setGroupSize(e.target.value)}>{[1,2,3,4,5,6,7,8,9,10].map((n) => <option key={n} value={n}>{n === 1 ? 'Just me' : n + ' people'}</option>)}<option value="11">11+ people</option></select></div><div className="field"><label>Scheduled date</label><input type="date" value={selectedHike.date || ''} readOnly /></div></div><div className="field"><label htmlFor={messageId}>Anything else?</label><textarea id={messageId} rows={4} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Questions, fitness levels, dietary needs, or anything you want us to know." /></div></div>}
+            <p className="privacy-notice">Free enquiry. No payment is required. We usually reply within 24–48 hours. <span>By submitting, you agree to our <Link href="/privacy-policy" className="legal-link">Privacy Policy</Link>.</span></p>
+            <button type="submit" className="form-submit-btn" disabled={submitting}>{submitting ? 'Sending…' : 'Let’s talk'}</button>
+          </form>
+        </div>
+        <aside className="enquiry-side-note" aria-label="Enquiry reassurance"><div className="side-note-main"><span className="side-kicker">Scheduled departure</span><h3>{selectedHike.name}</h3><p>This enquiry is for the selected scheduled departure.</p></div><div className="trust-list"><div><strong>Free to enquire</strong><span>No payment at this stage.</span></div><div><strong>24–48 hours</strong><span>That&apos;s our usual reply time.</span></div><div><strong>Real people</strong><span>We&apos;ll help with the details.</span></div></div></aside>
       </div>
     )
   }
