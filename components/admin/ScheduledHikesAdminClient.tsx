@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useState } from 'react'
 
+const hikeSlug = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
 type Hike = {
   id: string
   hike_id: string
@@ -71,7 +73,7 @@ export default function ScheduledHikesAdminClient({ initialHikes }: { initialHik
             </div>
             <div className="flex items-center gap-2">
               <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/70">{hike.status}</span>
-              <Link href={`/hikes/${hike.hike_id}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-emerald-400 px-3.5 py-2 text-xs font-bold text-slate-950 transition hover:bg-emerald-300">
+              <Link href={`/hikes/${hikeSlug(hike.hikes.name)}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-emerald-400 px-3.5 py-2 text-xs font-bold text-slate-950 transition hover:bg-emerald-300">
                 View live <span aria-hidden="true">↗</span>
               </Link>
             </div>
