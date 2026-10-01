@@ -51,7 +51,6 @@ export default async function ScheduledHikePage({ params }: Props) {
   const hike = departure.hike
   const spots = departure.spots_remaining ?? 0
   const available = spots > 0
-  const enquiryRef = `${hike.name} — ${formatDate(departure.date)}`
 
   return (
     <div className="scheduled-page">
