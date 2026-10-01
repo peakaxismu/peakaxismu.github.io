@@ -5,7 +5,7 @@ import EnquiryFormClient from '@/components/EnquiryFormClient'
 export const revalidate = 0
 
 type EnquiryPageProps = {
-  searchParams: Promise<{ interest?: string; ref?: string }>
+  searchParams: Promise<{ interest?: string; ref?: string; scheduled_id?: string }>
 }
 
 export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
@@ -20,6 +20,7 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
   const { data: teamPackages } = await supabase.from('team_building_packages').select('id, name, type, duration, price_note, description').eq('status', 'published')
   const allowedInterests = new Set(['hike', 'private_hike', 'expedition', 'piton_des_neiges', 'team', 'activity'])
   let initialInterest = params.interest && allowedInterests.has(params.interest) ? params.interest : ''
+  const scheduledId = params.scheduled_id ?? ''
   const rawRef = params.ref ?? ''
   let initialRef = ''
   try { initialRef = decodeURIComponent(rawRef) } catch { initialRef = rawRef }
@@ -62,7 +63,7 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
             </div>
             <p>Choose what sounds right. You can add dates, group size and other details only if you already know them.</p>
           </div>
-          <EnquiryFormClient hikes={hikes || []} expeditions={expeditions || []} teamPackages={teamPackages || []} initialInterest={initialInterest} initialRef={initialRef} />
+          <EnquiryFormClient hikes={hikes || []} expeditions={expeditions || []} teamPackages={teamPackages || []} initialInterest={initialInterest} initialRef={scheduledId || initialRef} initialScheduledId={scheduledId} />
         </div>
       </section>
 
