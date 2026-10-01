@@ -28,7 +28,7 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
 
   return (
     <div id="view-enquire" className="view active" style={{ display: 'block' }}>
-      <section className="contact-hero">
+      {!scheduledId && <section className="contact-hero">
         <svg className="contact-hero-scape" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
           <path d="M0,500 L0,340 C150,300 220,220 340,220 C440,220 470,150 560,150 C620,150 640,110 690,110 C740,110 760,150 820,150 C920,150 980,260 1100,250 C1150,246 1180,270 1200,270 L1200,500 Z" fill="#173838" opacity="0.9" />
           <path d="M0,500 L0,400 C160,370 240,320 360,320 C450,320 480,270 570,270 C630,270 650,240 700,240 C750,240 770,270 830,270 C930,270 990,340 1100,335 L1200,335 L1200,500 Z" fill="#0f2626" />
@@ -52,17 +52,17 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
             </div>
           </div>
         </div>
-      </section>
+      </section>}
 
       <section className="contact-form-section">
         <div className="wrap">
-          <div className="contact-form-heading">
+          {!scheduledId && <div className="contact-form-heading">
             <div>
               <span className="contact-form-kicker">A SIMPLE START</span>
               <h2>Let&apos;s talk.</h2>
             </div>
             <p>Choose what sounds right. You can add dates, group size and other details only if you already know them.</p>
-          </div>
+          </div>}
           <EnquiryFormClient hikes={hikes || []} expeditions={expeditions || []} teamPackages={teamPackages || []} initialInterest={initialInterest} initialRef={scheduledId || initialRef} initialScheduledId={scheduledId} />
         </div>
       </section>
