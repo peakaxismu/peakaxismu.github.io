@@ -47,7 +47,15 @@ This route describes one exact departure and owns its date, price, capacity, ava
 | Hikes listing | `getScheduledHikeHref(scheduledHike.id)` / **Join this hike** | `getOnDemandHikeHref(hike.name)` / **Plan this hike** |
 | Homepage featured scheduled hike | `getScheduledHikeHref(scheduledHike.id)` | N/A |
 | Admin Scheduled Hikes “View live” | `getScheduledHikeHref(scheduledHike.id)` | N/A |
-| Scheduled detail “View hike details” | parent hike route | N/A |
+| Scheduled detail | Full parent hike detail content + scheduled departure overlay | N/A |
+
+## Content inheritance rule
+
+A scheduled hike page is the complete hike detail page for one exact departure. It must inherit the parent `hikes` record and its media/content, then overlay departure-specific fields from `scheduled_hikes`.
+
+The parent hike is the source of truth for reusable content: description, imagery/gallery, route facts, experience, what to bring, inclusions/exclusions, safety, logistics, and other general hike information. The scheduled row is the source of truth for the exact departure: date, scheduled price, spots/capacity, availability, and departure-specific trail conditions.
+
+The scheduled page must not send users to a separate “View hike details” page to see the parent content. It renders that content itself. This shared rendering is implemented in `components/HikeDetailContent.tsx`, which is used by both `/hikes/<slug>` and `/hikes/scheduled/<scheduled_hikes.id>` so future parent-content changes are inherited automatically.
 
 ## Implementation rule
 
