@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 
 type Hike = {
@@ -68,7 +69,12 @@ export default function ScheduledHikesAdminClient({ initialHikes }: { initialHik
               <h2 className="mt-1 text-lg font-semibold text-white">{hike.hikes.name}</h2>
               <p className="mt-1 text-sm text-white/55">{hike.hikes.location} · {hike.hikes.difficulty} · {hike.price}</p>
             </div>
-            <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/70">{hike.status}</span>
+            <div className="flex items-center gap-2">
+              <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold text-white/70">{hike.status}</span>
+              <Link href={`/hikes/${hike.hike_id}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-emerald-400 px-3.5 py-2 text-xs font-bold text-slate-950 transition hover:bg-emerald-300">
+                View live <span aria-hidden="true">↗</span>
+              </Link>
+            </div>
           </div>
 
           <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
