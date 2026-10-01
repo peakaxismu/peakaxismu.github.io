@@ -21,7 +21,7 @@ type Hike = {
 
 type Toast = { type: 'success' | 'error'; message: string } | null
 
-const inputClass = 'w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none transition placeholder:text-white/25 focus:border-emerald-300/60 focus:ring-2 focus:ring-emerald-300/10 disabled:cursor-wait disabled:opacity-60'
+const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 disabled:cursor-wait disabled:bg-slate-100 disabled:text-slate-500'
 
 export default function ScheduledHikesAdminClient({ initialHikes }: { initialHikes: Hike[] }) {
   const [hikes, setHikes] = useState(initialHikes)
@@ -78,7 +78,7 @@ export default function ScheduledHikesAdminClient({ initialHikes }: { initialHik
   }
 
   if (!hikes.length) {
-    return <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-sm text-white/60">No scheduled departures yet. Create one from the schedule flow.</div>
+    return <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">No scheduled departures yet. Create one from the schedule flow.</div>
   }
 
   const published = hikes.filter((hike) => hike.status === 'published').length
@@ -87,46 +87,46 @@ export default function ScheduledHikesAdminClient({ initialHikes }: { initialHik
   return (
     <div className="space-y-5">
       {toast && (
-        <div role="status" aria-live="polite" className={`fixed bottom-5 right-5 z-[80] flex max-w-sm items-start gap-3 rounded-2xl border px-4 py-3 shadow-2xl backdrop-blur-md ${toast.type === 'success' ? 'border-emerald-300/20 bg-emerald-950/95 text-emerald-100' : 'border-red-300/20 bg-red-950/95 text-red-100'}`}>
+        <div role="status" aria-live="polite" className={`fixed bottom-5 right-5 z-[80] flex max-w-sm items-start gap-3 rounded-2xl border px-4 py-3 shadow-2xl backdrop-blur-md ${toast.type === 'success' ? 'border-emerald-200 bg-white text-emerald-800' : 'border-red-200 bg-white text-red-800'}`}>
           <span aria-hidden="true" className="font-bold">{toast.type === 'success' ? '✓' : '!'}</span>
           <p className="text-sm font-medium">{toast.message}</p>
-          <button type="button" onClick={() => setToast(null)} className="ml-2 text-white/50 hover:text-white" aria-label="Dismiss notification">×</button>
+          <button type="button" onClick={() => setToast(null)} className="ml-2 text-slate-400 hover:text-slate-700" aria-label="Dismiss notification">×</button>
         </div>
       )}
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/40">Total departures</p><p className="mt-1 text-2xl font-semibold text-white">{hikes.length}</p></div>
-        <div className="rounded-2xl border border-emerald-300/15 bg-emerald-300/[0.05] p-4"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-200/60">Published</p><p className="mt-1 text-2xl font-semibold text-emerald-200">{published}</p></div>
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/40">Drafts</p><p className="mt-1 text-2xl font-semibold text-white">{drafts}</p></div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Total departures</p><p className="mt-1 text-2xl font-semibold text-slate-900">{hikes.length}</p></div>
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Published</p><p className="mt-1 text-2xl font-semibold text-emerald-700">{published}</p></div>
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Drafts</p><p className="mt-1 text-2xl font-semibold text-white">{drafts}</p></div>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center">
         <input aria-label="Search scheduled hikes" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by hike, location, or difficulty…" className={`${inputClass} flex-1`} />
         <select aria-label="Filter by visibility" value={status} onChange={(event) => setStatus(event.target.value as typeof status)} className={`${inputClass} sm:w-44`}>
           <option value="all">All visibility</option><option value="published">Published</option><option value="draft">Draft</option><option value="retired">Retired</option>
         </select>
-        {(query || status !== 'all') && <button type="button" onClick={() => { setQuery(''); setStatus('all') }} className="rounded-xl px-3 py-2 text-sm font-semibold text-white/60 hover:bg-white/5 hover:text-white">Clear</button>}
+        {(query || status !== 'all') && <button type="button" onClick={() => { setQuery(''); setStatus('all') }} className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-900">Clear</button>}
       </div>
 
       {!visibleHikes.length ? (
-        <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 text-center"><p className="font-medium text-white">No departures match these filters.</p><p className="mt-1 text-sm text-white/45">Try a different search or clear the filters.</p></div>
+        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center"><p className="font-medium text-slate-900">No departures match these filters.</p><p className="mt-1 text-sm text-slate-500">Try a different search or clear the filters.</p></div>
       ) : (
         <div className="space-y-4">
           {visibleHikes.map((hike) => {
             const isSaving = saving === hike.id
             return (
-              <article key={hike.id} className={`rounded-2xl border bg-white/[0.03] p-5 transition ${isSaving ? 'border-emerald-300/25' : 'border-white/10'}`}>
+              <article key={hike.id} className={`rounded-2xl border bg-white p-5 shadow-sm transition ${isSaving ? 'border-emerald-400' : 'border-white/10'}`}>
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/40">Scheduled departure</p>
-                      <span className="rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white/65">{hike.status}</span>
+                      <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-slate-600">{hike.status}</span>
                     </div>
                     <h2 className="mt-2 text-lg font-semibold text-white">{hike.hikes.name}</h2>
-                    <p className="mt-1 text-sm text-white/50">{hike.hikes.location} · {hike.hikes.difficulty} · {hike.price || 'Price not set'}</p>
+                    <p className="mt-1 text-sm text-slate-500">{hike.hikes.location} · {hike.hikes.difficulty} · {hike.price || 'Price not set'}</p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    {isSaving && <span className="text-xs font-medium text-emerald-200/70" role="status">Saving…</span>}
+                    {isSaving && <span className="text-xs font-medium text-emerald-700" role="status">Saving…</span>}
                     <Link href={getScheduledHikeHref(hike.id)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-emerald-400 px-3.5 py-2 text-xs font-bold text-slate-950 transition hover:bg-emerald-300">View live <span aria-hidden="true">↗</span></Link>
                   </div>
                 </div>
@@ -144,7 +144,7 @@ export default function ScheduledHikesAdminClient({ initialHikes }: { initialHik
                   <label className="space-y-1 text-sm text-white/65">Operational note<textarea disabled={isSaving} value={hike.trail_condition_note || ''} onChange={(event) => update(hike.id, { trail_condition_note: event.target.value })} onBlur={() => save(hike, { trail_condition_note: hike.trail_condition_note || '' }, 'Operational note saved.')} rows={2} className={inputClass} placeholder="Add weather, access, footing, or other departure-specific conditions." /></label>
                 </div>
 
-                <p className="mt-4 text-xs text-white/35">Changes save automatically when you leave a field. Visibility and trail condition save immediately.</p>
+                <p className="mt-4 text-xs text-slate-500">Changes save automatically when you leave a field. Visibility and trail condition save immediately.</p>
               </article>
             )
           })}
