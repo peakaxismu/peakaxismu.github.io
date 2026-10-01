@@ -90,7 +90,7 @@ export default async function ScheduledHikePage({ params }: Props) {
               )}
               <div className="departure-actions">
                 {available ? (
-                  <Link href={`/enquire?interest=hike&ref=${encodeURIComponent(enquiryRef)}`} className="book-btn">Request this departure</Link>
+                  <Link href={`/enquire?interest=hike&scheduled_id=${encodeURIComponent(departure.id)}`} className="book-btn">Request this departure</Link>
                 ) : (
                   <span className="sold-out">Fully booked</span>
                 )}
