@@ -79,7 +79,7 @@ export default function EnquiryFormClient({
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [preferredDate, setPreferredDate] = useState('')
-  const [groupSize, setGroupSize] = useState('2')
+  const [groupSize, setGroupSize] = useState('1')
   const [message, setMessage] = useState('')
   const [website, setWebsite] = useState('')
   const [submitting, setSubmitting] = useState(false)
