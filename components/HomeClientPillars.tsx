@@ -3,16 +3,21 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import HomeStoryKilimanjaro from '@/components/HomeStoryKilimanjaro'
+import { getOnDemandHikeHref, getScheduledHikeHref } from '@/lib/hike-routes'
 
-interface Hike { id:string; name:string; difficulty:string; date:string; duration:string; location:string; price:string; spots_remaining:number; booking_type?:'scheduled_group'|'on_demand'|'private' }
+interface Hike { id:string; name:string; difficulty:string; duration:string; location:string; price:string; booking_type?:'on_demand'|'private'|'scheduled_group'; date?:string; spots_remaining?:number; spots_total?:number }
+interface ScheduledHike { id:string; hike_id:string; date:string; price:string; spots_remaining:number; spots_total:number }
+type DisplayedHike = Hike & { scheduledHikeId?:string; hikeId?:string; booking_type?:'on_demand'|'private'|'scheduled_group'; date?:string; spots_remaining?:number; spots_total?:number }
 interface Expedition { id:string; slug:string; name:string; destination:string; duration_days:number; price_from:string; next_departure:string; description:string }
 interface TeamBuilding { id:string; name:string; type:string; description:string }
 interface Copy { hikes_title:string; hikes_body:string; hikes_primary_cta:string; hikes_primary_url:string; hikes_secondary_cta:string; hikes_secondary_url:string; expeditions_title:string; expeditions_body:string; expeditions_cta:string; expeditions_url:string; team_title:string; team_body:string; team_cta:string; team_url:string; activities_title:string; activities_body:string; activities_cta:string; activities_url:string }
 
-export default function HomeClientPillars({hikes,expedition,teamBuilding,copy}:{hikes:Hike[];expedition:Expedition|null;teamBuilding:TeamBuilding[];copy:Copy}) {
+export default function HomeClientPillars({hikes,scheduledHikes=[],expedition,teamBuilding,copy}:{hikes:Hike[];scheduledHikes?:ScheduledHike[];expedition:Expedition|null;teamBuilding:TeamBuilding[];copy:Copy}) {
   const [activeTab,setActiveTab]=useState<'hikes'|'expeditions'|'team'|'activities'>('hikes')
-  const scheduledHikes=hikes.filter(h=>h.booking_type==='scheduled_group')
-  const displayedHikes=scheduledHikes.length>0 ? scheduledHikes : hikes
+  const routeById=new Map(hikes.map(h=>[h.id,h]))
+  const displayedHikes:DisplayedHike[]=scheduledHikes.length>0
+    ? scheduledHikes.flatMap(s=>{const parent=routeById.get(s.hike_id); if(!parent)return []; return [{ ...parent, scheduledHikeId:s.id, hikeId:s.hike_id, date:s.date, price:s.price, booking_type:'scheduled_group' as const, spots_remaining:s.spots_remaining, spots_total:s.spots_total }]})
+    : hikes
   const outdoorTeam=teamBuilding.filter(t=>t.type==='outdoor')
   const indoorActivities=teamBuilding.filter(t=>t.type==='indoor')
   const tabs=[['hikes','01','HIKES'],['expeditions','02','EXPEDITIONS'],['team','03','TEAM BUILDING'],['activities','04','ACTIVITIES']] as const
@@ -20,7 +25,7 @@ export default function HomeClientPillars({hikes,expedition,teamBuilding,copy}:{
 
   return <>
     <section className="pillars"><div className="wrap"><div className="tab-row" role="tablist" aria-label="Experience Pillars">{tabs.map(([tab,number,label])=><button key={tab} id={`tab-${tab}`} role="tab" aria-selected={activeTab===tab} aria-controls={`panel-${tab}`} className={`tab-btn ${activeTab===tab?'active':''}`} onClick={()=>setActiveTab(tab)}><span className="code">{number}</span> {label}</button>)}</div>{panels.map(([tab,title,body,cta,url,secondary,secondaryUrl])=><div key={tab} id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className={`panel ${activeTab===tab?'active':''}`} hidden={activeTab!==tab}><div className="p-left"><h2>{title}</h2><p>{body}</p><div className="p-ctas"><Link href={url} className="btn-primary">{cta}</Link>{secondary&&<Link href={secondaryUrl} className="btn-ghost">{secondary}</Link>}</div></div><div className="p-right">
-      {tab==='hikes'&&<div className="card-list">{displayedHikes.slice(0,3).map(h=><div key={h.id} className="mini-card"><div className="tag">{h.booking_type==='scheduled_group'?'SCHEDULED GROUP':h.booking_type==='private'?'PRIVATE / ON-DEMAND':'ON-DEMAND'}</div><h3>{h.name}</h3><div className="meta"><span>{h.date||'Date on request'}</span> · <span>{h.duration}</span> · <span>{h.price}</span></div></div>)}</div>}
+      {tab==='hikes'&&<div className="card-list">{displayedHikes.slice(0,3).map(h=>{const href=h.booking_type==='scheduled_group' ? getScheduledHikeHref(h.scheduledHikeId!) : getOnDemandHikeHref(h.name); return <Link href={href} key={h.scheduledHikeId||h.id} className="mini-card mini-card-link"><div className="tag">{h.booking_type==='scheduled_group'?'SCHEDULED GROUP':h.booking_type==='private'?'PRIVATE / ON-DEMAND':'ON-DEMAND'}</div><h3>{h.name}</h3><div className="meta"><span>{h.date?new Date(`${h.date}T12:00:00`).toLocaleDateString('en-MU',{weekday:'short',day:'numeric',month:'short'}):'Date on request'}</span> · <span>{h.duration}</span> · <span>{h.price}</span>{h.booking_type==='scheduled_group'&&h.spots_remaining!=null&&<span> · {h.spots_remaining} spots left</span>}</div></Link>})}</div>}
       {tab==='expeditions'&&expedition&&<div className="feat-box"><span className="badge">NEXT EXPEDITION</span><h3>{expedition.name}</h3><div className="dest">{expedition.destination} · {expedition.duration_days} days</div><p className="desc">{expedition.description?.substring(0,140)}{expedition.description?.length>140?'...':''}</p><div className="foot"><span>Departure: {expedition.next_departure||'On request'}</span><span className="price">From {expedition.price_from}</span></div></div>}
       {tab==='team'&&<div className="card-list">{outdoorTeam.slice(0,3).map(p=><div key={p.id} className="mini-card"><div className="tag">OUTDOOR</div><h3>{p.name}</h3><div className="meta">{p.description}</div></div>)}</div>}
       {tab==='activities'&&<div className="card-list">{indoorActivities.slice(0,3).map(p=><div key={p.id} className="mini-card"><div className="tag">INDOOR / OUTDOOR</div><h3>{p.name}</h3><div className="meta">{p.description}</div></div>)}</div>}
