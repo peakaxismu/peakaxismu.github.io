@@ -9,8 +9,24 @@ select has_table('public', 'crm_ai_suggestions', 'AI suggestions review queue ex
 select has_column('public', 'enquiries', 'customer_id', 'existing enquiries link to canonical customers');
 select has_column('public', 'bookings', 'scheduled_hike_id', 'bookings can link to scheduled hikes');
 select has_index('public', 'bookings', 'bookings_date_status_idx', 'bookings have a date/status index');
-select has_check('public', 'bookings', 'bookings_hike_type_check', 'scheduled hike bookings require a scheduled departure');
-select has_check('public', 'bookings', 'bookings_expedition_type_check', 'expedition bookings require an expedition record');
+select ok(
+  exists (
+    select 1 from pg_constraint
+    where conrelid = 'public.bookings'::regclass
+      and conname = 'bookings_hike_type_check'
+      and contype = 'c'
+  ),
+  'scheduled hike bookings require a scheduled departure'
+);
+select ok(
+  exists (
+    select 1 from pg_constraint
+    where conrelid = 'public.bookings'::regclass
+      and conname = 'bookings_expedition_type_check'
+      and contype = 'c'
+  ),
+  'expedition bookings require an expedition record'
+);
 select has_trigger('public', 'bookings', 'bookings_sync_capacity', 'confirmed bookings reserve scheduled-hike capacity');
 select ok((select relrowsecurity from pg_class where oid = 'public.customers'::regclass), 'customer rows have RLS enabled');
 select ok((select relrowsecurity from pg_class where oid = 'public.bookings'::regclass), 'booking rows have RLS enabled');
