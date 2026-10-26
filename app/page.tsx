@@ -211,7 +211,7 @@ export default async function HomePage() {
             </div>
           ) : (
             <div className="insta-empty">
-              <p>Add your latest Instagram posts from Admin > Site Content to display them here.</p>
+              <p>Add your latest Instagram posts from Admin &gt; Site Content to display them here.</p>
               <a href={s.instagram_url} target="_blank" rel="noreferrer" className="btn-ghost">Follow @{s.instagram_handle}</a>
             </div>
           )}
