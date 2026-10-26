@@ -1,6 +1,6 @@
 begin;
 
-select plan(18);
+select plan(24);
 
 select has_table('public', 'customers', 'customers table exists');
 select has_table('public', 'bookings', 'bookings table exists');
@@ -36,6 +36,60 @@ select ok(not has_table_privilege('anon', 'public.customers', 'SELECT'), 'anonym
 select ok(not has_table_privilege('authenticated', 'public.customers', 'SELECT'), 'authenticated non-admins cannot read customer records directly');
 select ok(not has_table_privilege('anon', 'public.bookings', 'SELECT'), 'anonymous users cannot read bookings');
 select ok(not has_table_privilege('anon', 'public.crm_ai_suggestions', 'SELECT'), 'anonymous users cannot read internal AI suggestions');
+
+-- Exercise the real capacity trigger, not only the trigger's presence.
+insert into public.customers (id, full_name, email)
+values ('91000000-0000-4000-8000-000000000001', 'CRM Capacity Test', 'crm-capacity-test@example.invalid');
+
+insert into public.hikes (id, name, difficulty, duration, location, price, status)
+values ('92000000-0000-4000-8000-000000000001', 'CRM Capacity Test Hike', 'moderate', '1 day', 'Test location', 'MUR 100', 'published');
+
+insert into public.scheduled_hikes (id, hike_id, date, price, spots_total, spots_remaining, status)
+values ('93000000-0000-4000-8000-000000000001', '92000000-0000-4000-8000-000000000001', current_date + 30, 'MUR 100', 5, 5, 'published');
+
+insert into public.bookings (id, customer_id, activity_type, scheduled_hike_id, booking_date, group_size, status)
+values ('94000000-0000-4000-8000-000000000001', '91000000-0000-4000-8000-000000000001', 'hike', '93000000-0000-4000-8000-000000000001', current_date + 30, 2, 'confirmed');
+
+select is(
+  (select spots_remaining from public.scheduled_hikes where id = '93000000-0000-4000-8000-000000000001'),
+  3,
+  'confirmed booking reserves its group size'
+);
+
+update public.bookings set group_size = 4 where id = '94000000-0000-4000-8000-000000000001';
+
+select is(
+  (select spots_remaining from public.scheduled_hikes where id = '93000000-0000-4000-8000-000000000001'),
+  1,
+  'increasing a confirmed group reserves only the additional spaces'
+);
+
+select throws_ok(
+  $$ update public.bookings set group_size = 6 where id = '94000000-0000-4000-8000-000000000001' $$,
+  '23514',
+  'Not enough available spaces for this booking',
+  'capacity guard rejects a group increase that would overbook'
+);
+
+select is(
+  (select group_size from public.bookings where id = '94000000-0000-4000-8000-000000000001'),
+  4,
+  'failed over-capacity update leaves the booking unchanged'
+);
+
+select is(
+  (select spots_remaining from public.scheduled_hikes where id = '93000000-0000-4000-8000-000000000001'),
+  1,
+  'failed over-capacity update does not consume spaces'
+);
+
+update public.bookings set status = 'cancelled' where id = '94000000-0000-4000-8000-000000000001';
+
+select is(
+  (select spots_remaining from public.scheduled_hikes where id = '93000000-0000-4000-8000-000000000001'),
+  5,
+  'cancelling a confirmed booking releases its reserved spaces'
+);
 
 select * from finish();
 rollback;
