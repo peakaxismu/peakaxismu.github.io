@@ -111,7 +111,7 @@ declare
   delta integer;
 begin
   if tg_op <> 'INSERT' then
-    old_active := old.status = 'confirmed' and old.scheduled_hike_id is not null;
+    old_active := old.status in ('confirmed', 'completed') and old.scheduled_hike_id is not null;
     old_hike_id := old.scheduled_hike_id;
     old_group_size := old.group_size;
   end if;
@@ -125,7 +125,7 @@ begin
     return old;
   end if;
 
-  new_active := new.status = 'confirmed' and new.scheduled_hike_id is not null;
+  new_active := new.status in ('confirmed', 'completed') and new.scheduled_hike_id is not null;
 
   if old_active and new_active and old_hike_id = new.scheduled_hike_id then
     delta := new.group_size - old_group_size;
