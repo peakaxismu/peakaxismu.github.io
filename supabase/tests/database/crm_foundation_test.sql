@@ -1,0 +1,19 @@
+begin;
+
+select plan(12);
+
+select has_table('public', 'customers', 'customers table exists');
+select has_table('public', 'bookings', 'bookings table exists');
+select has_table('public', 'crm_tasks', 'CRM tasks table exists');
+select has_table('public', 'crm_ai_suggestions', 'AI suggestions review queue exists');
+select has_column('public', 'enquiries', 'customer_id', 'existing enquiries link to canonical customers');
+select has_column('public', 'bookings', 'scheduled_hike_id', 'bookings can link to scheduled hikes');
+select has_index('public', 'bookings', 'bookings_date_status_idx', 'bookings have a date/status index');
+select has_trigger('public', 'bookings', 'bookings_sync_capacity', 'confirmed bookings reserve scheduled-hike capacity');
+select ok((select relrowsecurity from pg_class where oid = 'public.customers'::regclass), 'customer rows have RLS enabled');
+select ok((select relrowsecurity from pg_class where oid = 'public.bookings'::regclass), 'booking rows have RLS enabled');
+select ok((select relrowsecurity from pg_class where oid = 'public.crm_tasks'::regclass), 'task rows have RLS enabled');
+select ok((select relrowsecurity from pg_class where oid = 'public.crm_ai_suggestions'::regclass), 'AI suggestions have RLS enabled');
+
+select * from finish();
+rollback;
