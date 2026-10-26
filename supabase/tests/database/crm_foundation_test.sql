@@ -1,6 +1,6 @@
 begin;
 
-select plan(12);
+select plan(16);
 
 select has_table('public', 'customers', 'customers table exists');
 select has_table('public', 'bookings', 'bookings table exists');
@@ -14,6 +14,10 @@ select ok((select relrowsecurity from pg_class where oid = 'public.customers'::r
 select ok((select relrowsecurity from pg_class where oid = 'public.bookings'::regclass), 'booking rows have RLS enabled');
 select ok((select relrowsecurity from pg_class where oid = 'public.crm_tasks'::regclass), 'task rows have RLS enabled');
 select ok((select relrowsecurity from pg_class where oid = 'public.crm_ai_suggestions'::regclass), 'AI suggestions have RLS enabled');
+select ok(not has_table_privilege('anon', 'public.customers', 'SELECT'), 'anonymous users cannot read customer records');
+select ok(not has_table_privilege('authenticated', 'public.customers', 'SELECT'), 'authenticated non-admins cannot read customer records directly');
+select ok(not has_table_privilege('anon', 'public.bookings', 'SELECT'), 'anonymous users cannot read bookings');
+select ok(not has_table_privilege('anon', 'public.crm_ai_suggestions', 'SELECT'), 'anonymous users cannot read internal AI suggestions');
 
 select * from finish();
 rollback;
