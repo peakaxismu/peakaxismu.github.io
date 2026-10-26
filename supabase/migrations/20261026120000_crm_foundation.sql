@@ -216,8 +216,8 @@ create trigger crm_tasks_set_updated_at
 before update on public.crm_tasks
 for each row execute function public.set_crm_task_updated_at();
 
--- Durable inbox for AI-generated suggestions. Generation is added in a later phase;
--- this table deliberately does not execute proposed actions by itself.
+-- Durable inbox for suggestions generated on demand by an authenticated admin.
+-- This table records review decisions; proposed actions are never executed by triggers.
 create table if not exists public.crm_ai_suggestions (
   id uuid primary key default gen_random_uuid(),
   entity_type text not null check (entity_type in ('customer', 'enquiry', 'booking')),
