@@ -21,7 +21,7 @@ export default function TaskManager({ initialTasks, customers }: { initialTasks:
   async function createTask(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setError(''); setNotice('')
     try {
-      const response = await fetch('/api/admin/tasks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, description, customer_id: customerId, due_at: dueAt, priority }) })
+      const response = await fetch('/api/admin/tasks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, description, customer_id: customerId, due_at: dueAt ? new Date(dueAt).toISOString() : '', priority }) })
       const payload = await response.json()
       if (!response.ok) throw new Error(payload.error || 'Unable to create task')
       setTasks(current => [...current, payload.data].sort((a, b) => (a.due_at || '9999').localeCompare(b.due_at || '9999')))
