@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
+import CustomerProfileEditor from '@/components/admin/CustomerProfileEditor'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { isAdminUser } from '@/lib/supabase/admin-auth'
@@ -26,7 +27,7 @@ export default async function AdminCustomerDetailPage({ params }: { params: Prom
 
   return <div>
     <Link href="/admin/customers" style={{ color: 'var(--ember)', fontSize: 13, fontWeight: 800 }}>← All customers</Link>
-    <div style={{ margin: '18px 0 24px' }}><p style={{ color: 'var(--ember)', fontSize: 10, fontWeight: 800, letterSpacing: '.12em' }}>CUSTOMER PROFILE</p><h1 style={{ fontFamily: 'Big Shoulders Display', fontSize: 42, fontWeight: 900, textTransform: 'uppercase' }}>{customer.full_name}</h1><p style={{ color: '#625d55', marginTop: 5 }}>{customer.email}{customer.phone ? ' · ' + customer.phone : ''}</p>{customer.notes && <p style={{ whiteSpace: 'pre-wrap', marginTop: 12, maxWidth: 800 }}>{customer.notes}</p>}</div>
+    <CustomerProfileEditor initialCustomer={customer} />
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 18 }}>
       <section style={panel}><div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}><h2 style={{ fontSize: 18, fontWeight: 900, textTransform: 'uppercase' }}>Enquiry history</h2><span>{enquiries?.length ?? 0}</span></div>
         {(enquiries ?? []).map(e => <div key={e.id} style={{ padding: '12px 0', borderTop: '1px solid var(--sand-line)' }}><div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}><strong>{e.reference_id || e.interest_type.replaceAll('_', ' ')}</strong>{badge(e.status)}</div><p style={{ color: '#625d55', fontSize: 12, marginTop: 4 }}>{e.preferred_date || 'Date not specified'} · {new Date(e.submitted_at).toLocaleDateString()}</p><Link href="/admin/enquiries" style={{ fontSize: 12, color: 'var(--ember)', fontWeight: 800 }}>Open enquiries →</Link></div>)}
