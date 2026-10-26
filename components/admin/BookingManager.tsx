@@ -30,7 +30,7 @@ export default function BookingManager({ initialBookings, customers, departures,
       : customers.find(customer => customer.email.trim().toLowerCase() === selectedEnquiry.email.trim().toLowerCase()))
     : undefined
   const customerMatchesEnquiry = !selectedEnquiry || Boolean(selectedEnquiryCustomer && selectedEnquiryCustomer.id === customerId)
-  const [type, setType = useState('hike')
+  const [type, setType] = useState('hike')
   const [departureId, setDepartureId] = useState(departures[0]?.id ?? '')
   const [expeditionId, setExpeditionId] = useState(expeditions[0]?.id ?? '')
   const [date, setDate] = useState('')
