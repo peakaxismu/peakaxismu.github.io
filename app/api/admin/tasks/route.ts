@@ -5,7 +5,6 @@ import { isAdminUser } from '@/lib/supabase/admin-auth'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const PRIORITIES = ['low', 'normal', 'high', 'urgent'] as const
-const STATUSES = ['pending', 'in_progress', 'completed', 'cancelled'] as const
 
 async function authorize() {
   const supabase = await createClient()
