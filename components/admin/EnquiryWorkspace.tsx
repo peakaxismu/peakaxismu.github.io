@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
 type Status = 'new' | 'contacted' | 'quoted' | 'awaiting_reply' | 'confirmed' | 'completed' | 'closed'
@@ -21,6 +22,7 @@ type Enquiry = {
   next_follow_up_at?: string | null
   quote_amount?: number | null
   lost_reason?: string | null
+  customer_id?: string | null
 }
 
 const STAGES = [
@@ -195,6 +197,24 @@ export default function EnquiryWorkspace({ initialEnquiries }: { initialEnquirie
     await logActivity(selected.id, 'reply_copied', `${replyType} subject + reply copied for ${selected.email}`)
   }
 
+  const createCustomerFromEnquiry = async () => {
+    if (!selected) return
+    setLoading(true)
+    try {
+      const response = await fetch('/api/admin/enquiries/' + selected.id + '/customer', { method: 'POST' })
+      const payload = await response.json()
+      if (!response.ok) throw new Error(payload.error || 'Unable to link customer')
+      const customerId = payload.data.customer_id as string
+      setSelected(current => current ? { ...current, customer_id: customerId } : current)
+      setEnquiries(current => current.map(e => e.id === selected.id ? { ...e, customer_id: customerId } : e))
+      await loadActivities(selected.id)
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Unable to link customer')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const setStageFilter = (value: 'all' | Status) => {
     setStatus(value)
     setQuery('')
@@ -301,6 +321,15 @@ export default function EnquiryWorkspace({ initialEnquiries }: { initialEnquirie
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 14 }}>
               <div style={{ ...card, padding: 16 }}><b>CONTACT</b><div style={{ marginTop: 7 }}>{selected.email || 'No email supplied'}</div>{selected.phone && <div style={{ fontSize: 13 }}>{selected.phone}</div>}<button style={{ ...button, marginTop: 10 }} onClick={() => copy(selected.email)}>Copy email</button></div>
               <div style={{ ...card, padding: 16 }}><b>REQUEST</b><div style={{ marginTop: 7 }}>{badge(selected.interest_type)}</div><div style={{ fontSize: 13, marginTop: 6 }}><b>Date:</b> {selected.preferred_date || 'Not specified'}</div><div style={{ fontSize: 13 }}><b>Group:</b> {selected.group_size || 'Not specified'}</div></div>
+            </div>
+
+            <div style={{ ...card, marginTop: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <div><b>CUSTOMER RECORD</b><p style={{ color: '#625d55', fontSize: 12, marginTop: 5 }}>{selected.customer_id ? 'This enquiry is linked to a customer record.' : 'Create or link a reusable customer record after reviewing this enquiry.'}</p></div>
+                {selected.customer_id
+                  ? <Link href={'/admin/customers/' + selected.customer_id} style={{ color: 'var(--ember)', fontWeight: 800, fontSize: 12 }}>Open customer →</Link>
+                  : <button style={button} disabled={loading} onClick={createCustomerFromEnquiry}>{loading ? 'Linking…' : 'Create / link customer'}</button>}
+              </div>
             </div>
 
             <div style={{ ...card, marginTop: 12 }}><b>ORIGINAL MESSAGE</b><div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.55, marginTop: 8 }}>{selected.message || 'No message supplied.'}</div></div>
