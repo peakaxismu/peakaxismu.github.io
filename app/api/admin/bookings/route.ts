@@ -60,15 +60,15 @@ export async function POST(request: Request) {
 
     const admin = createAdminClient()
     const [{ data: customer }, departureResult, expeditionResult, enquiryResult] = await Promise.all([
-      admin.from('customers').select('id').eq('id', customer_id).maybeSingle(),
+      admin.from('customers').select('id,email').eq('id', customer_id).maybeSingle(),
       scheduled_hike_id ? admin.from('scheduled_hikes').select('id,date,status,spots_remaining').eq('id', scheduled_hike_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
       expedition_id ? admin.from('expeditions').select('id,status').eq('id', expedition_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
-      enquiry_id ? admin.from('enquiries').select('id,customer_id').eq('id', enquiry_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+      enquiry_id ? admin.from('enquiries').select('id,customer_id,email').eq('id', enquiry_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
     ])
     if (!customer) return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
-    if (scheduled_hike_id && (!departureResult.data || departureResult.data.status !== 'published' || departureResult.data.spots_remaining < group_size)) return NextResponse.json({ error: 'That departure is unavailable or does not have enough remaining spaces' }, { status: 409 })
+    if (scheduled_hike_id && (!departureResult.data || departureResult.data.status !== 'published' || departureResult.data.date < new Date().toISOString().slice(0, 10) || departureResult.data.spots_remaining < group_size)) return NextResponse.json({ error: 'That departure is unavailable, in the past, or does not have enough remaining spaces' }, { status: 409 })
     if (expedition_id && (!expeditionResult.data || expeditionResult.data.status !== 'published')) return NextResponse.json({ error: 'Choose a published expedition' }, { status: 400 })
-    if (enquiry_id && (!enquiryResult.data || (enquiryResult.data.customer_id && enquiryResult.data.customer_id !== customer_id))) return NextResponse.json({ error: 'The enquiry does not belong to this customer' }, { status: 400 })
+    if (enquiry_id && (!enquiryResult.data || (enquiryResult.data.customer_id ? enquiryResult.data.customer_id !== customer_id : String(enquiryResult.data.email).trim().toLowerCase() !== String(customer.email).trim().toLowerCase()))) return NextResponse.json({ error: 'The enquiry does not belong to this customer' }, { status: 400 })
 
     const dateToSave = departureResult.data?.date ?? booking_date
     const { data, error } = await admin.from('bookings').insert({
