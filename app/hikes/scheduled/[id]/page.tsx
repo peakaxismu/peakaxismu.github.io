@@ -115,7 +115,7 @@ export default async function ScheduledHikePage({ params }: Props) {
               ].map(([label, value]) => <div key={label}><b>{label}</b><span>{value}</span></div>)}
             </section>
 
-            <section className="content-section inherited-details"><span className="section-kicker">THE EXPERIENCE</span><h2>What you&apos;ll experience</h2><p>{hike.description || hike.main_attraction || 'A guided experience on this route.'}</p>{hike.experience_types?.length ? <div className="chips">{hike.experience_types.filter(Boolean).map((x:string)=><span key={x}>✦ {x}</span>)}</div> : null}</section>
+            <section className="content-section inherited-details"><span className="section-kicker">THE EXPERIENCE</span><h2>What you'll experience</h2><p>{hike.description || hike.main_attraction || 'A guided experience on this route.'}</p>{hike.experience_types?.length ? <div className="chips">{hike.experience_types.filter(Boolean).map((x:string)=><span key={x}>✦ {x}</span>)}</div> : null}</section>
             {[
               ['What to bring', hike.what_to_bring],
               ["What's included", hike.included],
