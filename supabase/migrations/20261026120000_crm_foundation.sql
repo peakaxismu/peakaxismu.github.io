@@ -70,8 +70,8 @@ create table if not exists public.bookings (
   created_by uuid references auth.users(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint bookings_hike_type_check check (scheduled_hike_id is null or activity_type = 'hike'),
-  constraint bookings_expedition_type_check check (expedition_id is null or activity_type = 'expedition'),
+  constraint bookings_hike_type_check check ((activity_type = 'hike' and scheduled_hike_id is not null) or (activity_type <> 'hike' and scheduled_hike_id is null)),
+  constraint bookings_expedition_type_check check ((activity_type = 'expedition' and expedition_id is not null) or (activity_type <> 'expedition' and expedition_id is null)),
   constraint bookings_not_two_departures_check check (scheduled_hike_id is null or expedition_id is null)
 );
 
