@@ -193,10 +193,13 @@ export async function POST() {
       if (!verifiedType || entity_type !== verifiedType) continue
 
       const suggestion_type = item.suggestion_type
-      const validForEntity = verifiedType === 'enquiry'
-        ? suggestion_type === 'reply_draft' || suggestion_type === 'follow_up'
-        : suggestion_type === 'booking_risk' || suggestion_type === 'follow_up'
-      if (!validForEntity) continue
+      if (verifiedType === 'enquiry') {
+        if (suggestion_type !== 'reply_draft' && suggestion_type !== 'follow_up') continue
+      } else if (suggestion_type !== 'booking_risk' && suggestion_type !== 'follow_up') {
+        continue
+      }
+      // The values were narrowed against entity-specific allowlists above.
+      const acceptedSuggestionType = suggestion_type as Candidate['suggestion_type']
 
       const title = cleanText(item.title, 140)
       if (!title) continue
@@ -214,7 +217,7 @@ export async function POST() {
       accepted.push({
         entity_type: verifiedType,
         entity_id,
-        suggestion_type,
+        suggestion_type: acceptedSuggestionType,
         title,
         rationale: cleanText(item.rationale, 2000),
         evidence,
