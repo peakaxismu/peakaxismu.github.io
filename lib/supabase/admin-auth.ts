@@ -1,20 +1,16 @@
+import type { User } from '@supabase/supabase-js'
+
 /**
- * Authorize a Supabase identity for server-side admin operations.
+ * Authorize a Supabase user for server-side admin operations.
  *
- * Access is granted only when the identity has an explicit admin role in
- * app_metadata or its email is present in the server-only ADMIN_EMAILS
+ * Access is granted only when the user has an explicit admin role in
+ * app_metadata or their email is present in the server-only ADMIN_EMAILS
  * allowlist. Missing configuration fails closed.
  */
-export type AdminIdentity = {
-  email?: string | null
-  app_metadata?: object | null
-} | null
-
-export function isAdminUser(user: AdminIdentity): boolean {
+export function isAdminUser(user: User | null): boolean {
   if (!user) return false
 
-  const metadata = user.app_metadata
-  const appRole = metadata && 'role' in metadata ? metadata.role : undefined
+  const appRole = user.app_metadata?.role
   if (appRole === 'admin') return true
 
   const configuredEmails = (process.env.ADMIN_EMAILS || '')
