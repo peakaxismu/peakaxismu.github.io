@@ -13,7 +13,10 @@ export default async function AdminCustomersPage() {
 
   const admin = createAdminClient()
   const { data, error } = await admin.from('customers').select('id,full_name,email,phone,created_at').order('full_name')
-  if (error) throw new Error('Unable to load customer records')
+  if (error) {
+    console.error('Customer query failed:', error.message, error.code)
+    throw new Error('Unable to load customer records')
+  }
 
   return <CustomerManager initialCustomers={data ?? []} />
 }
