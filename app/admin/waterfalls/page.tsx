@@ -172,7 +172,11 @@ export default function AdminWaterfallsPage() {
       setEditing(null)
       setOriginalEditing(null)
       setNotice(isEdit ? 'Waterfall route updated.' : 'Waterfall route created.')
-      await refreshItems()
+      try {
+        await refreshItems()
+      } catch (refreshError) {
+        setError(refreshError instanceof Error ? refreshError.message : 'The route was saved, but the list could not be refreshed.')
+      }
     } catch (saveError) {
       setFormError(saveError instanceof Error ? saveError.message : 'Unable to save this route.')
     } finally {
@@ -236,7 +240,12 @@ export default function AdminWaterfallsPage() {
   }
 
   return (
-    <div className="waterfalls-admin">
+    <div className="waterfalls-admin" onKeyDown={event => {
+      if (event.key !== 'Escape') return
+      if (deleteTarget) setDeleteTarget(null)
+      else if (confirmDiscard) setConfirmDiscard(false)
+      else if (editing) closeEditor()
+    }}>
       <header className="page-header">
         <div className="eyebrow">SITE CONTENT <span aria-hidden="true">/</span> ROUTES</div>
         <div className="page-heading-row">
