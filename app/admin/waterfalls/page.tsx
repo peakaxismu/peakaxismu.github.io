@@ -366,7 +366,7 @@ export default function AdminWaterfallsPage() {
       </section>
 
       <div className="mobile-route-list" aria-label="Waterfall routes for mobile">
-        {loading ? <div className="loading-state"><span className="spinner" />Loading waterfall routes…</div> : filtered.map(item => (
+        {loading ? <div className="loading-state"><span className="spinner" />Loading waterfall routes…</div> : filtered.length > 0 ? filtered.map(item => (
           <article className="mobile-route-card" key={item.id}>
             <div className="mobile-card-top">
               <span className={'status-badge ' + item.status}><span className="status-dot" />{item.status === 'published' ? 'Published' : 'Draft'}</span>
@@ -383,7 +383,16 @@ export default function AdminWaterfallsPage() {
               <button type="button" className="action-button delete" disabled={saving || busyId === item.id} onClick={() => setDeleteTarget(item)}>Delete</button>
             </div>
           </article>
-        ))}
+        )) : (
+          <div className="empty-state">
+            <div className="empty-icon" aria-hidden="true">{hasFilters ? '⌕' : '◇'}</div>
+            <h3>{hasFilters ? 'No routes match your filters' : 'No waterfall routes yet'}</h3>
+            <p>{hasFilters ? 'Try another search or clear the current filters.' : 'Add your first route to begin managing waterfall experiences.'}</p>
+            {hasFilters
+              ? <button type="button" className="button secondary" onClick={() => { setQuery(''); setStatus('all') }}>Clear filters</button>
+              : <button type="button" className="button primary" onClick={openNewForm}>Add first route</button>}
+          </div>
+        )}
       </div>
 
       {editing && (
@@ -551,7 +560,7 @@ export default function AdminWaterfallsPage() {
           .waterfalls-admin{padding-bottom:36px}.page-header{margin-bottom:22px}.page-heading-row{gap:16px}.heading-copy h1{font-size:40px}.heading-copy p{font-size:13px}
           .header-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.header-actions .button{width:100%;padding-inline:10px}
           .summary-grid{gap:8px;margin-bottom:16px}.summary-card{min-height:100px;padding:14px 11px;gap:4px}.summary-label{font-size:9px;letter-spacing:.05em}.summary-card strong{font-size:26px}.summary-caption{font-size:10px;line-height:1.35}
-          .routes-section{display:none}.mobile-route-list{display:grid;gap:12px}.toolbar{grid-template-columns:1fr;gap:11px;padding:14px}.search-field{height:46px}.status-filter{grid-template-columns:62px 1fr;align-items:center}.status-filter select{height:42px}.reset-filters{margin-top:-2px}
+          .routes-section{display:block;background:transparent;border:0;overflow:visible}.routes-section .list-header{padding:18px 0;border:0}.routes-section .table-wrap,.routes-section .list-footer{display:none}.mobile-route-list{display:grid;gap:12px}.toolbar{grid-template-columns:1fr;gap:11px;padding:14px;background:var(--panel);border:1px solid var(--panel-border);border-radius:4px}.search-field{height:46px}.status-filter{grid-template-columns:62px 1fr;align-items:center}.status-filter select{height:42px}.reset-filters{margin-top:-2px}
           .mobile-route-card{padding:17px;background:var(--panel);border:1px solid var(--panel-border);border-radius:4px;min-width:0}
           .mobile-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.mobile-location{font-size:11px;color:var(--muted);font-weight:650;text-align:right}
           .mobile-route-card h3{font-size:18px;line-height:1.35;margin:13px 0 0;font-weight:850}.mobile-description{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.6}
