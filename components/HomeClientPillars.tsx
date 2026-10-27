@@ -21,7 +21,14 @@ export default function HomeClientPillars({hikes,scheduledHikes=[],expedition,te
   const outdoorTeam=teamBuilding.filter(t=>t.type==='outdoor')
   const indoorActivities=teamBuilding.filter(t=>t.type==='indoor')
   const tabs=[['hikes','01','HIKES'],['expeditions','02','EXPEDITIONS'],['team','03','TEAM BUILDING'],['activities','04','ACTIVITIES']] as const
-  const panels=[['hikes',copy.hikes_title,copy.hikes_body,copy.hikes_primary_cta,copy.hikes_primary_url,copy.hikes_secondary_cta,copy.hikes_secondary_url],['expeditions',copy.expeditions_title,copy.expeditions_body,copy.expeditions_cta,copy.expeditions_url,'',''],['team',copy.team_title,copy.team_body,copy.team_cta,copy.team_url,'',''],['activities',copy.activities_title,copy.activities_body,copy.activities_cta,copy.activities_url,'','']] as const
+  // Editable homepage copy can be partially populated in staging or older databases.
+  // Never pass an undefined destination to next/link; Next.js will throw while SSR renders.
+  const panels=[
+    ['hikes',copy.hikes_title || 'Guided hikes across Mauritius.',copy.hikes_body || 'Explore Mauritius mountain ranges and nature reserves on guided hikes.',copy.hikes_primary_cta || 'Explore all hikes',copy.hikes_primary_url || '/hikes',copy.hikes_secondary_cta || 'Book a private hike',copy.hikes_secondary_url || '/enquire?interest=private_hike'],
+    ['expeditions',copy.expeditions_title || 'Volcano expeditions in La Réunion.',copy.expeditions_body || 'Plan a guided mountain or volcano expedition with Peak Axis.',copy.expeditions_cta || 'Explore expeditions',copy.expeditions_url || '/expeditions/piton-de-la-fournaise','',''],
+    ['team',copy.team_title || 'Team building in real terrain.',copy.team_body || 'Outdoor team experiences built around collaboration and challenge.',copy.team_cta || 'Plan a team experience',copy.team_url || '/enquire?interest=team','',''],
+    ['activities',copy.activities_title || 'Outdoor and group activities.',copy.activities_body || 'Find an activity that fits your group.',copy.activities_cta || 'Ask about activities',copy.activities_url || '/enquire?interest=activity','',''],
+  ] as const
 
   return <>
     <section className="pillars"><div className="wrap"><div className="tab-row" role="tablist" aria-label="Experience Pillars">{tabs.map(([tab,number,label])=><button key={tab} id={`tab-${tab}`} role="tab" aria-selected={activeTab===tab} aria-controls={`panel-${tab}`} className={`tab-btn ${activeTab===tab?'active':''}`} onClick={()=>setActiveTab(tab)}><span className="code">{number}</span> {label}</button>)}</div>{panels.map(([tab,title,body,cta,url,secondary,secondaryUrl])=><div key={tab} id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className={`panel ${activeTab===tab?'active':''}`} hidden={activeTab!==tab}><div className="p-left"><h2>{title}</h2><p>{body}</p><div className="p-ctas"><Link href={url} className="btn-primary">{cta}</Link>{secondary&&<Link href={secondaryUrl} className="btn-ghost">{secondary}</Link>}</div></div><div className="p-right">
