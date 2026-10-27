@@ -1,5 +1,6 @@
 # Local Supabase configuration for reproducible migrations and pgTAP tests.
 # Generated from the documented minimal CLI configuration shape.
+# The CRM migration chain is validated in CI and should be tested on an isolated Supabase environment before production rollout.
 project_id = "peakaxis"
 
 [db]
