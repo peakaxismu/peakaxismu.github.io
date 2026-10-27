@@ -461,7 +461,7 @@ export default function AdminWaterfallsPage() {
           <section className="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="discard-title" aria-describedby="discard-description">
             <div className="confirm-icon" aria-hidden="true">!</div>
             <h2 id="discard-title">Discard unsaved changes?</h2>
-            <p id="discard-description">Your edits haven't been saved. You can return to the form or discard them.</p>
+            <p id="discard-description">Your edits haven&apos;t been saved. You can return to the form or discard them.</p>
             <div className="modal-footer">
               <button type="button" className="button secondary" onClick={() => setConfirmDiscard(false)}>Keep editing</button>
               <button type="button" className="button destructive" onClick={discardEditor}>Discard changes</button>
