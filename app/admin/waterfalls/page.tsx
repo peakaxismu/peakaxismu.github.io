@@ -231,7 +231,11 @@ export default function AdminWaterfallsPage() {
       const deletedName = deleteTarget.name
       setDeleteTarget(null)
       setNotice('“' + deletedName + '” was deleted.')
-      await refreshItems()
+      try {
+        await refreshItems()
+      } catch (refreshError) {
+        setError(refreshError instanceof Error ? refreshError.message : 'The route was deleted, but the list could not be refreshed.')
+      }
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : 'Unable to delete this route.')
     } finally {
