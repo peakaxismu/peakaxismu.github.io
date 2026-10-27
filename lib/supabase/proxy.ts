@@ -50,7 +50,8 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const { data: { claims }, error } = await supabase.auth.getClaims()
+  const { data, error } = await supabase.auth.getClaims()
+  const claims = data?.claims
   const appMetadata = claims?.app_metadata
   const identity = claims && !error
     ? {
