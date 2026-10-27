@@ -3,6 +3,8 @@ update public.waterfalls
 set status = 'published'
 where lower(status) not in ('draft', 'published');
 
+alter table public.waterfalls alter column status set default 'draft';
+
 -- Draft routes should not be readable by public/anonymous visitors.
 drop policy if exists "Public can read published waterfalls" on public.waterfalls;
 create policy "Public can read published waterfalls" on public.waterfalls
