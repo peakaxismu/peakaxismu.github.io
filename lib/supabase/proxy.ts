@@ -66,7 +66,7 @@ export async function updateSession(request: NextRequest) {
     url.pathname = '/admin/login'
     url.search = identity ? '?error=forbidden' : ''
     const redirectResponse = NextResponse.redirect(url)
-    redirectResponse.cookies.setAll(supabaseResponse.cookies.getAll())
+    supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie))
     for (const header of ['cache-control', 'expires', 'pragma']) {
       const value = supabaseResponse.headers.get(header)
       if (value) redirectResponse.headers.set(header, value)
