@@ -7,13 +7,14 @@
  */
 export type AdminIdentity = {
   email?: string | null
-  app_metadata?: { role?: unknown } | null
+  app_metadata?: object | null
 } | null
 
 export function isAdminUser(user: AdminIdentity): boolean {
   if (!user) return false
 
-  const appRole = user.app_metadata?.role
+  const metadata = user.app_metadata
+  const appRole = metadata && 'role' in metadata ? metadata.role : undefined
   if (appRole === 'admin') return true
 
   const configuredEmails = (process.env.ADMIN_EMAILS || '')
