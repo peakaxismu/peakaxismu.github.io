@@ -23,6 +23,13 @@ type Enquiry = {
   quote_amount?: number | null
   lost_reason?: string | null
   customer_id?: string | null
+  attribution_source?: string | null
+  attribution_medium?: string | null
+  attribution_campaign?: string | null
+  attribution_content?: string | null
+  attribution_referrer_host?: string | null
+  attribution_landing_path?: string | null
+  tracking_link_code?: string | null
 }
 
 const STAGES = [
@@ -96,7 +103,7 @@ export default function EnquiryWorkspace({ initialEnquiries }: { initialEnquirie
   const today = new Date().toISOString().slice(0, 10)
 
   const filtered = useMemo(() => enquiries.filter(e => {
-    const hay = `${e.name} ${e.email} ${e.phone || ''} ${e.reference_id || ''} ${e.message || ''}`.toLowerCase()
+    const hay = `${e.name} ${e.email} ${e.phone || ''} ${e.reference_id || ''} ${e.message || ''} ${e.attribution_source || ''} ${e.attribution_campaign || ''} ${e.attribution_content || ''} ${e.tracking_link_code || ''}`.toLowerCase()
     return (!query || hay.includes(query.toLowerCase())) && (status === 'all' || e.status === status) && (interest === 'all' || e.interest_type === interest)
   }), [enquiries, query, status, interest])
 
@@ -272,8 +279,8 @@ export default function EnquiryWorkspace({ initialEnquiries }: { initialEnquirie
       <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--sand-line)', fontSize: 12, color: '#625d55' }}>{filtered.length} matching {filtered.length === 1 ? 'enquiry' : 'enquiries'}</div>
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 900, textAlign: 'left', fontSize: 14 }}>
-            <thead><tr>{['Date', 'Customer', 'Request', 'Date', 'Group', 'Stage', 'Action'].map(h => <th key={h} style={{ padding: 12, fontSize: 10, textTransform: 'uppercase', color: '#5a564f', borderBottom: '2px solid var(--sand-line)' }}>{h}</th>)}</tr></thead>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 1080, textAlign: 'left', fontSize: 14 }}>
+            <thead><tr>{['Date', 'Customer', 'Request', 'Date', 'Group', 'Source', 'Stage', 'Action'].map(h => <th key={h} style={{ padding: 12, fontSize: 10, textTransform: 'uppercase', color: '#5a564f', borderBottom: '2px solid var(--sand-line)' }}>{h}</th>)}</tr></thead>
             <tbody>
               {filtered.map(e => {
                 const missing = missingInformation(e)
@@ -284,6 +291,13 @@ export default function EnquiryWorkspace({ initialEnquiries }: { initialEnquirie
                     <td style={{ padding: 12 }}>{badge(e.interest_type)}{e.reference_id && <div style={{ fontSize: 12, marginTop: 5 }}>{e.reference_id}</div>}{missing.length > 0 && <div style={{ fontSize: 10, marginTop: 6, color: 'var(--ember)', fontWeight: 800 }}>MISSING: {missing.join(', ')}</div>}</td>
                     <td style={{ padding: 12, fontSize: 12 }}>{e.preferred_date || '—'}</td>
                     <td style={{ padding: 12, fontSize: 12 }}>{e.group_size || '—'}</td>
+                    <td style={{ padding: 12, minWidth: 150 }}>
+                      <div style={{ display: 'inline-block', padding: '4px 7px', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', background: e.tracking_link_code ? '#e8f1eb' : '#eee9df', color: e.tracking_link_code ? '#245b41' : '#5d554a' }}>
+                        {e.attribution_content || e.attribution_source || e.attribution_referrer_host || 'Direct / unknown'}
+                      </div>
+                      {e.attribution_campaign && <div style={{ fontSize: 11, color: '#625d55', marginTop: 5 }}>{e.attribution_campaign}</div>}
+                      {e.attribution_referrer_host && e.attribution_referrer_host !== e.attribution_source && <div style={{ fontSize: 10, color: '#80796f', marginTop: 3 }}>{e.attribution_referrer_host}</div>}
+                    </td>
                     <td style={{ padding: 12 }}>{badge(e.status)}{e.next_follow_up_at && <div style={{ fontSize: 10, color: '#625d55', marginTop: 6 }}>Follow-up {e.next_follow_up_at.slice(0, 10)}</div>}</td>
                     <td style={{ padding: 12 }}><button style={button} onClick={() => open(e)}>Open</button></td>
                   </tr>
