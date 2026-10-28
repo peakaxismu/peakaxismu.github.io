@@ -21,12 +21,17 @@ export default function HomeClientPillars({hikes,scheduledHikes=[],expedition,te
     : hikes
   const outdoorTeam=teamBuilding.filter(t=>t.type==='outdoor')
   const indoorActivities=teamBuilding.filter(t=>t.type==='indoor')
+  // Discovery CTAs should open the full list, not a previously featured detail page.
+  const configuredExpeditionsUrl = copy.expeditions_url?.trim()
+  const expeditionsUrl = configuredExpeditionsUrl?.startsWith('/expeditions/')
+    ? '/expeditions'
+    : configuredExpeditionsUrl || '/expeditions'
   const tabs=[['hikes','01','HIKES'],['expeditions','02','EXPEDITIONS'],['team','03','TEAM BUILDING'],['activities','04','ACTIVITIES']] as const
   // Editable homepage copy can be partially populated in staging or older databases.
   // Never pass an undefined destination to next/link; Next.js will throw while SSR renders.
   const panels=[
     ['hikes',copy.hikes_title || 'Guided hikes across Mauritius.',copy.hikes_body || 'Explore Mauritius mountain ranges and nature reserves on guided hikes.',copy.hikes_primary_cta || 'Explore all hikes',copy.hikes_primary_url || '/hikes',copy.hikes_secondary_cta || 'Book a private hike',copy.hikes_secondary_url || '/enquire?interest=private_hike'],
-    ['expeditions',copy.expeditions_title || 'Volcano expeditions in La Réunion.',copy.expeditions_body || 'Plan a guided mountain or volcano expedition with Peak Axis.',copy.expeditions_cta || 'Explore expeditions',copy.expeditions_url || '/expeditions/piton-de-la-fournaise','',''],
+    ['expeditions',copy.expeditions_title || 'Volcano expeditions in La Réunion.',copy.expeditions_body || 'Plan a guided mountain or volcano expedition with Peak Axis.',copy.expeditions_cta || 'Explore expeditions',expeditionsUrl,'',''],
     ['team',copy.team_title || 'Team building in real terrain.',copy.team_body || 'Outdoor team experiences built around collaboration and challenge.',copy.team_cta || 'Plan a team experience',copy.team_url || '/enquire?interest=team','',''],
     ['activities',copy.activities_title || 'Outdoor and group activities.',copy.activities_body || 'Find an activity that fits your group.',copy.activities_cta || 'Ask about activities',copy.activities_url || '/enquire?interest=activity','',''],
   ] as const
