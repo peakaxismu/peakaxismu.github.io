@@ -4,6 +4,7 @@ import { useState, useId } from 'react'
 import Link from 'next/link'
 import { getHikePriceEstimate } from '@/lib/hikePricing'
 import { readAttribution } from '@/components/AttributionTracker'
+import { parseExpeditionDepartureStart } from '@/lib/expeditionDates'
 
 export interface HikeItem {
   id: string
@@ -32,6 +33,7 @@ export interface ExpeditionItem {
   duration?: string
   difficulty?: string
   description?: string
+  next_departure?: string | null
 }
 
 export interface TeamPackageItem {
@@ -76,12 +78,16 @@ export default function EnquiryFormClient({
   initialRef = '',
   initialScheduledId = '',
 }: EnquiryFormClientProps) {
+  const initialExpedition = expeditions.find((ex) => ex.name === initialRef || ex.id === initialRef)
+  const initialDepartureStart = parseExpeditionDepartureStart(initialExpedition?.next_departure)
   const [interestType, setInterestType] = useState(initialInterest)
   const [referenceId, setReferenceId] = useState(initialRef)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [preferredDate, setPreferredDate] = useState('')
+  const [expeditionDateMode, setExpeditionDateMode] = useState<'published' | 'custom'>(initialDepartureStart ? 'published' : 'custom')
+  const [customExpeditionDate, setCustomExpeditionDate] = useState('')
   const [groupSize, setGroupSize] = useState('1')
   const [message, setMessage] = useState('')
   const [website, setWebsite] = useState('')
@@ -98,6 +104,7 @@ export default function EnquiryFormClient({
     interest_type: string
     reference_id?: string
     preferred_date?: string
+    preferred_date_display?: string
     group_size: string
     message?: string
   } | null>(null)
@@ -150,6 +157,8 @@ export default function EnquiryFormClient({
     setInterestType(value)
     setReferenceId('')
     setPreferredDate('')
+    setCustomExpeditionDate('')
+    setExpeditionDateMode('custom')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -180,8 +189,38 @@ export default function EnquiryFormClient({
       return
     }
 
+    if (interestType === 'expedition' && selectedExpedition) {
+      const publishedStart = parseExpeditionDepartureStart(selectedExpedition.next_departure)
+      if (publishedStart && expeditionDateMode === 'published') {
+        // The advertised date will be recorded using its start date and full range in the enquiry notes.
+      } else if (!customExpeditionDate) {
+        setErrorMsg('Please choose your preferred expedition start date, or select the published Peak Axis departure.')
+        return
+      } else if (customExpeditionDate < new Date().toISOString().slice(0, 10)) {
+        setErrorMsg('Please choose a future date for your expedition enquiry.')
+        return
+      }
+    }
+
     setSubmitting(true)
     setErrorMsg('')
+
+    const selectedPreferredDate = interestType === 'expedition'
+      ? expeditionDateMode === 'published' && parseExpeditionDepartureStart(selectedExpedition?.next_departure)
+        ? parseExpeditionDepartureStart(selectedExpedition?.next_departure)
+        : customExpeditionDate || undefined
+      : preferredDate || undefined
+    const dateDisplay = interestType === 'expedition'
+      ? expeditionDateMode === 'published' && selectedExpedition?.next_departure
+        ? selectedExpedition.next_departure
+        : customExpeditionDate
+      : preferredDate
+    const expeditionDateNote = interestType === 'expedition' && selectedExpedition
+      ? expeditionDateMode === 'published' && parseExpeditionDepartureStart(selectedExpedition.next_departure)
+        ? `Requested published departure: ${selectedExpedition.next_departure}.`
+        : `Requested a custom expedition date. Preferred start date: ${customExpeditionDate || 'not specified'}.`
+      : ''
+    const combinedMessage = [expeditionDateNote, message.trim()].filter(Boolean).join('\n\n')
 
     const payload = {
       name: name.trim(),
@@ -189,9 +228,9 @@ export default function EnquiryFormClient({
       phone: phone.trim() || undefined,
       interest_type: interestType,
       reference_id: (interestType === 'expedition' ? selectedExpedition?.name || referenceId.trim() : referenceId.trim()) || undefined,
-      preferred_date: preferredDate || undefined,
+      preferred_date: selectedPreferredDate || undefined,
       group_size: groupSize,
-      message: message.trim() || undefined,
+      message: combinedMessage || undefined,
       website,
     }
 
@@ -203,7 +242,7 @@ export default function EnquiryFormClient({
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'We could not send your enquiry. Please try again.')
-      setSubmittedData({ id: json.data?.id, ...payload, reference_id: interestType === 'hike' ? (selectedHike?.name || payload.reference_id) : payload.reference_id })
+      setSubmittedData({ id: json.data?.id, ...payload, preferred_date_display: dateDisplay, reference_id: interestType === 'hike' ? (selectedHike?.name || payload.reference_id) : payload.reference_id })
       setSubmitted(true)
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : 'We could not send your enquiry. Please try again.')
@@ -234,7 +273,7 @@ export default function EnquiryFormClient({
           <dl className="recap-list">
             <div><dt>Experience</dt><dd>{title}</dd></div>
             {submittedData.reference_id && <div><dt>Selected experience</dt><dd>{submittedData.reference_id}</dd></div>}
-            {submittedData.preferred_date && <div><dt>Preferred date</dt><dd>{submittedData.preferred_date}</dd></div>}
+            {submittedData.preferred_date && <div><dt>{submittedData.interest_type === 'expedition' ? 'Expedition dates' : 'Preferred date'}</dt><dd>{submittedData.preferred_date_display || submittedData.preferred_date}</dd></div>}
             <div><dt>Group</dt><dd>{submittedData.group_size === '11' ? '11+ people' : submittedData.group_size + ' ' + (submittedData.group_size === '1' ? 'person' : 'people')}</dd></div>
             <div><dt>Email</dt><dd>{submittedData.email}</dd></div>
             {submittedData.phone && <div><dt>WhatsApp / phone</dt><dd>{submittedData.phone}</dd></div>}
@@ -380,7 +419,13 @@ export default function EnquiryFormClient({
                 <>
                   <div className="field">
                     <label htmlFor={expSelectId}>Which expedition interests you?</label>
-                    <select id={expSelectId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)}>
+                    <select id={expSelectId} value={referenceId} onChange={(e) => {
+                      const nextValue = e.target.value
+                      const nextExpedition = expeditions.find((ex) => ex.name === nextValue || ex.id === nextValue)
+                      setReferenceId(nextValue)
+                      setExpeditionDateMode(parseExpeditionDepartureStart(nextExpedition?.next_departure) ? 'published' : 'custom')
+                      setCustomExpeditionDate('')
+                    }}>
                       <option value="">I&apos;m open to options</option>
                       {referenceId && !expeditions.some((ex) => ex.name === referenceId) && (
                         <option value={referenceId}>
@@ -400,20 +445,44 @@ export default function EnquiryFormClient({
                   {selectedExpedition?.description && (
                     <div className="upsell-box">{selectedExpedition.description}</div>
                   )}
-                  <div className="row2">
+                  {selectedExpedition && parseExpeditionDepartureStart(selectedExpedition.next_departure) ? (
+                    <fieldset className="field departure-options">
+                      <legend>When would you like to go?</legend>
+                      <div className="departure-mode-grid" role="group" aria-label="Choose expedition date option">
+                        <button type="button" className={expeditionDateMode === 'published' ? 'departure-mode active' : 'departure-mode'} onClick={() => setExpeditionDateMode('published')} aria-pressed={expeditionDateMode === 'published'}>
+                          <span className="departure-mode-kicker">Published departure</span>
+                          <strong>{selectedExpedition.next_departure}</strong>
+                          <small>Join the dates announced by Peak Axis.</small>
+                        </button>
+                        <button type="button" className={expeditionDateMode === 'custom' ? 'departure-mode active' : 'departure-mode'} onClick={() => setExpeditionDateMode('custom')} aria-pressed={expeditionDateMode === 'custom'}>
+                          <span className="departure-mode-kicker">Your own dates</span>
+                          <strong>Request another date</strong>
+                          <small>Tell us when you would prefer to travel.</small>
+                        </button>
+                      </div>
+                      {expeditionDateMode === 'custom' && (
+                        <div className="field departure-custom-date">
+                          <label htmlFor={prefDatePrivateId}>Preferred start date <span className="req-star">*</span></label>
+                          <input type="date" id={prefDatePrivateId} min={new Date().toISOString().slice(0, 10)} required value={customExpeditionDate} onChange={(e) => setCustomExpeditionDate(e.target.value)} />
+                        </div>
+                      )}
+                      <p className="departure-help">This is an enquiry, not a confirmed booking. We&apos;ll check availability and logistics before confirming.</p>
+                    </fieldset>
+                  ) : (
                     <div className="field">
-                      <label htmlFor={prefDatePrivateId}>Preferred date</label>
-                      <input type="date" id={prefDatePrivateId} value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} />
+                      <label htmlFor={prefDatePrivateId}>Preferred start date {selectedExpedition && <span className="req-star">*</span>}</label>
+                      <input type="date" id={prefDatePrivateId} min={new Date().toISOString().slice(0, 10)} required={Boolean(selectedExpedition)} value={customExpeditionDate} onChange={(e) => setCustomExpeditionDate(e.target.value)} />
+                      <small className="departure-help">{selectedExpedition ? 'No published departure is listed yet. Choose a preferred start date and Peak Axis will confirm what is possible.' : 'Select an expedition to see its published departure, or leave your preferred date open while you explore options.'}</small>
                     </div>
-                    <div className="field">
-                      <label htmlFor={groupSizeId}>How many people?</label>
-                      <select id={groupSizeId} value={groupSize} onChange={(e) => setGroupSize(e.target.value)}>
-                        {[1,2,3,4,5,6,7,8,9,10].map((n) => (
-                          <option key={n} value={n}>{n === 1 ? 'Just me' : n + ' people'}</option>
-                        ))}
-                        <option value="11">11+ people</option>
-                      </select>
-                    </div>
+                  )}
+                  <div className="field">
+                    <label htmlFor={groupSizeId}>How many people?</label>
+                    <select id={groupSizeId} value={groupSize} onChange={(e) => setGroupSize(e.target.value)}>
+                      {[1,2,3,4,5,6,7,8,9,10].map((n) => (
+                        <option key={n} value={n}>{n === 1 ? 'Just me' : n + ' people'}</option>
+                      ))}
+                      <option value="11">11+ people</option>
+                    </select>
                   </div>
                 </>
               )}
