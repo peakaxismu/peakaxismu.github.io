@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import EnquiryFormClient from '@/components/EnquiryFormClient'
+import { parseExpeditionDepartureStart } from '@/lib/expeditionDates'
 
 export const revalidate = 0
 
@@ -16,11 +17,17 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
     const route = Array.isArray(departure.hikes) ? departure.hikes[0] : departure.hikes
     return route ? [{ ...route, id: departure.id, date: departure.date, price: departure.price, spots_remaining: departure.spots_remaining, spots_total: departure.spots_total, booking_type: 'scheduled_group' }] : []
   })
-  const { data: expeditions } = await supabase.from('expeditions').select('id, name, destination, price_from, duration_days, difficulty, description').eq('status', 'published')
-  const expeditionOptions = (expeditions || []).map((expedition) => ({
-    ...expedition,
-    duration: expedition.duration_days ? `${expedition.duration_days} days` : '',
-  }))
+  const { data: expeditions } = await supabase.from('expeditions').select('id, name, destination, price_from, duration_days, difficulty, description, next_departure').eq('status', 'published')
+  const today = new Date().toISOString().slice(0, 10)
+  const expeditionOptions = (expeditions || []).map((expedition) => {
+    const departureStart = parseExpeditionDepartureStart(expedition.next_departure)
+    return {
+      ...expedition,
+      // An advertised departure that has already started should not be offered as upcoming.
+      next_departure: departureStart && departureStart < today ? null : expedition.next_departure,
+      duration: expedition.duration_days ? `${expedition.duration_days} days` : '',
+    }
+  })
   const { data: teamPackages } = await supabase.from('team_building_packages').select('id, name, type, duration, price_note, description').eq('status', 'published')
   const allowedInterests = new Set(['hike', 'private_hike', 'expedition', 'piton_des_neiges', 'team', 'activity'])
   let initialInterest = params.interest && allowedInterests.has(params.interest) ? params.interest : ''
@@ -113,6 +120,20 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
         #view-enquire .interest-opt.inactive { opacity:.32; }
         #view-enquire .interest-opt.inactive:hover { opacity:.58; }
         #view-enquire .experience-context-panel { margin-top:14px; padding:18px; border:1px solid #ded7ca; border-radius:10px; background:#fffaf2; animation:enquiry-context-in .2s ease-out; }
+        #view-enquire .departure-options { border:0; padding:0; margin:18px 0 20px; min-width:0; }
+        #view-enquire .departure-options legend { margin-bottom:12px; color:#211f1d; font-size:13px; font-weight:800; }
+        #view-enquire .departure-mode-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+        #view-enquire .departure-mode { display:flex; flex-direction:column; align-items:flex-start; gap:7px; min-width:0; min-height:128px; padding:16px; text-align:left; border:1px solid #d2cbbf; border-radius:10px; background:#f5f1e8; color:#211f1d; cursor:pointer; }
+        #view-enquire .departure-mode:hover { border-color:#c1440e; }
+        #view-enquire .departure-mode.active { border-color:#c1440e; background:#211f1d; color:#faf8f3; box-shadow:inset 0 0 0 1px #c1440e; }
+        #view-enquire .departure-mode-kicker { color:#c1440e; font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+        #view-enquire .departure-mode strong { font-size:15px; line-height:1.35; }
+        #view-enquire .departure-mode small { color:#6b675f; font-size:11px; line-height:1.45; }
+        #view-enquire .departure-mode.active .departure-mode-kicker { color:#e2764b; }
+        #view-enquire .departure-mode.active small { color:#d1cbc2; }
+        #view-enquire .departure-help { display:block; margin-top:9px; color:#6b675f; font-size:11px; line-height:1.55; }
+        #view-enquire .departure-custom-date { margin-top:16px; }
+
         #view-enquire .experience-context-panel .field + .field { margin-top:14px; }
         @keyframes enquiry-context-in { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
         #view-enquire .interest-icon { width:30px; height:30px; flex:0 0 30px; display:grid; place-items:center; border-radius:50%; background:#e8e0d3; color:#c1440e; font-weight:800; }
@@ -177,7 +198,7 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
           #view-enquire .contact-form-heading { display:block; }
           #view-enquire .contact-form-heading p { margin-top:10px; }
           #view-enquire #enquiryForm { padding:22px; }
-          #view-enquire .interest-grid, #view-enquire .row2 { grid-template-columns:1fr; }
+          #view-enquire .interest-grid, #view-enquire .row2, #view-enquire .departure-mode-grid { grid-template-columns:1fr; }
           #view-enquire .contact-trust-row { gap:16px 24px; }
           #view-enquire .form-submit-btn { position:sticky; bottom:12px; z-index:5; box-shadow:0 8px 22px rgba(33,31,29,.18); }
           #view-enquire .enquiry-success-card { padding:24px; }
