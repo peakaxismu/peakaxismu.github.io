@@ -71,123 +71,6 @@ const cardValueForInterest = (type: string) => {
 }
 
 
-function ExpeditionDatePicker({
-  id,
-  value,
-  onChange,
-  minDate,
-  required = false,
-}: {
-  id: string
-  value: string
-  onChange: (value: string) => void
-  minDate: string
-  required?: boolean
-}) {
-  const [open, setOpen] = useState(false)
-  const today = new Date()
-  const parseLocal = (dateValue: string) => {
-    const parts = dateValue.split('-').map(Number)
-    return parts.length === 3 && parts.every(Number.isFinite)
-      ? new Date(parts[0], parts[1] - 1, parts[2])
-      : null
-  }
-  const selectedDate = parseLocal(value)
-  const min = parseLocal(minDate) || new Date(today.getFullYear(), today.getMonth(), today.getDate())
-  const [visibleMonth, setVisibleMonth] = useState(() => {
-    const initial = selectedDate || min
-    return new Date(initial.getFullYear(), initial.getMonth(), 1)
-  })
-  const monthStart = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), 1)
-  const daysInMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 0).getDate()
-  const leadingDays = monthStart.getDay()
-  const monthLabel = visibleMonth.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
-  const displayValue = selectedDate
-    ? selectedDate.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })
-    : 'Choose your preferred date'
-  const minMonth = new Date(min.getFullYear(), min.getMonth(), 1)
-  const previousMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1)
-  const canGoBack = previousMonth >= minMonth
-  const days = Array.from({ length: leadingDays + daysInMonth }, (_, index) =>
-    index < leadingDays ? null : new Date(visibleMonth.getFullYear(), visibleMonth.getMonth(), index - leadingDays + 1)
-  )
-  const toDateValue = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-
-  return (
-    <div className="custom-date-picker">
-      <button
-        type="button"
-        id={id}
-        className={value ? 'date-picker-trigger has-value' : 'date-picker-trigger'}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        aria-controls={`${id}-calendar`}
-        onClick={() => {
-          if (!open) {
-            const current = selectedDate || min
-            setVisibleMonth(new Date(current.getFullYear(), current.getMonth(), 1))
-          }
-          setOpen(!open)
-        }}
-      >
-        <span className="date-picker-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5" width="17" height="16" rx="2.5" stroke="currentColor" strokeWidth="1.7"/><path d="M7.5 3.5v4M16.5 3.5v4M4 9.5h16" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></svg>
-        </span>
-        <span className="date-picker-value">
-          <strong>{displayValue}</strong>
-          <small>{selectedDate ? 'Tap to change date' : 'Select a day from the calendar'}</small>
-        </span>
-        <span className="date-picker-action">{open ? 'Close' : 'Choose date'}</span>
-      </button>
-      {required && !value && <span className="date-picker-required">Please select a start date.</span>}
-      {open && (
-        <div className="date-calendar" id={`${id}-calendar`} role="dialog" aria-label="Choose expedition start date">
-          <div className="date-calendar-header">
-            <button type="button" className="calendar-nav" aria-label="Previous month" disabled={!canGoBack} onClick={() => setVisibleMonth(previousMonth)}>‹</button>
-            <div className="calendar-month-label">
-              <strong>{monthLabel}</strong>
-              <small>Choose your start day</small>
-            </div>
-            <button type="button" className="calendar-nav" aria-label="Next month" onClick={() => setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1))}>›</button>
-          </div>
-          <div className="calendar-grid calendar-weekdays" aria-hidden="true">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <span key={day}>{day}</span>)}
-          </div>
-          <div className="calendar-grid calendar-days">
-            {days.map((date, index) => {
-              if (!date) return <span className="calendar-empty" key={`empty-${index}`} />
-              const dateValue = toDateValue(date)
-              const disabled = dateValue < toDateValue(min)
-              const selected = dateValue === value
-              const todayValue = toDateValue(today)
-              return (
-                <button
-                  key={dateValue}
-                  type="button"
-                  className={`calendar-day${selected ? ' selected' : ''}${dateValue === todayValue ? ' today' : ''}`}
-                  disabled={disabled}
-                  aria-pressed={selected}
-                  aria-label={date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                  onClick={() => {
-                    onChange(dateValue)
-                    setOpen(false)
-                  }}
-                >
-                  {date.getDate()}
-                </button>
-              )
-            })}
-          </div>
-          <div className="date-calendar-footer">
-            <span>Dates are requests until Peak Axis confirms availability.</span>
-            {value && <button type="button" onClick={() => onChange('')}>Clear date</button>}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
 export default function EnquiryFormClient({
   hikes,
   expeditions,
@@ -581,7 +464,7 @@ export default function EnquiryFormClient({
                       {expeditionDateMode === 'custom' && (
                         <div className="field departure-custom-date">
                           <label htmlFor={prefDatePrivateId}>Preferred start date <span className="req-star">*</span></label>
-                          <ExpeditionDatePicker id={prefDatePrivateId} minDate={new Date().toISOString().slice(0, 10)} required value={customExpeditionDate} onChange={setCustomExpeditionDate} />
+                          <input type="date" id={prefDatePrivateId} min={new Date().toISOString().slice(0, 10)} required value={customExpeditionDate} onChange={(e) => setCustomExpeditionDate(e.target.value)} />
                         </div>
                       )}
                       <p className="departure-help">This is an enquiry, not a confirmed booking. We&apos;ll check availability and logistics before confirming.</p>
@@ -589,7 +472,7 @@ export default function EnquiryFormClient({
                   ) : (
                     <div className="field">
                       <label htmlFor={prefDatePrivateId}>Preferred start date {selectedExpedition && <span className="req-star">*</span>}</label>
-                      <ExpeditionDatePicker id={prefDatePrivateId} minDate={new Date().toISOString().slice(0, 10)} required={Boolean(selectedExpedition)} value={customExpeditionDate} onChange={setCustomExpeditionDate} />
+                      <input type="date" id={prefDatePrivateId} min={new Date().toISOString().slice(0, 10)} required={Boolean(selectedExpedition)} value={customExpeditionDate} onChange={(e) => setCustomExpeditionDate(e.target.value)} />
                       <small className="departure-help">{selectedExpedition ? 'No published departure is listed yet. Choose a preferred start date and Peak Axis will confirm what is possible.' : 'Select an expedition to see its published departure, or leave your preferred date open while you explore options.'}</small>
                     </div>
                   )}
