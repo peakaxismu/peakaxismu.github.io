@@ -325,6 +325,39 @@ export default function ExpeditionsAdminClient({ initialExpeditions }: { initial
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
                 <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Difficulty / Effort</label>
+                  <input
+                    type="text"
+                    value={editingExp.difficulty || ''}
+                    onChange={(e) => setEditingExp({ ...editingExp, difficulty: e.target.value })}
+                    placeholder="To be confirmed"
+                    style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Minimum Group Size (0 = confirm)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editingExp.group_size_min ?? 0}
+                    onChange={(e) => setEditingExp({ ...editingExp, group_size_min: Number(e.target.value) })}
+                    style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Maximum Group Size (0 = confirm)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editingExp.group_size_max ?? 0}
+                    onChange={(e) => setEditingExp({ ...editingExp, group_size_max: Number(e.target.value) })}
+                    style={{ width: '100%', padding: '10px', border: '1px solid var(--sand-line)' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+                <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', marginBottom: '4px' }}>Summit Elevation</label>
                   <input
                     type="text"
