@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import type { Hike } from '@/types/database'
+import { formatScheduledHikePrice } from '@/lib/scheduled-hike-pricing'
 
 export const revalidate = 0
 
@@ -77,7 +78,7 @@ export default async function ScheduledHikePage({ params }: Props) {
                 <h2>{formatDate(departure.date)}</h2>
               </div>
               <div className="departure-stats">
-                <div><b>PRICE</b><strong>{departure.price || 'Price on request'}</strong><span>per person</span></div>
+                <div><b>PRICE</b><strong>{formatScheduledHikePrice(departure.price)}</strong><span>per person</span></div>
                 <div><b>SPOTS</b><strong>{spots}</strong><span>remaining of {departure.spots_total ?? '—'}</span></div>
                 <div><b>DIFFICULTY</b><strong>{hike.difficulty}</strong><span>guided group</span></div>
               </div>
@@ -130,7 +131,7 @@ export default async function ScheduledHikePage({ params }: Props) {
             <p>The date, price, capacity and trail conditions shown here belong to this scheduled group, not the general on-demand hike.</p>
             <div className="side-list">
               <div><b>Date</b><span>{formatDate(departure.date)}</span></div>
-              <div><b>Price</b><span>{departure.price || 'On request'}</span></div>
+              <div><b>Price</b><span>{formatScheduledHikePrice(departure.price)}</span></div>
               <div><b>Availability</b><span>{available ? `${spots} spots remaining` : 'Fully booked'}</span></div>
             </div>
           </aside>
