@@ -41,16 +41,16 @@ export default async function ExpeditionDetailPage({
   const hasPackingList = packingList.some((category) => Array.isArray(category.items) && category.items.length > 0)
   const highlights = exp.slug === 'full-moon-summit-expedition'
     ? [
-        '🌕 Full Moon Summit Experience',
-        '⛰️ Piton des Neiges Sunrise',
-        '🥾 Mountain Trekking Adventure',
-        '🏡 Overnight at Gîte de la Caverne Dufour',
-        '🌿 Cilaos Mountain Village',
-        '📸 Roche Merveilleuse Viewpoint',
-        '💦 Cascade du Voile de la Mariée',
-        '🏘️ Hell-Bourg Traditional Village',
-        '🌋 Spectacular Volcanic Landscapes',
-        '✈️ Return to Mauritius',
+        'Full Moon Summit Experience',
+        'Piton des Neiges Sunrise',
+        'Mountain Trekking Adventure',
+        'Overnight at Gîte de la Caverne Dufour',
+        'Cilaos Mountain Village',
+        'Roche Merveilleuse Viewpoint',
+        'Cascade du Voile de la Mariée',
+        'Hell-Bourg Traditional Village',
+        'Spectacular Volcanic Landscapes',
+        'Return to Mauritius',
       ]
     : []
   let sectionCounter = 2
