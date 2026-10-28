@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { normalizeScheduledHikePrice } from '@/lib/scheduled-hike-pricing'
 
 type Hike = {
   id: string
@@ -17,21 +18,11 @@ const inputStyle: React.CSSProperties = {
   background: 'var(--warm-white)', color: 'var(--ink)', boxSizing: 'border-box',
 }
 
-function formatMurPrice(value: string) {
-  const trimmed = value.trim()
-  if (!trimmed) return ''
-  const numeric = trimmed.replace(/^(mur|rs|rs\.)\s*/i, '').replace(/,/g, '').trim()
-  if (/^\d+(?:\.\d{1,2})?$/.test(numeric)) {
-    const amount = Number(numeric)
-    return `MUR ${amount.toLocaleString('en-MU', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
-  }
-  return /^mur\s/i.test(trimmed) ? trimmed : `MUR ${trimmed}`
-}
 
 export default function ScheduleHikeClient({ hikes }: { hikes: Hike[] }) {
   const [sourceId, setSourceId] = useState(hikes[0]?.id || '')
   const [date, setDate] = useState('')
-  const [price, setPrice] = useState(hikes[0]?.price || '')
+  const [price, setPrice] = useState('')
   const [spots, setSpots] = useState(String(hikes[0]?.max_participants || 10))
   const [status, setStatus] = useState<'draft' | 'published'>('draft')
   const [loading, setLoading] = useState(false)
@@ -42,7 +33,7 @@ export default function ScheduleHikeClient({ hikes }: { hikes: Hike[] }) {
   const chooseSource = (id: string) => {
     setSourceId(id)
     const next = hikes.find((h) => h.id === id)
-    setPrice(next?.price || '')
+    setPrice('')
     setSpots(String(next?.max_participants || 10))
   }
 
@@ -51,12 +42,13 @@ export default function ScheduleHikeClient({ hikes }: { hikes: Hike[] }) {
     setError('')
     setMessage('')
     if (!sourceId || !date) { setError('Choose a route and date.'); return }
-    if (!price.trim()) { setError('Enter a price in MUR.'); return }
+    const scheduledPrice = normalizeScheduledHikePrice(price)
+    if (!scheduledPrice) { setError('Enter a valid scheduled price in Rs, for example Rs 2,500.'); return }
     setLoading(true)
     try {
       const response = await fetch(`/api/admin/hikes/${sourceId}/schedule`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date, price: formatMurPrice(price), spots_total: Number(spots), spots_remaining: Number(spots), status }),
+        body: JSON.stringify({ date, price: scheduledPrice, spots_total: Number(spots), spots_remaining: Number(spots), status }),
       })
       const json = await response.json().catch(() => ({}))
       if (!response.ok || !json.success) { setError(json.error || 'Could not schedule this hike.'); return }
@@ -70,7 +62,7 @@ export default function ScheduleHikeClient({ hikes }: { hikes: Hike[] }) {
   return <div style={{ maxWidth: 760, color: 'var(--ink)' }}>
     <a href="/admin/hikes" style={{ fontSize: 13, fontWeight: 700 }}>← Hikes management</a>
     <h1 style={{ fontFamily: 'Big Shoulders Display, sans-serif', fontSize: 42, textTransform: 'uppercase', margin: '18px 0 6px' }}>Schedule a hike</h1>
-    <p style={{ color: '#625e56', margin: '0 0 26px', lineHeight: 1.6 }}>Choose an existing route template. Peak Axis will copy its trail, customer and safety information into a separate scheduled-group departure. The departure price is independent and can be set in MUR.</p>
+    <p style={{ color: '#625e56', margin: '0 0 26px', lineHeight: 1.6 }}>Choose an existing route template to inherit its trail, customer and safety information. The scheduled departure has its own price in Rs; the on-demand price is never copied.</p>
 
     <form onSubmit={schedule} style={{ background: 'var(--warm-white)', border: '1px solid var(--sand-line)', padding: 24 }}>
       <div style={{ display: 'grid', gap: 18 }}>
@@ -80,14 +72,14 @@ export default function ScheduleHikeClient({ hikes }: { hikes: Hike[] }) {
           </select>
         </label>
 
-        {source && <div style={{ background: '#eeeadf', padding: 15, lineHeight: 1.55, fontSize: 13 }}><strong>{source.name}</strong><br />{source.difficulty} · {source.duration} · {source.location}<br />Template price: {source.price}</div>}
+        {source && <div style={{ background: '#eeeadf', padding: 15, lineHeight: 1.55, fontSize: 13 }}><strong>{source.name}</strong><br />{source.difficulty} · {source.duration} · {source.location}<br />On-demand price (reference only; not copied to the departure): {source.price}</div>}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
           <label style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}>Scheduled date
             <input required type="date" value={date} onChange={(e) => setDate(e.target.value)} style={inputStyle} />
           </label>
-          <label style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}>Price (MUR)
-            <input required type="text" value={price} onChange={(e) => setPrice(e.target.value)} onBlur={() => setPrice(formatMurPrice(price))} placeholder="MUR 2,500" inputMode="decimal" style={inputStyle} />
+          <label style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase' }}>Price (Rs)
+            <input required type="text" value={price} onChange={(e) => setPrice(e.target.value)} onBlur={() => setPrice(normalizeScheduledHikePrice(price) || price.trim())} placeholder="Rs 2,500" inputMode="decimal" style={inputStyle} />
           </label>
         </div>
 
@@ -103,7 +95,7 @@ export default function ScheduleHikeClient({ hikes }: { hikes: Hike[] }) {
         </label>
 
         <div style={{ borderLeft: '3px solid var(--ember)', background: '#f5f1e8', padding: '12px 14px', fontSize: 12, lineHeight: 1.55 }}>
-          The departure is its own record linked to the route. Its date, capacity, price, visibility, and trail conditions can change without changing the route details.
+          The departure is its own record linked to the route. Its date, Rs price, capacity, visibility and trail conditions can change without changing the on-demand hike.
         </div>
 
         {error && <div role="alert" style={{ color: '#8f3215', background: '#f7e7df', padding: 11 }}>{error}</div>}
