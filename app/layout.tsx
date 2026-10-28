@@ -49,6 +49,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className={inter.className}>
+        <AttributionTracker />
         <StructuredData />
         <a href="#main-content" className="skip-link">
           Skip to main content
