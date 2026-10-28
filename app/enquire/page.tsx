@@ -121,36 +121,11 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
         #view-enquire .interest-opt.inactive:hover { opacity:.58; }
         #view-enquire .experience-context-panel { margin-top:14px; padding:18px; border:1px solid #ded7ca; border-radius:10px; background:#fffaf2; animation:enquiry-context-in .2s ease-out; }
 
-        #view-enquire .custom-date-picker { position:relative; width:100%; }
-        #view-enquire .date-picker-trigger { width:100%; min-height:76px; display:flex; align-items:center; gap:13px; padding:14px 16px; text-align:left; border:1px solid #d5cec1; border-radius:12px; background:#fffdf8; color:#211f1d; cursor:pointer; transition:border-color .18s ease,box-shadow .18s ease,background .18s ease; }
-        #view-enquire .date-picker-trigger:hover, #view-enquire .date-picker-trigger[aria-expanded="true"] { border-color:#c1440e; box-shadow:0 0 0 3px rgba(193,68,14,.09); }
-        #view-enquire .date-picker-trigger:focus-visible, #view-enquire .calendar-nav:focus-visible, #view-enquire .calendar-day:focus-visible { outline:3px solid rgba(193,68,14,.35); outline-offset:2px; }
-        #view-enquire .date-picker-icon { width:42px; height:42px; flex:0 0 42px; display:grid; place-items:center; border-radius:10px; background:#f3e8d9; color:#b74416; }
-        #view-enquire .date-picker-icon svg { width:22px; height:22px; }
-        #view-enquire .date-picker-value { display:flex; flex:1; min-width:0; flex-direction:column; gap:4px; }
-        #view-enquire .date-picker-value strong { color:#292722; font-size:14px; line-height:1.35; font-weight:750; }
-        #view-enquire .date-picker-value small { color:#797369; font-size:11px; line-height:1.35; }
-        #view-enquire .date-picker-action { padding:8px 10px; border:1px solid #e4ddd1; border-radius:7px; color:#9f3b14; background:#fffaf2; font-size:11px; font-weight:800; white-space:nowrap; }
-        #view-enquire .date-picker-required { display:block; margin-top:7px; color:#a33a19; font-size:11px; }
-        #view-enquire .date-calendar { position:relative; z-index:4; margin-top:10px; padding:17px; border:1px solid #e1d9cc; border-radius:14px; background:#fffdf8; box-shadow:0 14px 35px rgba(33,31,29,.10); animation:enquiry-context-in .16s ease-out; }
-        #view-enquire .date-calendar-header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:17px; }
-        #view-enquire .calendar-month-label { display:flex; flex-direction:column; align-items:center; gap:3px; }
-        #view-enquire .calendar-month-label strong { color:#211f1d; font-family:var(--font-display),sans-serif; font-size:18px; font-weight:900; }
-        #view-enquire .calendar-month-label small { color:#797369; font-size:10px; }
-        #view-enquire .calendar-nav { width:36px; height:36px; display:grid; place-items:center; border:1px solid #e3dbcf; border-radius:9px; background:#f7f2e9; color:#292722; font-size:26px; line-height:1; cursor:pointer; }
-        #view-enquire .calendar-nav:hover:not(:disabled) { border-color:#c1440e; color:#b74416; }
-        #view-enquire .calendar-nav:disabled { opacity:.3; cursor:not-allowed; }
-        #view-enquire .calendar-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; }
-        #view-enquire .calendar-weekdays { margin-bottom:7px; }
-        #view-enquire .calendar-weekdays span { padding:6px 0; color:#91897d; text-align:center; font-size:10px; font-weight:800; }
-        #view-enquire .calendar-day { aspect-ratio:1; min-width:0; display:grid; place-items:center; padding:0; border:1px solid transparent; border-radius:9px; background:transparent; color:#302e29; font-size:12px; cursor:pointer; }
-        #view-enquire .calendar-day:hover:not(:disabled) { border-color:#e4b39e; background:#fff1e8; }
-        #view-enquire .calendar-day.today { border-color:#d8c6ae; font-weight:900; }
-        #view-enquire .calendar-day.selected { border-color:#173838; background:#173838; color:#fffdf8; font-weight:900; }
-        #view-enquire .calendar-day:disabled { color:#d4cec4; cursor:not-allowed; text-decoration:line-through; }
-        #view-enquire .date-calendar-footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:15px; padding-top:12px; border-top:1px solid #eee7dc; }
-        #view-enquire .date-calendar-footer span { color:#797369; font-size:10px; line-height:1.5; }
-        #view-enquire .date-calendar-footer button { border:0; padding:5px; background:transparent; color:#a33a19; font-size:11px; font-weight:800; cursor:pointer; white-space:nowrap; }
+        #view-enquire input[type="date"] { min-height:50px; padding:12px 14px; color-scheme:light; font-variant-numeric:tabular-nums; cursor:pointer; }
+        #view-enquire input[type="date"]:hover { border-color:#b8a995; }
+        #view-enquire input[type="date"]:focus-visible { border-color:#c1440e; outline:3px solid rgba(193,68,14,.14); outline-offset:1px; }
+        #view-enquire input[type="date"]::-webkit-calendar-picker-indicator { width:18px; height:18px; padding:3px; margin-left:8px; cursor:pointer; opacity:.78; }
+        #view-enquire input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity:1; }
 
         #view-enquire .departure-options { border:0; padding:0; margin:18px 0 20px; min-width:0; }
         #view-enquire .departure-options legend { margin-bottom:12px; color:#211f1d; font-size:13px; font-weight:800; }
@@ -231,14 +206,6 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
           #view-enquire .contact-form-heading p { margin-top:10px; }
           #view-enquire #enquiryForm { padding:22px; }
           #view-enquire .interest-grid, #view-enquire .row2, #view-enquire .departure-mode-grid { grid-template-columns:1fr; }
-          #view-enquire .date-picker-trigger { padding:12px; gap:10px; }
-          #view-enquire .date-picker-icon { width:38px; height:38px; flex-basis:38px; }
-          #view-enquire .date-picker-value strong { font-size:12px; }
-          #view-enquire .date-picker-action { padding:7px 8px; font-size:10px; }
-          #view-enquire .date-calendar { padding:12px; }
-          #view-enquire .calendar-grid { gap:3px; }
-          #view-enquire .calendar-day { font-size:11px; border-radius:7px; }
-          #view-enquire .date-calendar-footer { align-items:flex-start; }
           #view-enquire .contact-trust-row { gap:16px 24px; }
           #view-enquire .form-submit-btn { position:sticky; bottom:12px; z-index:5; box-shadow:0 8px 22px rgba(33,31,29,.18); }
           #view-enquire .enquiry-success-card { padding:24px; }
