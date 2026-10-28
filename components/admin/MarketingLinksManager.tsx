@@ -55,7 +55,7 @@ function getConversionRate(link: MarketingLink) {
   return link.click_count ? Math.round((link.enquiry_count / link.click_count) * 1000) / 10 : 0
 }
 
-export default function MarketingLinksManager() {
+export default function MarketingLinksManager({ initialOrigin }: { initialOrigin: string }) {
   const [links, setLinks] = useState<MarketingLink[]>([])
   const [form, setForm] = useState(initialForm)
   const [loading, setLoading] = useState(true)
@@ -66,7 +66,6 @@ export default function MarketingLinksManager() {
   const [showForm, setShowForm] = useState(false)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<'all' | 'active' | 'paused'>('all')
-  const [origin, setOrigin] = useState('https://peakaxis.mu')
 
   async function loadLinks() {
     const response = await fetch('/api/admin/marketing-links', { cache: 'no-store' })
@@ -76,7 +75,6 @@ export default function MarketingLinksManager() {
   }
 
   useEffect(() => {
-    setOrigin(window.location.origin)
     loadLinks()
       .catch(err => setError(err instanceof Error ? err.message : 'Unable to load marketing links.'))
       .finally(() => setLoading(false))
@@ -100,7 +98,7 @@ export default function MarketingLinksManager() {
   }), [links])
 
   function urlFor(link: MarketingLink) {
-    return origin.replace(/\/$/, '') + '/go/' + link.code
+    return initialOrigin.replace(/\/$/, '') + '/go/' + link.code
   }
 
   async function copyLink(link: MarketingLink) {
