@@ -80,8 +80,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Please select a valid group size.' }, { status: 400 })
     }
 
-    if (cleanDate !== null && !DATE_PATTERN.test(cleanDate)) {
-      return NextResponse.json({ error: 'Please select a valid preferred date.' }, { status: 400 })
+    if (cleanDate !== null) {
+      if (!DATE_PATTERN.test(cleanDate)) {
+        return NextResponse.json({ error: 'Please select a valid preferred date.' }, { status: 400 })
+      }
+      const [year, month, day] = cleanDate.split('-').map(Number)
+      const dateCheck = new Date(Date.UTC(year, month - 1, day))
+      if (dateCheck.toISOString().slice(0, 10) !== cleanDate) {
+        return NextResponse.json({ error: 'Please select a valid preferred date.' }, { status: 400 })
+      }
+      if (interest_type !== 'hike' && cleanDate < new Date().toISOString().slice(0, 10)) {
+        return NextResponse.json({ error: 'Please choose a future preferred date.' }, { status: 400 })
+      }
     }
 
     const supabase = await createClient()
