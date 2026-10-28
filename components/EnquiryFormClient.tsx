@@ -55,12 +55,14 @@ interface EnquiryFormClientProps {
 const EXPERIENCE_OPTIONS = [
   ['hike', 'Join a group hike', 'Meet us on a scheduled trail'],
   ['private_hike', 'Plan a private trip', 'Choose the route, date and pace'],
+  ['expedition', 'Plan an expedition', 'High-altitude and multi-day adventures'],
   ['team', 'Bring my team', 'Outdoor experiences designed for teams'],
   ['activity', 'Something else', 'Tell us what you have in mind'],
 ] as const
 
 const cardValueForInterest = (type: string) => {
-  if (type === 'private_hike' || type === 'expedition') return 'private_hike'
+  if (type === 'expedition') return 'expedition'
+  if (type === 'private_hike') return 'private_hike'
   if (type === 'team') return 'team'
   if (type === 'activity') return 'activity'
   return 'hike'
@@ -119,7 +121,7 @@ export default function EnquiryFormClient({
 
   const parsedGroupSize = Number.parseInt(groupSize, 10) || 1
   const selectedHike = interestType === 'hike' ? hikes.find((h) => h.id === referenceId) : null
-  const selectedExpedition = interestType === 'expedition' ? expeditions.find((ex) => ex.name === referenceId) : null
+  const selectedExpedition = interestType === 'expedition' ? expeditions.find((ex) => ex.name === referenceId || ex.id === referenceId) : null
   const selectedTeamPkg = interestType === 'team' ? teamPackages.find((tp) => tp.name === referenceId) : null
   const isDeuxMamelles = selectedHike?.name.toLowerCase().includes('deux mamelles')
   const hikePriceEst =
@@ -135,7 +137,7 @@ export default function EnquiryFormClient({
 
   const getInterestTitle = (type: string) => {
     if (type === 'private_hike') return 'Private trip'
-    if (type === 'expedition') return 'Private trip'
+    if (type === 'expedition') return 'Expedition'
     if (type === 'team') return 'Team experience'
     if (type === 'activity') return 'Something else'
     return 'Group hike'
@@ -159,6 +161,15 @@ export default function EnquiryFormClient({
       return
     }
 
+    if (interestType === 'hike' && !referenceId.trim()) {
+      setErrorMsg(
+        scheduledHikes.length
+          ? 'Please choose a scheduled hike before submitting.'
+          : 'There are no published group hikes available right now. Please choose “Plan a private trip” or “Something else” instead.',
+      )
+      return
+    }
+
     if (!name.trim() || !email.trim()) {
       setErrorMsg('Please add your name and email so we can get back to you.')
       return
@@ -177,7 +188,7 @@ export default function EnquiryFormClient({
       email: email.trim(),
       phone: phone.trim() || undefined,
       interest_type: interestType,
-      reference_id: referenceId.trim() || undefined,
+      reference_id: (interestType === 'expedition' ? selectedExpedition?.name || referenceId.trim() : referenceId.trim()) || undefined,
       preferred_date: preferredDate || undefined,
       group_size: groupSize,
       message: message.trim() || undefined,
@@ -294,7 +305,7 @@ export default function EnquiryFormClient({
                     aria-pressed={active}
                   >
                     <span className="interest-icon" aria-hidden="true">
-                      {value === 'hike' ? '↗' : value === 'private_hike' ? '⌁' : value === 'team' ? '＋' : '…'}
+                      {value === 'hike' ? '↗' : value === 'private_hike' ? '⌁' : value === 'expedition' ? '⌃' : value === 'team' ? '＋' : '…'}
                     </span>
                     <span className="interest-copy">
                       <strong>{title}</strong>
@@ -319,6 +330,14 @@ export default function EnquiryFormClient({
                   {selectedHike.location && <span>{selectedHike.location}</span>}
                 </div>
               )}
+              {selectedExpedition && (
+                <div className="ref-card-meta">
+                  <span>{selectedExpedition.destination}</span>
+                  {selectedExpedition.duration && <span>{selectedExpedition.duration}</span>}
+                  {selectedExpedition.difficulty && <span>{selectedExpedition.difficulty}</span>}
+                  {selectedExpedition.price_from && <span>From {selectedExpedition.price_from}</span>}
+                </div>
+              )}
             </div>
           )}
 
@@ -328,13 +347,18 @@ export default function EnquiryFormClient({
                 <div className="field">
                   <label htmlFor={hikeSelectId}>Choose a scheduled hike</label>
                   <select id={hikeSelectId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)}>
-                    <option value="">{scheduledHikes.length ? 'Select a departure' : 'No hike planned'}</option>
+                    <option value="">{scheduledHikes.length ? 'Select a departure' : 'No departures currently available'}</option>
                     {scheduledHikes.map((h) => (
                       <option key={h.id} value={h.id}>
                         {h.name} · {h.date} · {h.spots_remaining} {h.spots_remaining === 1 ? 'spot' : 'spots'} left
                       </option>
                     ))}
                   </select>
+                  {scheduledHikes.length === 0 && (
+                    <div className="upsell-box" role="note">
+                      There are no published group departures available right now. Choose “Plan a private trip” or “Something else” above to send us a request.
+                    </div>
+                  )}
                   {isDeuxMamelles && <div className="upsell-box">Want to add a refreshing waterfall swim? Ask us about the Deux Mamelles + Waterfalls experience.</div>}
                 </div>
               )}
@@ -349,17 +373,46 @@ export default function EnquiryFormClient({
                     <label htmlFor={prefDatePrivateId}>Preferred date</label>
                     <input type="date" id={prefDatePrivateId} value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} />
                   </div>
-                  {initialInterest === 'expedition' && expeditions.length > 0 && (
+                </>
+              )}
+
+              {interestType === 'expedition' && (
+                <>
+                  <div className="field">
+                    <label htmlFor={expSelectId}>Which expedition interests you?</label>
+                    <select id={expSelectId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)}>
+                      <option value="">I&apos;m open to options</option>
+                      {referenceId && !expeditions.some((ex) => ex.name === referenceId) && (
+                        <option value={referenceId}>{referenceId} (from your link)</option>
+                      )}
+                      {expeditions.map((ex) => (
+                        <option key={ex.id} value={ex.name}>
+                          {ex.name} · {ex.destination}{ex.duration ? ` · ${ex.duration}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                    {expeditions.length === 0 && (
+                      <p className="field-help-text">No expeditions are currently listed. You can still send your destination or idea in the notes below.</p>
+                    )}
+                  </div>
+                  {selectedExpedition?.description && (
+                    <div className="upsell-box">{selectedExpedition.description}</div>
+                  )}
+                  <div className="row2">
                     <div className="field">
-                      <label htmlFor={expSelectId}>Or choose an expedition</label>
-                      <select id={expSelectId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)}>
-                        <option value="">I&apos;m open to options</option>
-                        {expeditions.map((ex) => (
-                          <option key={ex.id} value={ex.name}>{ex.name} · {ex.destination}</option>
+                      <label htmlFor={prefDatePrivateId}>Preferred date</label>
+                      <input type="date" id={prefDatePrivateId} value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} />
+                    </div>
+                    <div className="field">
+                      <label htmlFor={groupSizeId}>How many people?</label>
+                      <select id={groupSizeId} value={groupSize} onChange={(e) => setGroupSize(e.target.value)}>
+                        {[1,2,3,4,5,6,7,8,9,10].map((n) => (
+                          <option key={n} value={n}>{n === 1 ? 'Just me' : n + ' people'}</option>
                         ))}
+                        <option value="11">11+ people</option>
                       </select>
                     </div>
-                  )}
+                  </div>
                 </>
               )}
 
@@ -443,16 +496,18 @@ export default function EnquiryFormClient({
           {showMoreDetails && (
             <div className="details-panel">
             <div className="row2">
-                <div className="field">
-                  <label htmlFor={groupSizeId}>How many people?</label>
-                  <select id={groupSizeId} value={groupSize} onChange={(e) => setGroupSize(e.target.value)}>
-                    {[1,2,3,4,5,6,7,8,9,10].map((n) => (
-                      <option key={n} value={n}>{n === 1 ? 'Just me' : n + ' people'}</option>
-                    ))}
-                    <option value="11">11+ people</option>
-                  </select>
-                </div>
-                {interestType !== 'private_hike' && (
+                {interestType !== 'expedition' && (
+                  <div className="field">
+                    <label htmlFor={groupSizeId}>How many people?</label>
+                    <select id={groupSizeId} value={groupSize} onChange={(e) => setGroupSize(e.target.value)}>
+                      {[1,2,3,4,5,6,7,8,9,10].map((n) => (
+                        <option key={n} value={n}>{n === 1 ? 'Just me' : n + ' people'}</option>
+                      ))}
+                      <option value="11">11+ people</option>
+                    </select>
+                  </div>
+                )}
+                {interestType !== 'private_hike' && interestType !== 'expedition' && (
                   <div className="field">
                     <label htmlFor={activityDateId}>Preferred date</label>
                     <input type="date" id={activityDateId} value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} />
