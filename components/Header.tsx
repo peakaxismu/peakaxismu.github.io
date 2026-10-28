@@ -8,7 +8,7 @@ const links = [
   { href: '/', label: 'Home' },
   { href: '/hikes', label: 'Hikes' },
   { href: '/camping', label: 'Camping' },
-  { href: '/expeditions/piton-de-la-fournaise', label: 'Expeditions' },
+  { href: '/expeditions', label: 'Expeditions' },
   { href: '/journal', label: 'Journal' },
   { href: '/enquire', label: 'Contact' },
 ]
