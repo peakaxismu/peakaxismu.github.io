@@ -39,7 +39,7 @@ export default async function ExpeditionsPage() {
                 <p>{expedition.description}</p>
                 <div className="expedition-card-facts">
                   <span>{expedition.duration_days} days</span>
-                  <span>From {expedition.price_from}</span>
+                  <span>{expedition.price_from.toLowerCase() === 'price on request' ? expedition.price_from : `From ${expedition.price_from}`}</span>
                   <span>{expedition.next_departure || 'On request'}</span>
                 </div>
                 <Link href={`/expeditions/${expedition.slug}`} className="expedition-card-link">
