@@ -18,8 +18,8 @@ export async function POST(request: Request) {
     const admin = createAdminClient()
     const { data, error } = await admin.from('expeditions').insert({
       slug: generatedSlug, name, destination, duration_days: Number(duration_days) || 1,
-      difficulty: difficulty || 'Moderate', price_from, group_size_min: Number(group_size_min) || 4,
-      group_size_max: Number(group_size_max) || 12, summit_elevation: summit_elevation || null,
+      difficulty: difficulty || 'Moderate', price_from, group_size_min: Number(group_size_min) === 0 ? 0 : Number(group_size_min) || 4,
+      group_size_max: Number(group_size_max) === 0 ? 0 : Number(group_size_max) || 12, summit_elevation: summit_elevation || null,
       next_departure: next_departure || null, description: description || null,
       itinerary: itinerary || [], included: included || [], not_included: not_included || [],
       packing_list: packing_list || [], safety_notes: safety_notes || null, status: status || 'published',
