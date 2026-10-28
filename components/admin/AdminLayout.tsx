@@ -32,6 +32,7 @@ const navigationGroups = [
     links: [
       { href: '/admin/journal', label: 'Journal' },
       { href: '/admin/site-content', label: 'Site content' },
+      { href: '/admin/marketing-links', label: 'Marketing links' },
     ],
   },
 ]
