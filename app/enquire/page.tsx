@@ -16,7 +16,11 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
     const route = Array.isArray(departure.hikes) ? departure.hikes[0] : departure.hikes
     return route ? [{ ...route, id: departure.id, date: departure.date, price: departure.price, spots_remaining: departure.spots_remaining, spots_total: departure.spots_total, booking_type: 'scheduled_group' }] : []
   })
-  const { data: expeditions } = await supabase.from('expeditions').select('id, name, destination, price_from, duration, difficulty, description').eq('status', 'published')
+  const { data: expeditions } = await supabase.from('expeditions').select('id, name, destination, price_from, duration_days, difficulty, description').eq('status', 'published')
+  const expeditionOptions = (expeditions || []).map((expedition) => ({
+    ...expedition,
+    duration: expedition.duration_days ? `${expedition.duration_days} days` : '',
+  }))
   const { data: teamPackages } = await supabase.from('team_building_packages').select('id, name, type, duration, price_note, description').eq('status', 'published')
   const allowedInterests = new Set(['hike', 'private_hike', 'expedition', 'piton_des_neiges', 'team', 'activity'])
   let initialInterest = params.interest && allowedInterests.has(params.interest) ? params.interest : ''
@@ -63,7 +67,7 @@ export default async function EnquiryPage({ searchParams }: EnquiryPageProps) {
             </div>
             <p>Choose what sounds right. You can add dates, group size and other details only if you already know them.</p>
           </div>}
-          <EnquiryFormClient hikes={hikes || []} expeditions={expeditions || []} teamPackages={teamPackages || []} initialInterest={initialInterest} initialRef={scheduledId || initialRef} initialScheduledId={scheduledId} />
+          <EnquiryFormClient hikes={hikes || []} expeditions={expeditionOptions} teamPackages={teamPackages || []} initialInterest={initialInterest} initialRef={scheduledId || initialRef} initialScheduledId={scheduledId} />
         </div>
       </section>
 
