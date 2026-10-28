@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
     }
 
-    const { name, email, phone, interest_type, reference_id, preferred_date, group_size, message, website } = body
+    const { name, email, phone, interest_type, reference_id, preferred_date, group_size, message, website, attribution } = body
 
     if (typeof website === 'string' && website.trim()) {
       return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
@@ -57,6 +57,24 @@ export async function POST(request: Request) {
     const cleanDate = typeof preferred_date === 'string' ? preferred_date.trim().slice(0, 50) : null
     const cleanGroupSize = typeof group_size === 'string' ? group_size.trim() : null
     const cleanMessage = typeof message === 'string' ? message.trim().slice(0, 2000) : null
+
+    // Attribution is optional and deliberately limited to campaign labels,
+    // a referrer hostname, a path (never a full URL), and a generated link code.
+    const attributionInput = attribution && typeof attribution === 'object' && !Array.isArray(attribution)
+      ? attribution as Record<string, unknown>
+      : {}
+    const attributionText = (key: string, maxLength: number) =>
+      typeof attributionInput[key] === 'string' ? (attributionInput[key] as string).trim().slice(0, maxLength) || null : null
+    const attributionSource = attributionText('source', 80)
+    const attributionMedium = attributionText('medium', 80)
+    const attributionCampaign = attributionText('campaign', 120)
+    const attributionContent = attributionText('content', 120)
+    const rawReferrerHost = attributionText('referrer_host', 253)?.toLowerCase() ?? null
+    const attributionReferrerHost = rawReferrerHost && /^[a-z0-9.-]{1,253}$/.test(rawReferrerHost) && !rawReferrerHost.startsWith('.') && !rawReferrerHost.endsWith('.') ? rawReferrerHost : null
+    const rawLandingPath = attributionText('landing_path', 200)
+    const attributionLandingPath = rawLandingPath && rawLandingPath.startsWith('/') && !rawLandingPath.startsWith('//') && !rawLandingPath.includes('\\\\') ? rawLandingPath.split(/[?#]/, 1)[0].slice(0, 200) : null
+    const rawTrackingCode = attributionText('tracking_link_code', 16)?.toLowerCase() ?? null
+    const trackingLinkCode = rawTrackingCode && /^[a-z0-9]{8,16}$/.test(rawTrackingCode) ? rawTrackingCode : null
 
     if (cleanGroupSize !== null && !/^(?:[1-9]|10|11)$/.test(cleanGroupSize)) {
       return NextResponse.json({ error: 'Please select a valid group size.' }, { status: 400 })
@@ -106,6 +124,13 @@ export async function POST(request: Request) {
         preferred_date: cleanDate,
         group_size: cleanGroupSize,
         message: cleanMessage,
+        attribution_source: attributionSource,
+        attribution_medium: attributionMedium,
+        attribution_campaign: attributionCampaign,
+        attribution_content: attributionContent,
+        attribution_referrer_host: attributionReferrerHost,
+        attribution_landing_path: attributionLandingPath,
+        tracking_link_code: trackingLinkCode,
         status: 'new',
       })
 
