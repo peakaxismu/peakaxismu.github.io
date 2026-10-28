@@ -295,7 +295,7 @@ export default function EnquiryFormClient({
             <legend>What are you dreaming of?</legend>
             <div className={'interest-grid ' + (interestType ? 'has-selection' : '')} role="radiogroup" aria-label="Choose an experience">
               {EXPERIENCE_OPTIONS.map(([value, title, sub]) => {
-                const active = cardValueForInterest(interestType) === value
+                const active = Boolean(interestType) && cardValueForInterest(interestType) === value
                 return (
                   <button
                     key={value}
@@ -321,7 +321,7 @@ export default function EnquiryFormClient({
             <div className="referenced-item-card" aria-label="Selected experience">
               <div>
                 <span className="ref-card-kicker">You&apos;re enquiring about</span>
-                <h3>{referenceId}</h3>
+                <h3>{interestType === 'expedition' ? selectedExpedition?.name || referenceId : referenceId}</h3>
               </div>
               <button type="button" className="ref-clear-btn" onClick={clearReference}>Change</button>
               {selectedHike && (
@@ -383,7 +383,9 @@ export default function EnquiryFormClient({
                     <select id={expSelectId} value={referenceId} onChange={(e) => setReferenceId(e.target.value)}>
                       <option value="">I&apos;m open to options</option>
                       {referenceId && !expeditions.some((ex) => ex.name === referenceId) && (
-                        <option value={referenceId}>{referenceId} (from your link)</option>
+                        <option value={referenceId}>
+                          {selectedExpedition ? `${selectedExpedition.name} · ${selectedExpedition.destination}` : `${referenceId} (from your link)`}
+                        </option>
                       )}
                       {expeditions.map((ex) => (
                         <option key={ex.id} value={ex.name}>
