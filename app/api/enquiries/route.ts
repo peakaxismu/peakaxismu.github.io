@@ -72,7 +72,7 @@ export async function POST(request: Request) {
     const rawReferrerHost = attributionText('referrer_host', 253)?.toLowerCase() ?? null
     const attributionReferrerHost = rawReferrerHost && /^[a-z0-9.-]{1,253}$/.test(rawReferrerHost) && !rawReferrerHost.startsWith('.') && !rawReferrerHost.endsWith('.') ? rawReferrerHost : null
     const rawLandingPath = attributionText('landing_path', 200)
-    const attributionLandingPath = rawLandingPath && rawLandingPath.startsWith('/') && !rawLandingPath.startsWith('//') && !rawLandingPath.includes('\\\\') ? rawLandingPath.split(/[?#]/, 1)[0].slice(0, 200) : null
+    const attributionLandingPath = rawLandingPath && rawLandingPath.startsWith('/') && !rawLandingPath.startsWith('//') && !rawLandingPath.includes(String.fromCharCode(92)) ? rawLandingPath.split(/[?#]/, 1)[0].slice(0, 200) : null
     const rawTrackingCode = attributionText('tracking_link_code', 16)?.toLowerCase() ?? null
     const trackingLinkCode = rawTrackingCode && /^[a-z0-9]{8,16}$/.test(rawTrackingCode) ? rawTrackingCode : null
 
