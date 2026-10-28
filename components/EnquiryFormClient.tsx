@@ -3,6 +3,7 @@
 import { useState, useId } from 'react'
 import Link from 'next/link'
 import { getHikePriceEstimate } from '@/lib/hikePricing'
+import { readAttribution } from '@/components/AttributionTracker'
 
 export interface HikeItem {
   id: string
@@ -187,7 +188,7 @@ export default function EnquiryFormClient({
       const res = await fetch('/api/enquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, attribution: readAttribution() }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'We could not send your enquiry. Please try again.')
