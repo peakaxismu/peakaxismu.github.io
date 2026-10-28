@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { isAdminUser } from '@/lib/supabase/admin-auth'
+import { normalizeScheduledHikePrice } from '@/lib/scheduled-hike-pricing'
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -12,7 +13,6 @@ async function requireAdmin() {
 const validConditions = ['open', 'conditions_to_confirm', 'temporarily_unsuitable', 'closed']
 const validStatuses = ['draft', 'published', 'retired']
 const validDate = (value: unknown): value is string => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value.trim())
-const validPrice = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0 && value.trim().length <= 100
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const denied = await requireAdmin()
@@ -26,7 +26,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     if (status !== undefined && (typeof status !== 'string' || !['draft', 'published'].includes(status))) return NextResponse.json({ error: 'Invalid visibility status' }, { status: 400 })
     const date = typeof inputDate === 'string' ? inputDate.trim() : ''
     if (!validDate(date)) return NextResponse.json({ error: 'Enter a valid scheduled date (YYYY-MM-DD)' }, { status: 400 })
-    if (!validPrice(price)) return NextResponse.json({ error: 'Enter a valid price in MUR' }, { status: 400 })
+    const scheduledPrice = normalizeScheduledHikePrice(price)
+    if (!scheduledPrice) return NextResponse.json({ error: 'Enter a valid scheduled price in Rs, for example Rs 2,500.' }, { status: 400 })
     const admin = createAdminClient()
     const { data: source, error: sourceError } = await admin.from('hikes').select('*').eq('id', id).single()
     if (sourceError || !source) return NextResponse.json({ error: 'Route not found' }, { status: 404 })
@@ -38,7 +39,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const { data, error } = await admin.from('scheduled_hikes').insert({
       hike_id: source.id,
       date,
-      price: String(price).trim(),
+      price: scheduledPrice,
       spots_total: total,
       spots_remaining: remaining,
       status: status || 'draft',
@@ -67,7 +68,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const patch = Object.fromEntries(Object.entries(input).filter(([key]) => allowed.includes(key))) as Record<string, unknown>
     if (!Object.keys(patch).length) return NextResponse.json({ error: 'No supported changes supplied' }, { status: 400 })
     if (patch.date !== undefined && !validDate(patch.date)) return NextResponse.json({ error: 'Enter a valid scheduled date (YYYY-MM-DD)' }, { status: 400 })
-    if (patch.price !== undefined && !validPrice(patch.price)) return NextResponse.json({ error: 'Enter a valid price in MUR' }, { status: 400 })
+    if (patch.price !== undefined) {
+      const scheduledPrice = normalizeScheduledHikePrice(patch.price)
+      if (!scheduledPrice) return NextResponse.json({ error: 'Enter a valid scheduled price in Rs, for example Rs 2,500.' }, { status: 400 })
+      patch.price = scheduledPrice
+    }
     if (patch.status !== undefined && !validStatuses.includes(String(patch.status))) return NextResponse.json({ error: 'Invalid visibility status' }, { status: 400 })
     if (patch.trail_condition_status !== undefined && !validConditions.includes(String(patch.trail_condition_status))) return NextResponse.json({ error: 'Invalid trail condition' }, { status: 400 })
     const admin = createAdminClient()
