@@ -335,7 +335,7 @@ export default function EnquiryFormClient({
                   <span>{selectedExpedition.destination}</span>
                   {selectedExpedition.duration && <span>{selectedExpedition.duration}</span>}
                   {selectedExpedition.difficulty && <span>{selectedExpedition.difficulty}</span>}
-                  {selectedExpedition.price_from && <span>From {selectedExpedition.price_from}</span>}
+                  {selectedExpedition.price_from && <span>{selectedExpedition.price_from.toLowerCase() === 'price on request' ? selectedExpedition.price_from : `From ${selectedExpedition.price_from}`}</span>}
                 </div>
               )}
             </div>
